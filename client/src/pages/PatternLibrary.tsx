@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -7,13 +7,11 @@ import {
   CardContent,
   Chip,
   TextField,
-  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Button,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,13 +21,13 @@ import {
 import {
   Add as AddIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
-  FilterList as FilterIcon,
 } from '@mui/icons-material';
 import { PatternOrExercise } from '../types';
 import { patternsAPI } from '../api';
+import { useTranslation } from 'react-i18next';
 
 const PatternLibrary: React.FC = () => {
+  const { t } = useTranslation();
   const [patterns, setPatterns] = useState<PatternOrExercise[]>([]);
   const [filteredPatterns, setFilteredPatterns] = useState<PatternOrExercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,10 +41,6 @@ const PatternLibrary: React.FC = () => {
     loadPatterns();
   }, []);
 
-  useEffect(() => {
-    filterPatterns();
-  }, [patterns, searchTerm, typeFilter, levelFilter]);
-
   const loadPatterns = async () => {
     try {
       setLoading(true);
@@ -59,7 +53,7 @@ const PatternLibrary: React.FC = () => {
     }
   };
 
-  const filterPatterns = () => {
+  const filterPatterns = useCallback(() => {
     let filtered = patterns;
 
     if (searchTerm) {
@@ -80,7 +74,11 @@ const PatternLibrary: React.FC = () => {
     }
 
     setFilteredPatterns(filtered);
-  };
+  }, [patterns, searchTerm, typeFilter, levelFilter]);
+
+  useEffect(() => {
+    filterPatterns();
+  }, [filterPatterns]);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -114,7 +112,7 @@ const PatternLibrary: React.FC = () => {
   if (loading) {
     return (
       <Container>
-        <Typography>Loading patterns...</Typography>
+        <Typography>{t('patternLibrary.loadingPatterns')}</Typography>
       </Container>
     );
   }
@@ -123,64 +121,64 @@ const PatternLibrary: React.FC = () => {
     <Container maxWidth="lg">
       <Box sx={{ py: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Pattern & Exercise Library
+          {t('patternLibrary.title')}
         </Typography>
 
         {/* Filters */}
         <Box sx={{ mb: 3 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+            <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
               <TextField
                 fullWidth
-                label="Search patterns..."
+                label={t('patternLibrary.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 variant="outlined"
                 size="small"
               />
-            </Grid>
-            <Grid item xs={6} md={2}>
+            </Box>
+            <Box sx={{ flex: '0 0 150px' }}>
               <FormControl fullWidth size="small">
-                <InputLabel>Type</InputLabel>
+                <InputLabel>{t('patternLibrary.filters.type')}</InputLabel>
                 <Select
                   value={typeFilter}
-                  label="Type"
+                  label={t('patternLibrary.filters.type')}
                   onChange={(e) => setTypeFilter(e.target.value)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="pattern">Patterns</MenuItem>
-                  <MenuItem value="exercise">Exercises</MenuItem>
+                  <MenuItem value="">{t('patternLibrary.filters.all')}</MenuItem>
+                  <MenuItem value="pattern">{t('patternLibrary.filters.patterns')}</MenuItem>
+                  <MenuItem value="exercise">{t('patternLibrary.filters.exercises')}</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={6} md={2}>
+            </Box>
+            <Box sx={{ flex: '0 0 150px' }}>
               <FormControl fullWidth size="small">
-                <InputLabel>Level</InputLabel>
+                <InputLabel>{t('patternLibrary.filters.level')}</InputLabel>
                 <Select
                   value={levelFilter}
-                  label="Level"
+                  label={t('patternLibrary.filters.level')}
                   onChange={(e) => setLevelFilter(e.target.value)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="beginner">Beginner</MenuItem>
-                  <MenuItem value="improver">Improver</MenuItem>
-                  <MenuItem value="intermediate">Intermediate</MenuItem>
-                  <MenuItem value="advanced">Advanced</MenuItem>
+                  <MenuItem value="">{t('patternLibrary.filters.all')}</MenuItem>
+                  <MenuItem value="beginner">{t('patternLibrary.filters.beginner')}</MenuItem>
+                  <MenuItem value="improver">{t('patternLibrary.filters.improver')}</MenuItem>
+                  <MenuItem value="intermediate">{t('patternLibrary.filters.intermediate')}</MenuItem>
+                  <MenuItem value="advanced">{t('patternLibrary.filters.advanced')}</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
+            </Box>
+            <Box sx={{ flex: '1 1 200px' }}>
               <Typography variant="body2" color="text.secondary">
-                Showing {filteredPatterns.length} of {patterns.length} items
+                {t('patternLibrary.showingResults', { filtered: filteredPatterns.length, total: patterns.length })}
               </Typography>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
 
         {/* Pattern Grid */}
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           {filteredPatterns.map((pattern) => (
-            <Grid item xs={12} md={6} lg={4} key={pattern.id}>
+            <Box key={pattern.id} sx={{ flex: '1 1 350px', minWidth: '350px', maxWidth: '400px' }}>
               <Card 
                 sx={{ 
                   height: '100%', 
@@ -227,9 +225,9 @@ const PatternLibrary: React.FC = () => {
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {filteredPatterns.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -288,7 +286,7 @@ const PatternLibrary: React.FC = () => {
 
                 {selectedPattern.steps.length > 0 && (
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="h6" gutterBottom>Steps</Typography>
+                    <Typography variant="h6" gutterBottom>{t('patternLibrary.details.steps')}</Typography>
                     {selectedPattern.steps.map((step, index) => (
                       <Typography key={index} variant="body2">
                         {index + 1}. {step}
@@ -299,7 +297,7 @@ const PatternLibrary: React.FC = () => {
 
                 {selectedPattern.teachingPoints.length > 0 && (
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="h6" gutterBottom>Teaching Points</Typography>
+                    <Typography variant="h6" gutterBottom>{t('patternLibrary.details.teachingPoints')}</Typography>
                     {selectedPattern.teachingPoints.map((point, index) => (
                       <Typography key={index} variant="body2">
                         • {point}
@@ -310,7 +308,7 @@ const PatternLibrary: React.FC = () => {
 
                 {selectedPattern.commonMistakes.length > 0 && (
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="h6" gutterBottom>Common Mistakes</Typography>
+                    <Typography variant="h6" gutterBottom>{t('patternLibrary.details.commonMistakes')}</Typography>
                     {selectedPattern.commonMistakes.map((mistake, index) => (
                       <Typography key={index} variant="body2" color="error">
                         • {mistake}
@@ -320,23 +318,23 @@ const PatternLibrary: React.FC = () => {
                 )}
 
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" gutterBottom>Details</Typography>
+                  <Typography variant="h6" gutterBottom>{t('patternLibrary.details.details')}</Typography>
                   <Typography variant="body2">
-                    <strong>Duration:</strong> {selectedPattern.estimatedMinutes} minutes
+                    <strong>{t('patternLibrary.details.duration')}:</strong> {selectedPattern.estimatedMinutes} {t('patternLibrary.details.minutes')}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>BPM Range:</strong> {selectedPattern.bpmRange.min}-{selectedPattern.bpmRange.max}
+                    <strong>{t('patternLibrary.details.bpmRange')}:</strong> {selectedPattern.bpmRange.min}-{selectedPattern.bpmRange.max}
                   </Typography>
                   {selectedPattern.counts.length > 0 && (
                     <Typography variant="body2">
-                      <strong>Counts:</strong> {selectedPattern.counts.join(', ')}
+                      <strong>{t('patternLibrary.details.counts')}:</strong> {selectedPattern.counts.join(', ')}
                     </Typography>
                   )}
                 </Box>
 
                 {selectedPattern.tags.length > 0 && (
                   <Box>
-                    <Typography variant="h6" gutterBottom>Tags</Typography>
+                    <Typography variant="h6" gutterBottom>{t('patternLibrary.details.tags')}</Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                       {selectedPattern.tags.map((tag) => (
                         <Chip key={tag} label={tag} size="small" variant="outlined" />
@@ -346,9 +344,9 @@ const PatternLibrary: React.FC = () => {
                 )}
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleCloseDialog}>Close</Button>
+                <Button onClick={handleCloseDialog}>{t('patternLibrary.details.close')}</Button>
                 <Button variant="contained" startIcon={<EditIcon />}>
-                  Edit
+                  {t('patternLibrary.details.edit')}
                 </Button>
               </DialogActions>
             </>
