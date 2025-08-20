@@ -1,0 +1,6 @@
+@DanceCourseCreator.API_HostAddress = http://localhost:5139
+
+GET {{DanceCourseCreator.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

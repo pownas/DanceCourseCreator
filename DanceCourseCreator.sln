@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{25FF9796-12FE-49DC-88CC-26B382F165D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DanceCourseCreator.API", "src\DanceCourseCreator.API\DanceCourseCreator.API.csproj", "{AFF5FD8C-5FFD-43F8-A5FF-764752532183}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DanceCourseCreator.Client", "src\DanceCourseCreator.Client\DanceCourseCreator.Client.csproj", "{F43A9353-3506-4F6C-B713-61162E391529}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AFF5FD8C-5FFD-43F8-A5FF-764752532183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF5FD8C-5FFD-43F8-A5FF-764752532183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF5FD8C-5FFD-43F8-A5FF-764752532183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF5FD8C-5FFD-43F8-A5FF-764752532183}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F43A9353-3506-4F6C-B713-61162E391529}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F43A9353-3506-4F6C-B713-61162E391529}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F43A9353-3506-4F6C-B713-61162E391529}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F43A9353-3506-4F6C-B713-61162E391529}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AFF5FD8C-5FFD-43F8-A5FF-764752532183} = {25FF9796-12FE-49DC-88CC-26B382F165D9}
+		{F43A9353-3506-4F6C-B713-61162E391529} = {25FF9796-12FE-49DC-88CC-26B382F165D9}
+	EndGlobalSection
+EndGlobal
