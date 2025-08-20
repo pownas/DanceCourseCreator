@@ -7,6 +7,7 @@ import Navigation from './components/Navigation';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import PatternLibrary from './pages/PatternLibrary';
+import './i18n'; // Initialize i18n
 
 // Create a theme
 const theme = createTheme({

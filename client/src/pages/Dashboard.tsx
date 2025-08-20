@@ -3,7 +3,6 @@ import {
   Container,
   Typography,
   Box,
-  Grid,
   Card,
   CardContent,
   CardActions,
@@ -14,34 +13,33 @@ import {
   LibraryBooks,
   Assignment,
   School,
-  Add as AddIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { t } = useTranslation();
 
   const quickActions = [
     {
-      title: 'Browse Pattern Library',
-      description: 'Explore available West Coast Swing patterns and exercises',
+      title: t('dashboard.actions.browsePatternLibrary.title'),
+      description: t('dashboard.actions.browsePatternLibrary.description'),
       icon: <LibraryBooks sx={{ fontSize: 40, color: 'primary.main' }} />,
       action: () => navigate('/patterns'),
       color: 'primary.light',
     },
     {
-      title: 'Create New Lesson',
-      description: 'Build a lesson plan with patterns and exercises',
+      title: t('dashboard.actions.createNewLesson.title'),
+      description: t('dashboard.actions.createNewLesson.description'),
       icon: <Assignment sx={{ fontSize: 40, color: 'secondary.main' }} />,
       action: () => navigate('/lessons/new'),
       color: 'secondary.light',
       disabled: true,
     },
     {
-      title: 'Plan Course',
-      description: 'Design a multi-week course curriculum',
+      title: t('dashboard.actions.planCourse.title'),
+      description: t('dashboard.actions.planCourse.description'),
       icon: <School sx={{ fontSize: 40, color: 'success.main' }} />,
       action: () => navigate('/courses/new'),
       color: 'success.light',
@@ -50,31 +48,31 @@ const Dashboard: React.FC = () => {
   ];
 
   const recentStats = [
-    { label: 'Available Patterns', value: '6', color: 'primary' },
-    { label: 'Beginner Level', value: '4', color: 'success' },
-    { label: 'Improver Level', value: '1', color: 'info' },
-    { label: 'Exercises', value: '2', color: 'secondary' },
+    { label: t('dashboard.stats.availablePatterns'), value: '6', color: 'primary' },
+    { label: t('dashboard.stats.beginnerLevel'), value: '4', color: 'success' },
+    { label: t('dashboard.stats.improverLevel'), value: '1', color: 'info' },
+    { label: t('dashboard.stats.exercises'), value: '2', color: 'secondary' },
   ];
 
   return (
     <Container maxWidth="lg">
       <Box sx={{ py: 4 }}>
         <Typography variant="h3" gutterBottom>
-          Welcome to WCS Course Creator
+          {t('dashboard.title')}
         </Typography>
         
         <Typography variant="h6" color="text.secondary" paragraph>
-          Plan, structure, and share your West Coast Swing lessons and courses
+          {t('dashboard.subtitle')}
         </Typography>
 
         {/* Quick Stats */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h5" gutterBottom>
-            Library Overview
+            {t('dashboard.libraryOverview')}
           </Typography>
-          <Grid container spacing={2}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             {recentStats.map((stat) => (
-              <Grid item xs={6} md={3} key={stat.label}>
+              <Box key={stat.label} sx={{ flex: '1 1 200px', minWidth: '200px' }}>
                 <Card sx={{ textAlign: 'center', py: 2 }}>
                   <CardContent sx={{ pb: 1 }}>
                     <Typography variant="h4" color={`${stat.color}.main`}>
@@ -85,18 +83,18 @@ const Dashboard: React.FC = () => {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         </Box>
 
         {/* Quick Actions */}
         <Typography variant="h5" gutterBottom>
-          Quick Actions
+          {t('dashboard.quickActions')}
         </Typography>
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
           {quickActions.map((action, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Box key={index} sx={{ flex: '1 1 300px', minWidth: '300px' }}>
               <Card 
                 sx={{ 
                   height: '100%',
@@ -113,7 +111,7 @@ const Dashboard: React.FC = () => {
                     {action.title}
                     {action.disabled && (
                       <Chip 
-                        label="Coming Soon" 
+                        label={t('dashboard.actions.comingSoon')} 
                         size="small" 
                         color="default" 
                         sx={{ ml: 1 }}
@@ -130,28 +128,27 @@ const Dashboard: React.FC = () => {
                     onClick={action.action}
                     disabled={action.disabled}
                   >
-                    Get Started
+                    {t('dashboard.actions.getStarted')}
                   </Button>
                 </CardActions>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
 
         {/* Welcome Message */}
         <Box sx={{ mt: 4, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
           <Typography variant="h6" gutterBottom>
-            Getting Started
+            {t('dashboard.gettingStarted')}
           </Typography>
           <Typography variant="body1" paragraph>
-            This is your MVP (Minimum Viable Product) for the West Coast Swing Course Creator. 
-            Currently available features:
+            {t('dashboard.mvpInfo.description')}
           </Typography>
           <Typography component="div" variant="body2">
-            <strong>✅ Pattern Library:</strong> Browse and view detailed information about WCS patterns and exercises<br />
-            <strong>🚧 Lesson Builder:</strong> Coming soon - Create structured lesson plans<br />
-            <strong>🚧 Course Planning:</strong> Coming soon - Design multi-week course curricula<br />
-            <strong>🚧 Export Features:</strong> Coming soon - Export to PDF and Markdown
+            <strong>✅ {t('dashboard.mvpInfo.patternLibrary')}</strong> {t('dashboard.mvpInfo.patternLibraryDescription')}<br />
+            <strong>🚧 {t('dashboard.mvpInfo.lessonBuilder')}</strong> {t('dashboard.mvpInfo.lessonBuilderDescription')}<br />
+            <strong>🚧 {t('dashboard.mvpInfo.coursePlanning')}</strong> {t('dashboard.mvpInfo.coursePlanningDescription')}<br />
+            <strong>🚧 {t('dashboard.mvpInfo.exportFeatures')}</strong> {t('dashboard.mvpInfo.exportFeaturesDescription')}
           </Typography>
           <Box sx={{ mt: 2 }}>
             <Button 
@@ -159,7 +156,7 @@ const Dashboard: React.FC = () => {
               onClick={() => navigate('/patterns')}
               startIcon={<LibraryBooks />}
             >
-              Explore Pattern Library
+              {t('dashboard.mvpInfo.explorePatternLibrary')}
             </Button>
           </Box>
         </Box>

@@ -1,0 +1,87 @@
+{
+  "navigation": {
+    "appTitle": "WCS Course Creator",
+    "patternLibrary": "Pattern Library",
+    "lessons": "Lessons",
+    "courses": "Courses",
+    "welcome": "Welcome, {{name}}",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Welcome to WCS Course Creator",
+    "subtitle": "Plan, structure, and share your West Coast Swing lessons and courses",
+    "libraryOverview": "Library Overview",
+    "quickActions": "Quick Actions",
+    "gettingStarted": "Getting Started",
+    "stats": {
+      "availablePatterns": "Available Patterns",
+      "beginnerLevel": "Beginner Level",
+      "improverLevel": "Improver Level",
+      "exercises": "Exercises"
+    },
+    "actions": {
+      "browsePatternLibrary": {
+        "title": "Browse Pattern Library",
+        "description": "Explore available West Coast Swing patterns and exercises"
+      },
+      "createNewLesson": {
+        "title": "Create New Lesson",
+        "description": "Build a lesson plan with patterns and exercises"
+      },
+      "planCourse": {
+        "title": "Plan Course",
+        "description": "Design a multi-week course curriculum"
+      },
+      "comingSoon": "Coming Soon",
+      "getStarted": "Get Started"
+    },
+    "mvpInfo": {
+      "description": "This is your MVP (Minimum Viable Product) for the West Coast Swing Course Creator. Currently available features:",
+      "patternLibrary": "Pattern Library:",
+      "patternLibraryDescription": "Browse and view detailed information about WCS patterns and exercises",
+      "lessonBuilder": "Lesson Builder:",
+      "lessonBuilderDescription": "Coming soon - Create structured lesson plans",
+      "coursePlanning": "Course Planning:",
+      "coursePlanningDescription": "Coming soon - Design multi-week course curricula",
+      "exportFeatures": "Export Features:",
+      "exportFeaturesDescription": "Coming soon - Export to PDF and Markdown",
+      "explorePatternLibrary": "Explore Pattern Library"
+    }
+  },
+  "patternLibrary": {
+    "title": "Pattern & Exercise Library",
+    "searchPlaceholder": "Search patterns...",
+    "filters": {
+      "type": "Type",
+      "level": "Level",
+      "all": "All",
+      "patterns": "Patterns",
+      "exercises": "Exercises",
+      "beginner": "Beginner",
+      "improver": "Improver",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "showingResults": "Showing {{filtered}} of {{total}} items",
+    "loadingPatterns": "Loading patterns...",
+    "details": {
+      "steps": "Steps",
+      "teachingPoints": "Teaching Points",
+      "commonMistakes": "Common Mistakes",
+      "details": "Details",
+      "duration": "Duration",
+      "bpmRange": "BPM Range",
+      "counts": "Counts",
+      "tags": "Tags",
+      "minutes": "minutes",
+      "close": "Close",
+      "edit": "Edit"
+    }
+  },
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "swedish": "Swedish"
+  }
+}

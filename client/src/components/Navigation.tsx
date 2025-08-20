@@ -17,11 +17,14 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -44,7 +47,7 @@ const Navigation: React.FC = () => {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 0, mr: 4 }}>
-          WCS Course Creator
+          {t('navigation.appTitle')}
         </Typography>
         
         <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
@@ -57,7 +60,7 @@ const Navigation: React.FC = () => {
               backgroundColor: isActive('/patterns') ? 'rgba(255,255,255,0.1)' : 'transparent'
             }}
           >
-            Pattern Library
+            {t('navigation.patternLibrary')}
           </Button>
           
           <Button
@@ -70,7 +73,7 @@ const Navigation: React.FC = () => {
             }}
             disabled
           >
-            Lessons
+            {t('navigation.lessons')}
           </Button>
           
           <Button
@@ -82,13 +85,14 @@ const Navigation: React.FC = () => {
             }}
             disabled
           >
-            Courses
+            {t('navigation.courses')}
           </Button>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            Welcome, {user?.name}
+          <LanguageSwitcher />
+          <Typography variant="body2" sx={{ mr: 2, ml: 2 }}>
+            {t('navigation.welcome', { name: user?.name })}
           </Typography>
           <IconButton
             size="large"
@@ -118,8 +122,8 @@ const Navigation: React.FC = () => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          <MenuItem onClick={handleMenuClose}>{t('navigation.profile')}</MenuItem>
+          <MenuItem onClick={handleLogout}>{t('navigation.logout')}</MenuItem>
         </Menu>
       </Toolbar>
     </AppBar>
