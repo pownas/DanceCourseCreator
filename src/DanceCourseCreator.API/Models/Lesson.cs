@@ -5,6 +5,9 @@ namespace DanceCourseCreator.API.Models;
 
 public class LessonSection
 {
+    [Key]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    
     public LessonSectionType Type { get; set; }
     
     public string ItemsJson { get; set; } = "[]";

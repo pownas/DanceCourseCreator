@@ -12,6 +12,7 @@ public class DanceCourseDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<PatternOrExercise> Patterns { get; set; }
+    public DbSet<LessonSection> LessonSections { get; set; }
     public DbSet<Lesson> Lessons { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<Template> Templates { get; set; }
@@ -49,6 +50,13 @@ public class DanceCourseDbContext : DbContext
                   .WithMany(u => u.CreatedPatterns)
                   .HasForeignKey(e => e.CreatedBy)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // LessonSection configuration
+        modelBuilder.Entity<LessonSection>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).HasConversion<string>();
         });
 
         // Lesson configuration
