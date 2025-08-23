@@ -1,0 +1,63 @@
+﻿@page "/"
+@attribute [Authorize]
+
+<PageTitle>Dashboard - Dance Course Creator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
+    
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Class="pa-4" Height="200px">
+                <MudText Typo="Typo.h6" GutterBottom="true">Pattern Library</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4">
+                    Manage your collection of West Coast Swing patterns and exercises.
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           Href="/patterns"
+                           StartIcon="Icons.Material.Filled.LibraryBooks">
+                    View Patterns
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Class="pa-4" Height="200px">
+                <MudText Typo="Typo.h6" GutterBottom="true">Lessons</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4">
+                    Create and organize individual lesson plans.
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Secondary" 
+                           Href="/lessons"
+                           StartIcon="Icons.Material.Filled.School">
+                    Manage Lessons
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="4">
+            <MudPaper Class="pa-4" Height="200px">
+                <MudText Typo="Typo.h6" GutterBottom="true">Courses</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4">
+                    Plan multi-week course series and track progression.
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Tertiary" 
+                           Href="/courses"
+                           StartIcon="Icons.Material.Filled.Timeline">
+                    Plan Courses
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    
+    <MudText Typo="Typo.h5" Class="mt-8 mb-4">Recent Activity</MudText>
+    
+    <MudPaper Class="pa-4">
+        <MudText Typo="Typo.body1">
+            Welcome to Dance Course Creator! Start by exploring the pattern library or creating your first lesson plan.
+        </MudText>
+    </MudPaper>
+</MudContainer>

@@ -1,0 +1,183 @@
+@page "/patterns"
+@attribute [Authorize]
+@inject IPatternsService PatternsService
+@inject IDialogService DialogService
+
+<PageTitle>Patterns - Dance Course Creator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Pattern Library</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="Icons.Material.Filled.Add"
+                                   OnClick="OpenCreateDialog">
+                            Add Pattern
+                        </MudButton>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <!-- Filters -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12" sm="3">
+                            <MudSelect @bind-Value="filterType" Label="Type" Clearable="true" OnClearButtonClick="@(() => { filterType = null; LoadPatterns(); })">
+                                <MudSelectItem Value="@("pattern")">Pattern</MudSelectItem>
+                                <MudSelectItem Value="@("exercise")">Exercise</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudSelect @bind-Value="filterLevel" Label="Level" Clearable="true" OnClearButtonClick="@(() => { filterLevel = null; LoadPatterns(); })">
+                                <MudSelectItem Value="@("beginner")">Beginner</MudSelectItem>
+                                <MudSelectItem Value="@("improver")">Improver</MudSelectItem>
+                                <MudSelectItem Value="@("intermediate")">Intermediate</MudSelectItem>
+                                <MudSelectItem Value="@("advanced")">Advanced</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField @bind-Value="searchText" 
+                                          Label="Search" 
+                                          Adornment="Adornment.End" 
+                                          AdornmentIcon="Icons.Material.Filled.Search"
+                                          OnAdornmentClick="LoadPatterns" />
+                        </MudItem>
+                        <MudItem xs="12" sm="2">
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Primary" 
+                                       OnClick="LoadPatterns"
+                                       FullWidth="true">
+                                Filter
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- Loading Indicator -->
+                    @if (isLoading)
+                    {
+                        <MudProgressLinear Indeterminate="true" />
+                    }
+
+                    <!-- Patterns Grid -->
+                    @if (patterns != null && patterns.Any())
+                    {
+                        <MudGrid>
+                            @foreach (var pattern in patterns)
+                            {
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudCard Class="mb-4">
+                                        <MudCardHeader>
+                                            <CardHeaderContent>
+                                                <MudText Typo="Typo.h6">@pattern.Name</MudText>
+                                                <MudChip T="string" Size="Size.Small" Color="GetChipColor(pattern.Level)">
+                                                    @pattern.Level.ToUpperInvariant()
+                                                </MudChip>
+                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                                                    @pattern.Type.ToUpperInvariant()
+                                                </MudChip>
+                                            </CardHeaderContent>
+                                        </MudCardHeader>
+                                        <MudCardContent>
+                                            <MudText Typo="Typo.body2" Class="mb-2">
+                                                @(string.IsNullOrEmpty(pattern.Description) ? "No description" : 
+                                                  pattern.Description.Length > 100 ? pattern.Description.Substring(0, 100) + "..." : pattern.Description)
+                                            </MudText>
+                                            @if (pattern.EstimatedMinutes > 0)
+                                            {
+                                                <MudText Typo="Typo.caption">
+                                                    <MudIcon Icon="Icons.Material.Filled.Timer" Size="Size.Small" /> @pattern.EstimatedMinutes min
+                                                </MudText>
+                                            }
+                                        </MudCardContent>
+                                        <MudCardActions>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Primary" 
+                                                       OnClick="@(() => ViewPattern(pattern))">
+                                                View
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Secondary" 
+                                                       OnClick="@(() => EditPattern(pattern))">
+                                                Edit
+                                            </MudButton>
+                                        </MudCardActions>
+                                    </MudCard>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else if (!isLoading)
+                    {
+                        <MudText Typo="Typo.body1" Align="Align.Center" Class="my-8">
+                            No patterns found. Start by adding your first pattern!
+                        </MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<PatternOrExercise>? patterns;
+    private bool isLoading = false;
+    private string? filterType;
+    private string? filterLevel;
+    private string searchText = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPatterns();
+    }
+
+    private async Task LoadPatterns()
+    {
+        isLoading = true;
+        try
+        {
+            var searchValue = string.IsNullOrWhiteSpace(searchText) ? null : searchText;
+            patterns = await PatternsService.GetPatternsAsync(filterType, filterLevel, searchValue);
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Color GetChipColor(string level)
+    {
+        return level.ToLower() switch
+        {
+            "beginner" => Color.Success,
+            "improver" => Color.Info,
+            "intermediate" => Color.Warning,
+            "advanced" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        // TODO: Create pattern dialog
+        await LoadPatterns();
+    }
+
+    private async Task ViewPattern(PatternOrExercise pattern)
+    {
+        // TODO: View pattern dialog
+    }
+
+    private async Task EditPattern(PatternOrExercise pattern)
+    {
+        // TODO: Edit pattern dialog
+        await LoadPatterns();
+    }
+}

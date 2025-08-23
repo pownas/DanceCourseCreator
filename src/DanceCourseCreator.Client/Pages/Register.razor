@@ -1,0 +1,118 @@
+@page "/register"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Register - Dance Course Creator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8">
+        <MudForm @ref="form" @onsubmit:preventDefault="true">
+            <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+                Create Account
+            </MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" GutterBottom="true" Class="mb-6">
+                Join Dance Course Creator
+            </MudText>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4">
+                    @errorMessage
+                </MudAlert>
+            }
+
+            <MudTextField @bind-Value="registerRequest.Name"
+                          Label="Full Name"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="Name is required"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="registerRequest.Email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="Email is required"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="registerRequest.Password"
+                          Label="Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Required="true"
+                          RequiredError="Password is required"
+                          Class="mb-4" />
+
+            <MudSelect @bind-Value="registerRequest.Role"
+                       Label="Role"
+                       Variant="Variant.Outlined"
+                       Class="mb-6">
+                <MudSelectItem Value="@("instructor")">Instructor</MudSelectItem>
+                <MudSelectItem Value="@("editor")">Editor</MudSelectItem>
+                <MudSelectItem Value="@("reader")">Reader</MudSelectItem>
+            </MudSelect>
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="isLoading">
+                @if (isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ml-2">Creating account...</MudText>
+                }
+                else
+                {
+                    <MudText>Create Account</MudText>
+                }
+            </MudButton>
+        </MudForm>
+
+        <MudDivider Class="my-6" />
+
+        <MudText Typo="Typo.body2" Align="Align.Center">
+            Already have an account?
+            <MudLink Href="/login" Color="Color.Primary">Sign in</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private MudForm form = null!;
+    private RegisterRequest registerRequest = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task HandleRegister()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var result = await AuthService.RegisterAsync(registerRequest);
+            
+            if (result != null)
+            {
+                var authStateProvider = (CustomAuthStateProvider)AuthStateProvider;
+                await authStateProvider.MarkUserAsAuthenticated(result.User);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Failed to create account. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred during registration. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

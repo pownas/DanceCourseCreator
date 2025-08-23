@@ -1,0 +1,35 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <MudNavMenu>
+            <MudNavLink Href="/" Icon="Icons.Material.Filled.Dashboard" Match="NavLinkMatch.All">
+                Dashboard
+            </MudNavLink>
+            <MudNavLink Href="/patterns" Icon="Icons.Material.Filled.LibraryBooks">
+                Patterns
+            </MudNavLink>
+            <MudNavLink Href="/lessons" Icon="Icons.Material.Filled.School">
+                Lessons
+            </MudNavLink>
+            <MudNavLink Href="/courses" Icon="Icons.Material.Filled.Timeline">
+                Courses
+            </MudNavLink>
+            <MudDivider Class="my-4" />
+            <MudNavLink Href="/templates" Icon="Icons.Material.Filled.FileCopy">
+                Templates
+            </MudNavLink>
+            <MudNavLink Href="/shared" Icon="Icons.Material.Filled.Share">
+                Shared Content
+            </MudNavLink>
+        </MudNavMenu>
+    </Authorized>
+    <NotAuthorized>
+        <MudNavMenu>
+            <MudNavLink Href="/login" Icon="Icons.Material.Filled.Login">
+                Login
+            </MudNavLink>
+            <MudNavLink Href="/register" Icon="Icons.Material.Filled.PersonAdd">
+                Register
+            </MudNavLink>
+        </MudNavMenu>
+    </NotAuthorized>
+</AuthorizeView>
