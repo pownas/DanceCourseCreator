@@ -85,3 +85,47 @@ public class CreatePatternRequest
     public List<string> Tags { get; set; } = new();
     public List<string> MediaLinks { get; set; } = new();
 }
+
+public class LessonSection
+{
+    public string Id { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public List<string> Items { get; set; } = new();
+    public string Notes { get; set; } = string.Empty;
+}
+
+public class Lesson
+{
+    public string Id { get; set; } = string.Empty;
+    public string? CourseId { get; set; }
+    public DateTime? Date { get; set; }
+    public int Duration { get; set; } // minutes
+    public List<LessonSection> Sections { get; set; } = new();
+    public int TotalEstimatedMinutes { get; set; }
+    public string Notes { get; set; } = string.Empty;
+    public int Version { get; set; } = 1;
+    public string CreatedBy { get; set; } = string.Empty;
+    public List<string> Reviewers { get; set; } = new();
+    public List<string> History { get; set; } = new();
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+
+public class CreateLessonRequest
+{
+    public string? CourseId { get; set; }
+    public DateTime? Date { get; set; }
+    public int Duration { get; set; } = 75; // Default to 75 minutes
+    public List<LessonSection> Sections { get; set; } = new();
+    public string Notes { get; set; } = string.Empty;
+}
+
+public enum LessonSectionType
+{
+    Warmup,
+    Technique,
+    Patterns,
+    Combination,
+    Repetition,
+    Social
+}

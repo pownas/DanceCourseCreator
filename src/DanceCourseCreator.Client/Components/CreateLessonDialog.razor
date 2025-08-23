@@ -1,0 +1,486 @@
+@using MudBlazor
+@inject ILessonsService LessonsService
+@inject IPatternsService PatternsService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center pa-8">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </div>
+        }
+        else
+        {
+            <MudContainer Style="max-height: 80vh; overflow-y: auto;">
+                <MudGrid>
+                    <!-- Lesson Details -->
+                    <MudItem xs="12">
+                        <MudPaper Class="pa-4 mb-4">
+                            <MudText Typo="Typo.h6" Class="mb-4">Lesson Details</MudText>
+                            <MudGrid>
+                                <MudItem xs="12" md="6">
+                                    <MudDatePicker Label="Date (Optional)" 
+                                                   @bind-Date="lessonRequest.Date"
+                                                   ReadOnly="ReadOnly" />
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="lessonRequest.Duration" 
+                                               Label="Duration (minutes)"
+                                               ReadOnly="ReadOnly">
+                                        <MudSelectItem Value="60">60 minutes</MudSelectItem>
+                                        <MudSelectItem Value="75">75 minutes</MudSelectItem>
+                                        <MudSelectItem Value="90">90 minutes</MudSelectItem>
+                                        <MudSelectItem Value="120">120 minutes (2 hours)</MudSelectItem>
+                                        <MudSelectItem Value="240">240 minutes (4 hours)</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="lessonRequest.Notes" 
+                                                  Label="Notes" 
+                                                  Lines="3"
+                                                  ReadOnly="ReadOnly" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+
+                    <!-- Lesson Sections -->
+                    <MudItem xs="12">
+                        <MudPaper Class="pa-4 mb-4">
+                            <div class="d-flex justify-space-between align-center mb-4">
+                                <MudText Typo="Typo.h6">Lesson Sections</MudText>
+                                @if (!ReadOnly)
+                                {
+                                    <MudButton Size="Size.Small" 
+                                               Color="Color.Primary" 
+                                               StartIcon="Icons.Material.Filled.Add"
+                                               OnClick="AddSection">
+                                        Add Section
+                                    </MudButton>
+                                }
+                            </div>
+
+                            @if (lessonRequest.Sections.Any())
+                            {
+                                @for (int i = 0; i < lessonRequest.Sections.Count; i++)
+                                {
+                                    var section = lessonRequest.Sections[i];
+                                    var sectionIndex = i;
+                                    
+                                    <MudPaper Class="pa-3 mb-3 section-paper" Elevation="2">
+                                        <div class="d-flex justify-space-between align-center mb-3">
+                                            <MudSelect @bind-Value="section.Type" 
+                                                       Label="Section Type"
+                                                       ReadOnly="ReadOnly"
+                                                       Style="min-width: 200px;">
+                                                <MudSelectItem Value="@("Warmup")">Warmup</MudSelectItem>
+                                                <MudSelectItem Value="@("Technique")">Technique</MudSelectItem>
+                                                <MudSelectItem Value="@("Patterns")">Patterns</MudSelectItem>
+                                                <MudSelectItem Value="@("Combination")">Combination</MudSelectItem>
+                                                <MudSelectItem Value="@("Repetition")">Repetition</MudSelectItem>
+                                                <MudSelectItem Value="@("Social")">Social</MudSelectItem>
+                                            </MudSelect>
+                                            
+                                            @if (!ReadOnly)
+                                            {
+                                                <div class="d-flex align-center">
+                                                    @if (sectionIndex > 0)
+                                                    {
+                                                        <MudIconButton Icon="Icons.Material.Filled.KeyboardArrowUp" 
+                                                                       Size="Size.Small"
+                                                                       OnClick="() => MoveSectionUp(sectionIndex)" />
+                                                    }
+                                                    @if (sectionIndex < lessonRequest.Sections.Count - 1)
+                                                    {
+                                                        <MudIconButton Icon="Icons.Material.Filled.KeyboardArrowDown" 
+                                                                       Size="Size.Small"
+                                                                       OnClick="() => MoveSectionDown(sectionIndex)" />
+                                                    }
+                                                    <MudIconButton Icon="Icons.Material.Filled.Delete" 
+                                                                   Size="Size.Small"
+                                                                   Color="Color.Error"
+                                                                   OnClick="() => RemoveSection(sectionIndex)" />
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <!-- Section Items -->
+                                        @if (!ReadOnly)
+                                        {
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Secondary" 
+                                                       StartIcon="Icons.Material.Filled.Add"
+                                                       OnClick="() => AddItemToSection(sectionIndex)"
+                                                       Class="mb-3">
+                                                Add Pattern/Exercise
+                                            </MudButton>
+                                        }
+
+                                        @if (section.Items.Any())
+                                        {
+                                            @for (int j = 0; j < section.Items.Count; j++)
+                                            {
+                                                var item = section.Items[j];
+                                                var itemIndex = j;
+                                                var pattern = patterns?.FirstOrDefault(p => p.Id == item);
+                                                
+                                                <div class="d-flex justify-space-between align-center pa-2 mb-2 pattern-item">
+                                                    <div class="flex-grow-1">
+                                                        @if (pattern != null)
+                                                        {
+                                                            <MudText Typo="Typo.body1">@pattern.Name</MudText>
+                                                            <MudText Typo="Typo.caption">
+                                                                @pattern.Type | @pattern.Level | @pattern.EstimatedMinutes min
+                                                            </MudText>
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudText Typo="Typo.body1" Class="text-muted">@item</MudText>
+                                                        }
+                                                    </div>
+                                                    
+                                                    @if (!ReadOnly)
+                                                    {
+                                                        <div class="d-flex align-center">
+                                                            @if (itemIndex > 0)
+                                                            {
+                                                                <MudIconButton Icon="Icons.Material.Filled.KeyboardArrowUp" 
+                                                                               Size="Size.Small"
+                                                                               OnClick="() => MoveItemUp(sectionIndex, itemIndex)" />
+                                                            }
+                                                            @if (itemIndex < section.Items.Count - 1)
+                                                            {
+                                                                <MudIconButton Icon="Icons.Material.Filled.KeyboardArrowDown" 
+                                                                               Size="Size.Small"
+                                                                               OnClick="() => MoveItemDown(sectionIndex, itemIndex)" />
+                                                            }
+                                                            <MudIconButton Icon="Icons.Material.Filled.Delete" 
+                                                                           Size="Size.Small"
+                                                                           Color="Color.Error"
+                                                                           OnClick="() => RemoveItemFromSection(sectionIndex, itemIndex)" />
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <MudAlert Severity="Severity.Info" Class="mt-2">
+                                                No patterns/exercises added to this section yet.
+                                            </MudAlert>
+                                        }
+
+                                        <!-- Section Notes -->
+                                        <MudTextField @bind-Value="section.Notes" 
+                                                      Label="Section Notes" 
+                                                      Lines="2"
+                                                      ReadOnly="ReadOnly"
+                                                      Class="mt-3" />
+                                    </MudPaper>
+                                }
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Info">
+                                    No sections added yet. Click "Add Section" to start building your lesson.
+                                </MudAlert>
+                            }
+                        </MudPaper>
+                    </MudItem>
+
+                    <!-- Lesson Summary -->
+                    @if (lessonRequest.Sections.Any())
+                    {
+                        <MudItem xs="12">
+                            <MudPaper Class="pa-4">
+                                <MudText Typo="Typo.h6" Class="mb-3">Lesson Summary</MudText>
+                                <MudGrid>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.body1">
+                                            <strong>Total Sections:</strong> @lessonRequest.Sections.Count
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.body1">
+                                            <strong>Total Items:</strong> @lessonRequest.Sections.Sum(s => s.Items.Count)
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.body1">
+                                            <strong>Planned Duration:</strong> @lessonRequest.Duration minutes
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.body1">
+                                            <strong>Estimated Time:</strong> @CalculateEstimatedTime() minutes
+                                        </MudText>
+                                    </MudItem>
+                                </MudGrid>
+                                
+                                @if (Math.Abs(lessonRequest.Duration - CalculateEstimatedTime()) > 15)
+                                {
+                                    <MudAlert Severity="Severity.Warning" Class="mt-3">
+                                        Warning: There's a significant difference between planned duration (@lessonRequest.Duration min) 
+                                        and estimated time (@CalculateEstimatedTime() min).
+                                    </MudAlert>
+                                }
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudContainer>
+        }
+    </DialogContent>
+    
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        @if (!ReadOnly)
+        {
+            <MudButton Color="Color.Primary" 
+                       Variant="Variant.Filled" 
+                       OnClick="Save"
+                       Disabled="isSaving">
+                @if (isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                @(IsEdit ? "Update" : "Create") Lesson
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .section-paper {
+        border-left: 4px solid var(--mud-palette-primary);
+    }
+    
+    .pattern-item {
+        background-color: var(--mud-palette-background-grey);
+        border-radius: 4px;
+    }
+    
+    .pattern-item:hover {
+        background-color: var(--mud-palette-action-hover);
+    }
+</style>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [Parameter] public string? LessonId { get; set; }
+    [Parameter] public bool ReadOnly { get; set; } = false;
+
+    private CreateLessonRequest lessonRequest = new();
+    private List<PatternOrExercise>? patterns;
+    private bool isLoading = false;
+    private bool isSaving = false;
+
+    private bool IsEdit => !string.IsNullOrEmpty(LessonId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        try
+        {
+            // Load patterns for selection
+            patterns = await PatternsService.GetPatternsAsync();
+            
+            if (IsEdit)
+            {
+                var lesson = await LessonsService.GetLessonAsync(LessonId!);
+                if (lesson != null)
+                {
+                    lessonRequest = new CreateLessonRequest
+                    {
+                        CourseId = lesson.CourseId,
+                        Date = lesson.Date,
+                        Duration = lesson.Duration,
+                        Sections = lesson.Sections.Select(s => new LessonSection
+                        {
+                            Id = s.Id,
+                            Type = s.Type,
+                            Items = new List<string>(s.Items),
+                            Notes = s.Notes
+                        }).ToList(),
+                        Notes = lesson.Notes
+                    };
+                }
+            }
+            else
+            {
+                // Initialize with default section for new lessons
+                lessonRequest.Sections.Add(new LessonSection { Type = "Warmup" });
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Failed to load lesson data", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Close();
+
+    private async Task Save()
+    {
+        if (ReadOnly) return;
+
+        isSaving = true;
+        try
+        {
+            if (IsEdit)
+            {
+                var result = await LessonsService.UpdateLessonAsync(LessonId!, lessonRequest);
+                if (result != null)
+                {
+                    MudDialog.Close(DialogResult.Ok(true));
+                }
+                else
+                {
+                    Snackbar.Add("Failed to update lesson", Severity.Error);
+                }
+            }
+            else
+            {
+                var result = await LessonsService.CreateLessonAsync(lessonRequest);
+                if (result != null)
+                {
+                    MudDialog.Close(DialogResult.Ok(true));
+                }
+                else
+                {
+                    Snackbar.Add("Failed to create lesson", Severity.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error saving lesson: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void AddSection()
+    {
+        lessonRequest.Sections.Add(new LessonSection { Type = "Patterns" });
+    }
+
+    private void RemoveSection(int index)
+    {
+        if (index >= 0 && index < lessonRequest.Sections.Count)
+        {
+            lessonRequest.Sections.RemoveAt(index);
+        }
+    }
+
+    private void MoveSectionUp(int index)
+    {
+        if (index > 0 && index < lessonRequest.Sections.Count)
+        {
+            var section = lessonRequest.Sections[index];
+            lessonRequest.Sections.RemoveAt(index);
+            lessonRequest.Sections.Insert(index - 1, section);
+        }
+    }
+
+    private void MoveSectionDown(int index)
+    {
+        if (index >= 0 && index < lessonRequest.Sections.Count - 1)
+        {
+            var section = lessonRequest.Sections[index];
+            lessonRequest.Sections.RemoveAt(index);
+            lessonRequest.Sections.Insert(index + 1, section);
+        }
+    }
+
+    private async Task AddItemToSection(int sectionIndex)
+    {
+        if (patterns == null || !patterns.Any())
+        {
+            Snackbar.Add("No patterns/exercises available. Create some patterns first.", Severity.Warning);
+            return;
+        }
+
+        var parameters = new DialogParameters();
+        parameters.Add("Patterns", patterns);
+        parameters.Add("ExistingItems", lessonRequest.Sections[sectionIndex].Items);
+
+        var options = new DialogOptions() 
+        { 
+            MaxWidth = MaxWidth.Medium, 
+            FullWidth = true,
+            CloseButton = true 
+        };
+
+        var dialog = await DialogService.ShowAsync<SelectPatternDialog>("Select Pattern/Exercise", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is string selectedPatternId)
+        {
+            lessonRequest.Sections[sectionIndex].Items.Add(selectedPatternId);
+        }
+    }
+
+    private void RemoveItemFromSection(int sectionIndex, int itemIndex)
+    {
+        if (sectionIndex >= 0 && sectionIndex < lessonRequest.Sections.Count &&
+            itemIndex >= 0 && itemIndex < lessonRequest.Sections[sectionIndex].Items.Count)
+        {
+            lessonRequest.Sections[sectionIndex].Items.RemoveAt(itemIndex);
+        }
+    }
+
+    private void MoveItemUp(int sectionIndex, int itemIndex)
+    {
+        if (sectionIndex >= 0 && sectionIndex < lessonRequest.Sections.Count &&
+            itemIndex > 0 && itemIndex < lessonRequest.Sections[sectionIndex].Items.Count)
+        {
+            var items = lessonRequest.Sections[sectionIndex].Items;
+            var item = items[itemIndex];
+            items.RemoveAt(itemIndex);
+            items.Insert(itemIndex - 1, item);
+        }
+    }
+
+    private void MoveItemDown(int sectionIndex, int itemIndex)
+    {
+        if (sectionIndex >= 0 && sectionIndex < lessonRequest.Sections.Count &&
+            itemIndex >= 0 && itemIndex < lessonRequest.Sections[sectionIndex].Items.Count - 1)
+        {
+            var items = lessonRequest.Sections[sectionIndex].Items;
+            var item = items[itemIndex];
+            items.RemoveAt(itemIndex);
+            items.Insert(itemIndex + 1, item);
+        }
+    }
+
+    private int CalculateEstimatedTime()
+    {
+        int total = 0;
+        foreach (var section in lessonRequest.Sections)
+        {
+            foreach (var itemId in section.Items)
+            {
+                var pattern = patterns?.FirstOrDefault(p => p.Id == itemId);
+                if (pattern != null)
+                {
+                    total += pattern.EstimatedMinutes;
+                }
+                else
+                {
+                    total += 5; // Default estimate for unknown items
+                }
+            }
+        }
+        return total;
+    }
+}

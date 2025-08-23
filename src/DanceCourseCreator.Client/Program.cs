@@ -18,6 +18,7 @@ builder.Services.AddMudServices();
 // Add application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPatternsService, PatternsService>();
+builder.Services.AddScoped<ILessonsService, LessonsService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // Add authorization
