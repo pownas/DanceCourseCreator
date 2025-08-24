@@ -1,0 +1,263 @@
+@page "/courses"
+@* @attribute [Authorize] *@
+@inject ICoursesService CoursesService
+@inject IDialogService DialogService
+
+<PageTitle>Kurser - WCS Kursskapare</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Kursplaner</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Skapa och hantera fleraveckors kursplaner för West Coast Swing</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="Icons.Material.Filled.Add"
+                                   OnClick="OpenCreateDialog">
+                            Skapa kursplan
+                        </MudButton>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <!-- Filters -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12" sm="4">
+                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(() => { filterLevel = null; LoadCourses(); })">
+                                <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField @bind-Value="searchText" 
+                                          Label="Sök kurser..." 
+                                          Adornment="Adornment.End" 
+                                          AdornmentIcon="Icons.Material.Filled.Search"
+                                          OnAdornmentClick="LoadCourses" />
+                        </MudItem>
+                        <MudItem xs="12" sm="2">
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Primary" 
+                                       OnClick="LoadCourses"
+                                       FullWidth="true">
+                                Filtrera
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- Results Info -->
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                        @(courses?.Count ?? 0) kurser hittades
+                    </MudText>
+
+                    <!-- Loading State -->
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-center align-center" style="height: 200px;">
+                            <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+                        </div>
+                    }
+                    else if (courses != null && courses.Any())
+                    {
+                        <!-- Courses Grid -->
+                        <MudGrid>
+                            @foreach (var course in courses)
+                            {
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudCard Class="course-card" Style="height: 100%;">
+                                        <MudCardHeader>
+                                            <CardHeaderContent>
+                                                <MudText Typo="Typo.h6">@course.Name</MudText>
+                                                <MudChip T="string" Color="GetLevelColor(course.Level)" Size="Size.Small" Class="mt-1">
+                                                    @GetLevelDisplayName(course.Level)
+                                                </MudChip>
+                                            </CardHeaderContent>
+                                            <CardHeaderActions>
+                                                <MudIconButton Icon="Icons.Material.Filled.MoreVert" 
+                                                               Color="Color.Primary" 
+                                                               OnClick="@(() => ShowCourseMenu(course))" />
+                                            </CardHeaderActions>
+                                        </MudCardHeader>
+                                        <MudCardContent>
+                                            <MudText Typo="Typo.body2" Class="mb-2">
+                                                <MudIcon Icon="Icons.Material.Filled.Schedule" Size="Size.Small" Class="mr-1" />
+                                                @course.DurationWeeks veckor
+                                            </MudText>
+                                            
+                                            @if (course.Goals.Any())
+                                            {
+                                                <MudText Typo="Typo.body2" Class="mb-2">
+                                                    <strong>Mål:</strong>
+                                                </MudText>
+                                                <MudList T="string" Dense="true" Class="pa-0">
+                                                    @foreach (var goal in course.Goals.Take(3))
+                                                    {
+                                                        <MudListItem T="string" Class="px-0 py-1">
+                                                            <MudText Typo="Typo.body2">• @goal</MudText>
+                                                        </MudListItem>
+                                                    }
+                                                    @if (course.Goals.Count > 3)
+                                                    {
+                                                        <MudListItem T="string" Class="px-0 py-1">
+                                                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                                ... och @(course.Goals.Count - 3) fler
+                                                            </MudText>
+                                                        </MudListItem>
+                                                    }
+                                                </MudList>
+                                            }
+                                            
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-3">
+                                                Skapad @course.CreatedAt.ToString("yyyy-MM-dd")
+                                            </MudText>
+                                        </MudCardContent>
+                                        <MudCardActions>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Primary" 
+                                                       StartIcon="Icons.Material.Filled.Edit"
+                                                       OnClick="@(() => EditCourse(course))">
+                                                Redigera
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Secondary" 
+                                                       StartIcon="Icons.Material.Filled.Visibility"
+                                                       OnClick="@(() => ViewCourse(course))">
+                                                Visa
+                                            </MudButton>
+                                        </MudCardActions>
+                                    </MudCard>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else
+                    {
+                        <!-- Empty State -->
+                        <MudPaper Class="pa-8 text-center" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                            <MudIcon Icon="Icons.Material.Filled.Timeline" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Inga kurser hittades</MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                                Börja genom att skapa din första kursplan!
+                            </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="Icons.Material.Filled.Add"
+                                       OnClick="OpenCreateDialog">
+                                Skapa kursplan
+                            </MudButton>
+                        </MudPaper>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<Course>? courses;
+    private bool isLoading = false;
+    private string? filterLevel;
+    private string? searchText;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCourses();
+    }
+
+    private async Task LoadCourses()
+    {
+        isLoading = true;
+        try
+        {
+            courses = await CoursesService.GetCoursesAsync(filterLevel, searchText);
+        }
+        catch (Exception ex)
+        {
+            // Handle error - could show snackbar
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var dialog = await DialogService.ShowAsync<CreateCourseDialog>("Skapa ny kursplan");
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadCourses();
+        }
+    }
+
+    private async Task EditCourse(Course course)
+    {
+        var parameters = new DialogParameters<CreateCourseDialog>
+        {
+            { x => x.Course, course }
+        };
+
+        var dialog = await DialogService.ShowAsync<CreateCourseDialog>("Redigera kursplan", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadCourses();
+        }
+    }
+
+    private async Task ViewCourse(Course course)
+    {
+        // TODO: Navigate to course detail view
+        // For now, just edit
+        await EditCourse(course);
+    }
+
+    private async Task ShowCourseMenu(Course course)
+    {
+        // TODO: Implement context menu with options like duplicate, delete, export
+        await EditCourse(course);
+    }
+
+    private Color GetLevelColor(string level)
+    {
+        return level.ToLower() switch
+        {
+            "beginner" => Color.Success,
+            "improver" => Color.Info,
+            "intermediate" => Color.Warning,
+            "advanced" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private string GetLevelDisplayName(string level)
+    {
+        return level.ToLower() switch
+        {
+            "beginner" => "Nybörjare",
+            "improver" => "Förbättrare",
+            "intermediate" => "Medel",
+            "advanced" => "Avancerad",
+            _ => level
+        };
+    }
+}
+
+<style>
+    .course-card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .course-card:hover {
+        transform: translateY(-2px);
+    }
+</style>
