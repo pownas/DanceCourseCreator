@@ -27,13 +27,13 @@
                     <!-- Filters -->
                     <MudGrid Class="mb-4">
                         <MudItem xs="12" sm="3">
-                            <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(() => { filterType = null; LoadPatterns(); })">
+                            <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(async () => { filterType = null; await LoadPatterns(); })">>
                                 <MudSelectItem Value="@("pattern")">Mönster</MudSelectItem>
                                 <MudSelectItem Value="@("exercise")">Övning</MudSelectItem>
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="3">
-                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(() => { filterLevel = null; LoadPatterns(); })">
+                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadPatterns(); })">>
                                 <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
                                 <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
                                 <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
@@ -50,7 +50,7 @@
                         <MudItem xs="12" sm="2">
                             <MudButton Variant="Variant.Outlined" 
                                        Color="Color.Primary" 
-                                       OnClick="LoadPatterns"
+                                       OnClick="@(async () => await LoadPatterns())"
                                        FullWidth="true">
                                 Filtrera
                             </MudButton>
@@ -162,7 +162,7 @@
             var searchValue = string.IsNullOrWhiteSpace(searchText) ? null : searchText;
             patterns = await PatternsService.GetPatternsAsync(filterType, filterLevel, searchValue);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Handle error
         }
@@ -200,7 +200,7 @@
         await LoadPatterns();
     }
 
-    private async Task ViewPattern(PatternOrExercise pattern)
+    private void ViewPattern(PatternOrExercise pattern)
     {
         // TODO: View pattern dialog
     }

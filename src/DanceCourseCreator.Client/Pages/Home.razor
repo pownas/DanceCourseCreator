@@ -5,13 +5,22 @@
 <PageTitle>Kursskapare - Dance Course Creator</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudText Typo="Typo.h3" GutterBottom="true">Välkommen till WCS Kursskapare</MudText>
-    <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-6">
-        Planera, strukturera och dela dina West Coast Swing-lektioner och kurser
-    </MudText>
+    <!-- Hero section -->
+    <div class="hero-section mb-6">
+        <MudText Typo="Typo.h3" GutterBottom="true" Class="hero-title">
+            <MudIcon Icon="Icons.Material.Filled.MusicNote" Class="mr-2" Color="Color.Primary" />
+            Välkommen till WCS Kursskapare
+        </MudText>
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="hero-subtitle">
+            Planera, strukturera och dela dina West Coast Swing-lektioner och kurser
+        </MudText>
+    </div>
     
     <!-- Library Overview Stats -->
-    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">Biblioteksöversikt</MudText>
+    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
+        <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2" />
+        Biblioteksöversikt
+    </MudText>
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-number">@_totalPatterns</div>
@@ -32,7 +41,10 @@
     </div>
     
     <!-- Quick Actions -->
-    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">Snabbåtgärder</MudText>
+    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
+        <MudIcon Icon="Icons.Material.Filled.FlashOn" Class="mr-2" />
+        Snabbåtgärder
+    </MudText>
     <div class="quick-action-grid">
         <MudCard Class="action-card hover-lift">
             <div class="action-card-content">
@@ -95,7 +107,10 @@
     
     <!-- Getting Started / MVP Info -->
     <div class="getting-started-section">
-        <MudText Typo="Typo.h6" GutterBottom="true">Komma igång</MudText>
+        <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
+            <MudIcon Icon="Icons.Material.Filled.Help" Class="mr-2" />
+            Komma igång
+        </MudText>
         <MudText Typo="Typo.body1" Class="mb-4">
             Detta är din MVP (Minimum Viable Product) för West Coast Swing Kursskapare. För närvarande tillgängliga funktioner:
         </MudText>

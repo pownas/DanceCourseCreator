@@ -102,6 +102,47 @@ textarea:focus-visible,
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2) !important;
 }
 
+/* App branding */
+.app-title {
+  font-weight: 600;
+  margin-left: var(--spacing-sm);
+  letter-spacing: 0.025em;
+}
+
+/* Section styling */
+.section-header {
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg) !important;
+  display: flex;
+  align-items: center;
+}
+
+/* Hero section */
+.hero-section {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-secondary) 100%);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.hero-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.hero-subtitle {
+  font-weight: 400;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 /* Typography improvements */
 h1, h2, h3, h4, h5, h6 {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
