@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DanceCourseCreator.API/DanceCourseCreator.API.csproj" />
+    <Project Path="src/DanceCourseCreator.Client/DanceCourseCreator.Client.csproj" />
+  </Folder>
+</Solution>
