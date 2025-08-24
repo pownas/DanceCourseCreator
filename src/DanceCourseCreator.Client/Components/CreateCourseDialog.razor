@@ -1,0 +1,259 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ICoursesService CoursesService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-4">
+                        @(Course != null ? "Redigera kursplan" : "Skapa ny kursplan")
+                    </MudText>
+                </MudItem>
+
+                <!-- Course Basic Info -->
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Grundläggande information</MudText>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="courseRequest.Name" 
+                                              Label="Kursnamn" 
+                                              Required="true"
+                                              Error="@(!string.IsNullOrEmpty(nameError))"
+                                              ErrorText="@nameError"
+                                              Placeholder="T.ex. 'Nybörjarkurs Höst 2024'" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudSelect @bind-Value="courseRequest.Level" 
+                                           Label="Nivå"
+                                           Required="true">
+                                    <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                    <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                    <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                    <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudSelect @bind-Value="courseRequest.DurationWeeks" 
+                                           Label="Kurslängd (veckor)"
+                                           Required="true"
+                                           T="int">
+                                    <MudSelectItem Value="4">4 veckor</MudSelectItem>
+                                    <MudSelectItem Value="6">6 veckor</MudSelectItem>
+                                    <MudSelectItem Value="8">8 veckor</MudSelectItem>
+                                    <MudSelectItem Value="10">10 veckor</MudSelectItem>
+                                    <MudSelectItem Value="12">12 veckor</MudSelectItem>
+                                    <MudSelectItem Value="15">15 veckor</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <!-- Course Goals -->
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Kursmål</MudText>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="newGoal" 
+                                              Label="Lägg till mål" 
+                                              Placeholder="T.ex. 'Lära grundläggande mönster'"
+                                              Adornment="Adornment.End"
+                                              AdornmentIcon="Icons.Material.Filled.Add"
+                                              OnAdornmentClick="AddGoal"
+                                              OnKeyPress="@((KeyboardEventArgs e) => { if (e.Key == "Enter") AddGoal(); })" />
+                            </MudItem>
+                            @if (courseRequest.Goals.Any())
+                            {
+                                <MudItem xs="12">
+                                    <MudList T="string">
+                                        @for (int i = 0; i < courseRequest.Goals.Count; i++)
+                                        {
+                                            var index = i; // Capture for closure
+                                            <MudListItem T="string">
+                                                <div class="d-flex align-center justify-space-between w-100">
+                                                    <MudText>@courseRequest.Goals[index]</MudText>
+                                                    <MudIconButton Icon="Icons.Material.Filled.Delete" 
+                                                                   Color="Color.Error" 
+                                                                   Size="Size.Small"
+                                                                   OnClick="@(() => RemoveGoal(index))" />
+                                                </div>
+                                            </MudListItem>
+                                        }
+                                    </MudList>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <!-- Weekly Themes -->
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Veckoteman</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                            Definiera fokusområden för varje vecka i kursen
+                        </MudText>
+                        <MudGrid>
+                            @for (int week = 1; week <= courseRequest.DurationWeeks; week++)
+                            {
+                                var weekIndex = week - 1;
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="courseRequest.ThemesByWeek[weekIndex]" 
+                                                  Label="@($"Vecka {week}")" 
+                                                  Placeholder="T.ex. 'Grundläggande connection'" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Avbryt</MudButton>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="Save"
+                   Disabled="isLoading">
+            @if (isLoading)
+            {
+                <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+            }
+            @(Course != null ? "Uppdatera" : "Skapa")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+
+    [Parameter] public Course? Course { get; set; }
+
+    private CreateCourseRequest courseRequest = new();
+    private string newGoal = string.Empty;
+    private string nameError = string.Empty;
+    private bool isLoading = false;
+
+    protected override void OnParametersSet()
+    {
+        if (Course != null)
+        {
+            // Edit mode - populate from existing course
+            courseRequest = new CreateCourseRequest
+            {
+                Name = Course.Name,
+                Level = Course.Level,
+                DurationWeeks = Course.DurationWeeks,
+                Goals = new List<string>(Course.Goals),
+                ThemesByWeek = new List<string>(Course.ThemesByWeek)
+            };
+        }
+        
+        // Ensure ThemesByWeek has the right number of entries
+        EnsureThemesCount();
+    }
+
+    private void EnsureThemesCount()
+    {
+        while (courseRequest.ThemesByWeek.Count < courseRequest.DurationWeeks)
+        {
+            courseRequest.ThemesByWeek.Add(string.Empty);
+        }
+        
+        if (courseRequest.ThemesByWeek.Count > courseRequest.DurationWeeks)
+        {
+            courseRequest.ThemesByWeek = courseRequest.ThemesByWeek.Take(courseRequest.DurationWeeks).ToList();
+        }
+    }
+
+    private void AddGoal()
+    {
+        if (!string.IsNullOrWhiteSpace(newGoal))
+        {
+            courseRequest.Goals.Add(newGoal.Trim());
+            newGoal = string.Empty;
+        }
+    }
+
+    private void RemoveGoal(int index)
+    {
+        if (index >= 0 && index < courseRequest.Goals.Count)
+        {
+            courseRequest.Goals.RemoveAt(index);
+        }
+    }
+
+    private async Task Save()
+    {
+        nameError = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(courseRequest.Name))
+        {
+            nameError = "Kursnamn är obligatoriskt";
+            return;
+        }
+
+        EnsureThemesCount();
+
+        isLoading = true;
+        try
+        {
+            Course? result;
+            
+            if (Course != null)
+            {
+                // Update existing course
+                var updatedCourse = new Course
+                {
+                    Id = Course.Id,
+                    Name = courseRequest.Name,
+                    Level = courseRequest.Level,
+                    DurationWeeks = courseRequest.DurationWeeks,
+                    Goals = courseRequest.Goals,
+                    ThemesByWeek = courseRequest.ThemesByWeek,
+                    LessonIds = Course.LessonIds,
+                    CoverageMetrics = Course.CoverageMetrics,
+                    RepetitionPlan = Course.RepetitionPlan,
+                    CreatedBy = Course.CreatedBy,
+                    CreatedAt = Course.CreatedAt,
+                    UpdatedAt = Course.UpdatedAt
+                };
+                
+                result = await CoursesService.UpdateCourseAsync(Course.Id, updatedCourse);
+            }
+            else
+            {
+                // Create new course
+                result = await CoursesService.CreateCourseAsync(courseRequest);
+            }
+
+            if (result != null)
+            {
+                Snackbar.Add(Course != null ? "Kursplan uppdaterad!" : "Kursplan skapad!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(result));
+            }
+            else
+            {
+                Snackbar.Add("Ett fel inträffade. Försök igen.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+}

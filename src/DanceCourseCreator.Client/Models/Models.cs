@@ -129,3 +129,28 @@ public enum LessonSectionType
     Repetition,
     Social
 }
+
+public class Course
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty;
+    public int DurationWeeks { get; set; }
+    public List<string> Goals { get; set; } = new();
+    public List<string> ThemesByWeek { get; set; } = new();
+    public List<string> LessonIds { get; set; } = new();
+    public string CoverageMetrics { get; set; } = "{}";
+    public string RepetitionPlan { get; set; } = "{}";
+    public string CreatedBy { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+
+public class CreateCourseRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Level { get; set; } = "beginner";
+    public int DurationWeeks { get; set; } = 6;
+    public List<string> Goals { get; set; } = new();
+    public List<string> ThemesByWeek { get; set; } = new();
+}
