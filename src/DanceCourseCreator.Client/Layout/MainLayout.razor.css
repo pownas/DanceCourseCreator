@@ -1,67 +1,104 @@
+/* Main layout improvements with accessibility focus */
 .page {
     position: relative;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
 }
 
 main {
     flex: 1;
+    padding: var(--spacing-lg);
 }
 
+/* Improved sidebar with better contrast and modern styling */
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 70%);
+    box-shadow: var(--shadow-md);
 }
 
+/* Top row improvements with better accessibility */
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--divider-color, #E0E0E0);
     justify-content: flex-end;
-    height: 3.5rem;
+    height: 64px; /* Standard app bar height */
     display: flex;
     align-items: center;
+    padding: 0 var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
+.top-row ::deep a, 
+.top-row ::deep .btn-link {
+    white-space: nowrap;
+    margin-left: var(--spacing-lg);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    min-height: 44px; /* WCAG touch target minimum */
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+}
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+.top-row ::deep a:hover, 
+.top-row ::deep .btn-link:hover {
+    background-color: var(--hover-overlay);
+    text-decoration: none;
+    color: var(--primary-color);
+}
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+.top-row ::deep a:focus-visible,
+.top-row ::deep .btn-link:focus-visible {
+    outline: 2px solid var(--focus-outline);
+    outline-offset: 2px;
+}
 
+.top-row ::deep a:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mobile responsive improvements */
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
+        height: 56px; /* Shorter on mobile */
+        padding: 0 var(--spacing-md);
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
+    .top-row ::deep a, 
+    .top-row ::deep .btn-link {
         margin-left: 0;
+        margin-right: var(--spacing-sm);
+    }
+    
+    main {
+        padding: var(--spacing-md);
     }
 }
 
+/* Desktop layout improvements */
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
     }
 
     .sidebar {
-        width: 250px;
+        width: 280px; /* Wider for better touch targets */
         height: 100vh;
         position: sticky;
         top: 0;
+        overflow-y: auto;
     }
 
     .top-row {
         position: sticky;
         top: 0;
-        z-index: 1;
+        z-index: 1100; /* Below MudBlazor dialogs but above content */
     }
 
     .top-row.auth ::deep a:first-child {
@@ -70,8 +107,44 @@ main {
         width: 0;
     }
 
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
+    .top-row, 
+    article {
+        padding-left: var(--spacing-xl) !important;
+        padding-right: var(--spacing-lg) !important;
+    }
+}
+
+/* Improved scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Dark theme support for sidebar */
+@media (prefers-color-scheme: dark) {
+    .sidebar {
+        background: linear-gradient(180deg, #1E1E1E 0%, #121212 70%);
+    }
+    
+    .top-row {
+        background-color: #1E1E1E;
+        border-bottom-color: #424242;
+    }
+    
+    .top-row ::deep a,
+    .top-row ::deep .btn-link {
+        color: #FFFFFF;
     }
 }

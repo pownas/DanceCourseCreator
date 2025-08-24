@@ -11,149 +11,127 @@
     </MudText>
     
     <!-- Library Overview Stats -->
-    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4">Biblioteksöversikt</MudText>
-    <MudGrid Class="mb-6">
-        <MudItem xs="6" sm="3">
-            <MudCard Class="pa-4 text-center">
-                <MudCardContent Class="pb-2">
-                    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-1">@_totalPatterns</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">Tillgängliga mönster</MudText>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="6" sm="3">
-            <MudCard Class="pa-4 text-center">
-                <MudCardContent Class="pb-2">
-                    <MudText Typo="Typo.h4" Color="Color.Success" Class="mb-1">@_beginnerCount</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">Nybörjarnivå</MudText>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="6" sm="3">
-            <MudCard Class="pa-4 text-center">
-                <MudCardContent Class="pb-2">
-                    <MudText Typo="Typo.h4" Color="Color.Info" Class="mb-1">@_improverCount</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">Förbättringsnivå</MudText>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-        <MudItem xs="6" sm="3">
-            <MudCard Class="pa-4 text-center">
-                <MudCardContent Class="pb-2">
-                    <MudText Typo="Typo.h4" Color="Color.Secondary" Class="mb-1">@_exerciseCount</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">Övningar</MudText>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
+    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">Biblioteksöversikt</MudText>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">@_totalPatterns</div>
+            <p class="stat-label">Tillgängliga mönster</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@_beginnerCount</div>
+            <p class="stat-label">Nybörjarnivå</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@_improverCount</div>
+            <p class="stat-label">Förbättringsnivå</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@_exerciseCount</div>
+            <p class="stat-label">Övningar</p>
+        </div>
+    </div>
     
     <!-- Quick Actions -->
-    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4">Snabbåtgärder</MudText>
-    <MudGrid Class="mb-6">
-        <MudItem xs="12" sm="6" md="4">
-            <MudCard Class="pa-4" Style="height: 100%;">
-                <MudCardContent Class="text-center">
-                    <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Primary" Class="mb-3" />
-                    <MudText Typo="Typo.h6" GutterBottom="true">Bläddra i mönsterbibliotek</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-                        Utforska tillgängliga West Coast Swing-mönster och övningar
-                    </MudText>
-                </MudCardContent>
-                <MudCardActions Class="justify-center">
-                    <MudButton Variant="Variant.Filled" 
-                               Color="Color.Primary" 
-                               Href="/patterns"
-                               StartIcon="Icons.Material.Filled.LibraryBooks">
-                        Kom igång
-                    </MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
+    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">Snabbåtgärder</MudText>
+    <div class="quick-action-grid">
+        <MudCard Class="action-card hover-lift">
+            <div class="action-card-content">
+                <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Primary" Class="icon-large" />
+                <MudText Typo="Typo.h6" GutterBottom="true">Bläddra i mönsterbibliotek</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                    Utforska tillgängliga West Coast Swing-mönster och övningar
+                </MudText>
+            </div>
+            <div class="action-card-actions">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           Href="/patterns"
+                           StartIcon="Icons.Material.Filled.LibraryBooks">
+                    Kom igång
+                </MudButton>
+            </div>
+        </MudCard>
         
-        <MudItem xs="12" sm="6" md="4">
-            <MudCard Class="pa-4" Style="height: 100%; opacity: 0.6;">
-                <MudCardContent Class="text-center">
-                    <MudIcon Icon="Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Secondary" Class="mb-3" />
-                    <MudText Typo="Typo.h6" GutterBottom="true">
-                        Skapa ny lektion
-                        <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Class="ml-2">Kommer snart</MudChip>
-                    </MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-                        Bygg en lektionsplan med mönster och övningar
-                    </MudText>
-                </MudCardContent>
-                <MudCardActions Class="justify-center">
-                    <MudButton Variant="Variant.Filled" 
-                               Color="Color.Secondary" 
-                               Disabled="true">
-                        Kom igång
-                    </MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
+        <MudCard Class="action-card coming-soon-opacity">
+            <div class="action-card-content">
+                <MudIcon Icon="Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Secondary" Class="icon-large" />
+                <MudText Typo="Typo.h6" GutterBottom="true">
+                    Skapa ny lektion
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Class="ml-2">Kommer snart</MudChip>
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                    Bygg en lektionsplan med mönster och övningar
+                </MudText>
+            </div>
+            <div class="action-card-actions">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Secondary" 
+                           Disabled="true">
+                    Kom igång
+                </MudButton>
+            </div>
+        </MudCard>
         
-        <MudItem xs="12" sm="6" md="4">
-            <MudCard Class="pa-4" Style="height: 100%; opacity: 0.6;">
-                <MudCardContent Class="text-center">
-                    <MudIcon Icon="Icons.Material.Filled.School" Size="Size.Large" Color="Color.Tertiary" Class="mb-3" />
-                    <MudText Typo="Typo.h6" GutterBottom="true">
-                        Planera kurs
-                        <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Class="ml-2">Kommer snart</MudChip>
-                    </MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-                        Designa en fleraveckors kursplan
-                    </MudText>
-                </MudCardContent>
-                <MudCardActions Class="justify-center">
-                    <MudButton Variant="Variant.Filled" 
-                               Color="Color.Tertiary" 
-                               Disabled="true">
-                        Kom igång
-                    </MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
+        <MudCard Class="action-card coming-soon-opacity">
+            <div class="action-card-content">
+                <MudIcon Icon="Icons.Material.Filled.School" Size="Size.Large" Color="Color.Tertiary" Class="icon-large" />
+                <MudText Typo="Typo.h6" GutterBottom="true">
+                    Planera kurs
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Class="ml-2">Kommer snart</MudChip>
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                    Designa en fleraveckors kursplan
+                </MudText>
+            </div>
+            <div class="action-card-actions">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Tertiary" 
+                           Disabled="true">
+                    Kom igång
+                </MudButton>
+            </div>
+        </MudCard>
+    </div>
     
     <!-- Getting Started / MVP Info -->
-    <MudPaper Class="pa-6" Style="background-color: var(--mud-palette-grey-lighten5);">
+    <div class="getting-started-section">
         <MudText Typo="Typo.h6" GutterBottom="true">Komma igång</MudText>
         <MudText Typo="Typo.body1" Class="mb-4">
             Detta är din MVP (Minimum Viable Product) för West Coast Swing Kursskapare. För närvarande tillgängliga funktioner:
         </MudText>
-        <MudStack>
-            <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
-                <MudIcon Icon="Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="mr-2" Style="margin-top: 2px;" />
-                <div>
+        <div class="feature-list">
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="feature-icon" />
+                <div class="feature-content">
                     <MudText Typo="Typo.body2"><strong>Mönsterbibliotek:</strong> Bläddra och visa detaljerad information om WCS-mönster och övningar</MudText>
                 </div>
             </div>
-            <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
-                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="mr-2" Style="margin-top: 2px;" />
-                <div>
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="feature-icon" />
+                <div class="feature-content">
                     <MudText Typo="Typo.body2"><strong>Lektionsbyggare:</strong> Kommer snart - Skapa strukturerade lektionsplaner</MudText>
                 </div>
             </div>
-            <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
-                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="mr-2" Style="margin-top: 2px;" />
-                <div>
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="feature-icon" />
+                <div class="feature-content">
                     <MudText Typo="Typo.body2"><strong>Kursplanering:</strong> Kommer snart - Designa fleraveckors kursplaner</MudText>
                 </div>
             </div>
-            <div style="display: flex; align-items: flex-start; margin-bottom: 16px;">
-                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="mr-2" Style="margin-top: 2px;" />
-                <div>
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="feature-icon" />
+                <div class="feature-content">
                     <MudText Typo="Typo.body2"><strong>Exportfunktioner:</strong> Kommer snart - Exportera till PDF och Markdown</MudText>
                 </div>
             </div>
-        </MudStack>
+        </div>
         <MudButton Variant="Variant.Outlined" 
                    Color="Color.Primary" 
                    Href="/patterns"
                    StartIcon="Icons.Material.Filled.LibraryBooks">
             Utforska mönsterbibliotek
         </MudButton>
-    </MudPaper>
+    </div>
 </MudContainer>
 
 @code {
