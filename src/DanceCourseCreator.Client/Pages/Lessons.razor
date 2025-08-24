@@ -1,0 +1,258 @@
+@page "/lessons"
+@* @attribute [Authorize] *@
+@inject ILessonsService LessonsService
+@inject IPatternsService PatternsService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Lessons - Dance Course Creator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper Class="pa-4">
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h4">Lessons</MudText>
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               StartIcon="Icons.Material.Filled.Add"
+                               OnClick="OpenCreateDialog">
+                        Create Lesson
+                    </MudButton>
+                </div>
+
+                @if (isLoading)
+                {
+                    <div class="d-flex justify-center mt-8">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                    </div>
+                }
+                else if (lessons == null || !lessons.Any())
+                {
+                    <MudAlert Severity="Severity.Info" Class="mt-4">
+                        No lessons found. Create your first lesson to get started!
+                    </MudAlert>
+                }
+                else
+                {
+                    <MudGrid>
+                        @foreach (var lesson in lessons)
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudCard Class="mb-4">
+                                    <MudCardContent>
+                                        <div class="d-flex justify-space-between align-start mb-2">
+                                            <MudText Typo="Typo.h6">
+                                                @if (lesson.Date.HasValue)
+                                                {
+                                                    @lesson.Date.Value.ToString("yyyy-MM-dd")
+                                                }
+                                                else
+                                                {
+                                                    <span>Lesson</span>
+                                                }
+                                            </MudText>
+                                            <MudChip T="string" Size="Size.Small" Color="GetDurationColor(lesson.Duration)">
+                                                @lesson.Duration min
+                                            </MudChip>
+                                        </div>
+                                        
+                                        @if (lesson.Sections.Any())
+                                        {
+                                            <MudText Typo="Typo.body2" Class="mb-2">
+                                                @lesson.Sections.Count section(s), @lesson.TotalEstimatedMinutes min estimated
+                                            </MudText>
+                                            
+                                            <div class="mb-2">
+                                                @foreach (var section in lesson.Sections.Take(3))
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" 
+                                                             Color="GetSectionColor(section.Type)" 
+                                                             Class="mr-1 mb-1">
+                                                        @(section.Type) (@(section.Items.Count))
+                                                    </MudChip>
+                                                }
+                                                @if (lesson.Sections.Count > 3)
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="mr-1 mb-1">
+                                                        +@(lesson.Sections.Count - 3) more
+                                                    </MudChip>
+                                                }
+                                            </div>
+                                        }
+                                        
+                                        @if (!string.IsNullOrEmpty(lesson.Notes))
+                                        {
+                                            <MudText Typo="Typo.body2" Class="text-truncate">
+                                                @lesson.Notes
+                                            </MudText>
+                                        }
+                                        
+                                        <MudText Typo="Typo.caption" Class="mt-2">
+                                            Updated: @lesson.UpdatedAt.ToString("yyyy-MM-dd HH:mm")
+                                        </MudText>
+                                    </MudCardContent>
+                                    <MudCardActions>
+                                        <MudButton Size="Size.Small" 
+                                                   Color="Color.Primary" 
+                                                   OnClick="() => ViewLesson(lesson)">
+                                            View
+                                        </MudButton>
+                                        <MudButton Size="Size.Small" 
+                                                   Color="Color.Secondary" 
+                                                   OnClick="() => EditLesson(lesson)">
+                                            Edit
+                                        </MudButton>
+                                        <MudSpacer />
+                                        <MudIconButton Size="Size.Small" 
+                                                       Icon="Icons.Material.Filled.Delete" 
+                                                       Color="Color.Error"
+                                                       OnClick="() => DeleteLesson(lesson)" />
+                                    </MudCardActions>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<Lesson>? lessons;
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLessons();
+    }
+
+    private async Task LoadLessons()
+    {
+        isLoading = true;
+        try
+        {
+            lessons = await LessonsService.GetLessonsAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Failed to load lessons", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Color GetDurationColor(int duration)
+    {
+        return duration switch
+        {
+            <= 60 => Color.Success,
+            <= 90 => Color.Primary,
+            <= 120 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private Color GetSectionColor(string sectionType)
+    {
+        return sectionType.ToLower() switch
+        {
+            "warmup" => Color.Success,
+            "technique" => Color.Info,
+            "patterns" => Color.Primary,
+            "combination" => Color.Secondary,
+            "repetition" => Color.Warning,
+            "social" => Color.Tertiary,
+            _ => Color.Default
+        };
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions() 
+        { 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true,
+            CloseButton = true,
+            BackdropClick = false
+        };
+
+        var dialog = await DialogService.ShowAsync<CreateLessonDialog>("Create New Lesson", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadLessons();
+            Snackbar.Add("Lesson created successfully!", Severity.Success);
+        }
+    }
+
+    private async Task ViewLesson(Lesson lesson)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("LessonId", lesson.Id);
+        parameters.Add("ReadOnly", true);
+
+        var options = new DialogOptions() 
+        { 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true,
+            CloseButton = true 
+        };
+
+        await DialogService.ShowAsync<CreateLessonDialog>("View Lesson", parameters, options);
+    }
+
+    private async Task EditLesson(Lesson lesson)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("LessonId", lesson.Id);
+        parameters.Add("ReadOnly", false);
+
+        var options = new DialogOptions() 
+        { 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true,
+            CloseButton = true,
+            BackdropClick = false
+        };
+
+        var dialog = await DialogService.ShowAsync<CreateLessonDialog>("Edit Lesson", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadLessons();
+            Snackbar.Add("Lesson updated successfully!", Severity.Success);
+        }
+    }
+
+    private async Task DeleteLesson(Lesson lesson)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Delete Lesson",
+            $"Are you sure you want to delete this lesson? This action cannot be undone.",
+            yesText: "Delete",
+            cancelText: "Cancel"
+        );
+
+        if (confirmed == true)
+        {
+            var success = await LessonsService.DeleteLessonAsync(lesson.Id);
+            if (success)
+            {
+                await LoadLessons();
+                Snackbar.Add("Lesson deleted successfully!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to delete lesson", Severity.Error);
+            }
+        }
+    }
+}
