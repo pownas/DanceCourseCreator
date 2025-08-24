@@ -27,7 +27,7 @@
                     <!-- Filters -->
                     <MudGrid Class="mb-4">
                         <MudItem xs="12" sm="4">
-                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(() => { filterLevel = null; LoadCourses(); })">
+                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadCourses(); })">>
                                 <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
                                 <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
                                 <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
@@ -44,7 +44,7 @@
                         <MudItem xs="12" sm="2">
                             <MudButton Variant="Variant.Outlined" 
                                        Color="Color.Primary" 
-                                       OnClick="LoadCourses"
+                                       OnClick="@(async () => await LoadCourses())"
                                        FullWidth="true">
                                 Filtrera
                             </MudButton>
@@ -177,7 +177,7 @@
         {
             courses = await CoursesService.GetCoursesAsync(filterLevel, searchText);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Handle error - could show snackbar
         }
@@ -192,7 +192,7 @@
         var dialog = await DialogService.ShowAsync<CreateCourseDialog>("Skapa ny kursplan");
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             await LoadCourses();
         }
@@ -208,7 +208,7 @@
         var dialog = await DialogService.ShowAsync<CreateCourseDialog>("Redigera kursplan", parameters);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             await LoadCourses();
         }

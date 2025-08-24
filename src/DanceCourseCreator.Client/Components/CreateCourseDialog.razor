@@ -65,7 +65,7 @@
                                               Adornment="Adornment.End"
                                               AdornmentIcon="Icons.Material.Filled.Add"
                                               OnAdornmentClick="AddGoal"
-                                              OnKeyPress="@((KeyboardEventArgs e) => { if (e.Key == "Enter") AddGoal(); })" />
+                                              OnKeyDown="@((KeyboardEventArgs e) => { if (e.Key == "Enter") AddGoal(); })" />
                             </MudItem>
                             @if (courseRequest.Goals.Any())
                             {

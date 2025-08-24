@@ -315,7 +315,7 @@
                 lessonRequest.Sections.Add(new LessonSection { Type = "Warmup" });
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Snackbar.Add("Failed to load lesson data", Severity.Error);
         }
@@ -424,7 +424,7 @@
         var dialog = await DialogService.ShowAsync<SelectPatternDialog>("Select Pattern/Exercise", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is string selectedPatternId)
+        if (result is not null && !result.Canceled && result.Data is string selectedPatternId)
         {
             lessonRequest.Sections[sectionIndex].Items.Add(selectedPatternId);
         }

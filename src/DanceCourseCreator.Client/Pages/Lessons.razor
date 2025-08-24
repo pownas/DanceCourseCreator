@@ -136,7 +136,7 @@
         {
             lessons = await LessonsService.GetLessonsAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Snackbar.Add("Failed to load lessons", Severity.Error);
         }
@@ -185,7 +185,7 @@
         var dialog = await DialogService.ShowAsync<CreateLessonDialog>("Create New Lesson", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             await LoadLessons();
             Snackbar.Add("Lesson created successfully!", Severity.Success);
@@ -225,7 +225,7 @@
         var dialog = await DialogService.ShowAsync<CreateLessonDialog>("Edit Lesson", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             await LoadLessons();
             Snackbar.Add("Lesson updated successfully!", Severity.Success);

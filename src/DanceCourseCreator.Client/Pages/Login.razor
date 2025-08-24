@@ -82,7 +82,7 @@
             if (result != null)
             {
                 var authStateProvider = (CustomAuthStateProvider)AuthStateProvider;
-                await authStateProvider.MarkUserAsAuthenticated(result.User);
+                authStateProvider.MarkUserAsAuthenticated(result.User);
                 Navigation.NavigateTo("/");
             }
             else
@@ -90,7 +90,7 @@
                 errorMessage = "Invalid email or password.";
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             errorMessage = "An error occurred during login. Please try again.";
         }

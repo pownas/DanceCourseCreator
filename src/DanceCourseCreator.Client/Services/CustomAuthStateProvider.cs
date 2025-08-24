@@ -53,7 +53,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         }
     }
 
-    public async Task MarkUserAsAuthenticated(User user)
+    public void MarkUserAsAuthenticated(User user)
     {
         var claims = new[]
         {

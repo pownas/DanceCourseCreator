@@ -98,7 +98,7 @@
             if (result != null)
             {
                 var authStateProvider = (CustomAuthStateProvider)AuthStateProvider;
-                await authStateProvider.MarkUserAsAuthenticated(result.User);
+                authStateProvider.MarkUserAsAuthenticated(result.User);
                 Navigation.NavigateTo("/");
             }
             else
@@ -106,7 +106,7 @@
                 errorMessage = "Failed to create account. Please try again.";
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             errorMessage = "An error occurred during registration. Please try again.";
         }

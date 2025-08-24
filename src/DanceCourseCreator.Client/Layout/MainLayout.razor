@@ -1,9 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h6" Class="ml-3">WCS Kursskapare</MudText>
+    <MudAppBar Elevation="2" Dense="false">
+        <MudIconButton Icon="Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" 
+                       aria-label="Visa/dölj navigeringsmeny" />
+        <MudIcon Icon="Icons.Material.Filled.MusicNote" Color="Color.Inherit" Class="mr-2" />
+        <MudText Typo="Typo.h6" Class="app-title">WCS Kursskapare</MudText>
         <MudSpacer />
         
         <AuthorizeView>
