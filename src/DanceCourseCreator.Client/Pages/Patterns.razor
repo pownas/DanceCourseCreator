@@ -3,7 +3,7 @@
 @inject IPatternsService PatternsService
 @inject IDialogService DialogService
 
-<PageTitle>Patterns - Dance Course Creator</PageTitle>
+<PageTitle>Mönster - WCS Kursskapare</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
@@ -11,14 +11,15 @@
             <MudCard>
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h6">Pattern Library</MudText>
+                        <MudText Typo="Typo.h4">Mönster- och övningsbibliotek</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Utforska din samling av West Coast Swing-mönster och övningar</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
                                    StartIcon="Icons.Material.Filled.Add"
                                    OnClick="OpenCreateDialog">
-                            Add Pattern
+                            Lägg till mönster
                         </MudButton>
                     </CardHeaderActions>
                 </MudCardHeader>
@@ -26,22 +27,22 @@
                     <!-- Filters -->
                     <MudGrid Class="mb-4">
                         <MudItem xs="12" sm="3">
-                            <MudSelect @bind-Value="filterType" Label="Type" Clearable="true" OnClearButtonClick="@(() => { filterType = null; LoadPatterns(); })">
-                                <MudSelectItem Value="@("pattern")">Pattern</MudSelectItem>
-                                <MudSelectItem Value="@("exercise")">Exercise</MudSelectItem>
+                            <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(() => { filterType = null; LoadPatterns(); })">
+                                <MudSelectItem Value="@("pattern")">Mönster</MudSelectItem>
+                                <MudSelectItem Value="@("exercise")">Övning</MudSelectItem>
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="3">
-                            <MudSelect @bind-Value="filterLevel" Label="Level" Clearable="true" OnClearButtonClick="@(() => { filterLevel = null; LoadPatterns(); })">
-                                <MudSelectItem Value="@("beginner")">Beginner</MudSelectItem>
-                                <MudSelectItem Value="@("improver")">Improver</MudSelectItem>
-                                <MudSelectItem Value="@("intermediate")">Intermediate</MudSelectItem>
-                                <MudSelectItem Value="@("advanced")">Advanced</MudSelectItem>
+                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(() => { filterLevel = null; LoadPatterns(); })">
+                                <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="4">
                             <MudTextField @bind-Value="searchText" 
-                                          Label="Search" 
+                                          Label="Sök mönster..." 
                                           Adornment="Adornment.End" 
                                           AdornmentIcon="Icons.Material.Filled.Search"
                                           OnAdornmentClick="LoadPatterns" />
@@ -51,10 +52,18 @@
                                        Color="Color.Primary" 
                                        OnClick="LoadPatterns"
                                        FullWidth="true">
-                                Filter
+                                Filtrera
                             </MudButton>
                         </MudItem>
                     </MudGrid>
+
+                    <!-- Results Info -->
+                    @if (patterns != null)
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                            Visar @patterns.Count av totalt @patterns.Count objekt
+                        </MudText>
+                    }
 
                     <!-- Loading Indicator -->
                     @if (isLoading)
@@ -69,40 +78,41 @@
                             @foreach (var pattern in patterns)
                             {
                                 <MudItem xs="12" sm="6" md="4">
-                                    <MudCard Class="mb-4">
-                                        <MudCardHeader>
-                                            <CardHeaderContent>
-                                                <MudText Typo="Typo.h6">@pattern.Name</MudText>
-                                                <MudChip T="string" Size="Size.Small" Color="GetChipColor(pattern.Level)">
-                                                    @pattern.Level.ToUpperInvariant()
-                                                </MudChip>
-                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
-                                                    @pattern.Type.ToUpperInvariant()
-                                                </MudChip>
-                                            </CardHeaderContent>
-                                        </MudCardHeader>
+                                    <MudCard Class="mb-4" Style="height: 100%;">
                                         <MudCardContent>
-                                            <MudText Typo="Typo.body2" Class="mb-2">
-                                                @(string.IsNullOrEmpty(pattern.Description) ? "No description" : 
-                                                  pattern.Description.Length > 100 ? pattern.Description.Substring(0, 100) + "..." : pattern.Description)
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                                <MudText Typo="Typo.h6" Style="flex: 1;">@pattern.Name</MudText>
+                                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                                    <MudChip T="string" Size="Size.Small" Color="GetChipColor(pattern.Level)">
+                                                        @pattern.Level?.ToUpperInvariant()
+                                                    </MudChip>
+                                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="GetTypeColor(pattern.Type)">
+                                                        @(pattern.Type?.ToUpperInvariant() == "PATTERN" ? "MÖNSTER" : "ÖVNING")
+                                                    </MudChip>
+                                                </div>
+                                            </div>
+                                            <MudText Typo="Typo.body2" Class="mb-3" Style="color: var(--mud-palette-text-secondary);">
+                                                @(string.IsNullOrEmpty(pattern.Description) ? "Ingen beskrivning" : 
+                                                  pattern.Description.Length > 120 ? pattern.Description.Substring(0, 120) + "..." : pattern.Description)
                                             </MudText>
                                             @if (pattern.EstimatedMinutes > 0)
                                             {
-                                                <MudText Typo="Typo.caption">
-                                                    <MudIcon Icon="Icons.Material.Filled.Timer" Size="Size.Small" /> @pattern.EstimatedMinutes min
-                                                </MudText>
+                                                <div style="display: flex; align-items: center; color: var(--mud-palette-text-secondary);">
+                                                    <MudIcon Icon="Icons.Material.Filled.Timer" Size="Size.Small" Class="mr-1" /> 
+                                                    <MudText Typo="Typo.caption">@pattern.EstimatedMinutes min</MudText>
+                                                </div>
                                             }
                                         </MudCardContent>
                                         <MudCardActions>
                                             <MudButton Size="Size.Small" 
                                                        Color="Color.Primary" 
                                                        OnClick="@(() => ViewPattern(pattern))">
-                                                View
+                                                Visa
                                             </MudButton>
                                             <MudButton Size="Size.Small" 
                                                        Color="Color.Secondary" 
                                                        OnClick="@(() => EditPattern(pattern))">
-                                                Edit
+                                                Redigera
                                             </MudButton>
                                         </MudCardActions>
                                     </MudCard>
@@ -112,9 +122,19 @@
                     }
                     else if (!isLoading)
                     {
-                        <MudText Typo="Typo.body1" Align="Align.Center" Class="my-8">
-                            No patterns found. Start by adding your first pattern!
-                        </MudText>
+                        <MudPaper Class="pa-8 text-center" Style="background-color: var(--mud-palette-grey-lighten5);">
+                            <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Inga mönster hittades</MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                                Börja genom att lägga till ditt första mönster!
+                            </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="Icons.Material.Filled.Add"
+                                       OnClick="OpenCreateDialog">
+                                Lägg till mönster
+                            </MudButton>
+                        </MudPaper>
                     }
                 </MudCardContent>
             </MudCard>
@@ -152,14 +172,24 @@
         }
     }
 
-    private Color GetChipColor(string level)
+    private Color GetChipColor(string? level)
     {
-        return level.ToLower() switch
+        return level?.ToLower() switch
         {
             "beginner" => Color.Success,
             "improver" => Color.Info,
             "intermediate" => Color.Warning,
             "advanced" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetTypeColor(string? type)
+    {
+        return type?.ToLower() switch
+        {
+            "pattern" => Color.Primary,
+            "exercise" => Color.Secondary,
             _ => Color.Default
         };
     }
