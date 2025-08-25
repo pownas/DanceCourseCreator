@@ -1,0 +1,250 @@
+@page "/templates"
+@* @attribute [Authorize] *@
+@inject ITemplatesService TemplatesService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Mallar - WCS Kursskapare</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Kursmallar</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Hantera dina lektions- och kursmallar för snabbare planering</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="Icons.Material.Filled.Add"
+                                   OnClick="OpenCreateDialog">
+                            Skapa mall
+                        </MudButton>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <!-- Filters -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12" sm="3">
+                            <MudSelect @bind-Value="filterScope" Label="Typ" Clearable="true" OnClearButtonClick="@(async () => { filterScope = null; await LoadTemplates(); })">
+                                <MudSelectItem Value="@("Lesson")">Lektionsmall</MudSelectItem>
+                                <MudSelectItem Value="@("Course")">Kursmall</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="searchText" 
+                                          Label="Sök mallar..." 
+                                          Adornment="Adornment.End" 
+                                          AdornmentIcon="Icons.Material.Filled.Search"
+                                          OnAdornmentClick="@(async () => await LoadTemplates())" />
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudButton OnClick="@(async () => await LoadTemplates())" 
+                                       Variant="Variant.Outlined"
+                                       FullWidth="true"
+                                       StartIcon="Icons.Material.Filled.FilterList">
+                                Filtrera
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+
+                    @if (isLoading)
+                    {
+                        <MudProgressCircular Indeterminate="true" Class="mx-auto d-block" />
+                    }
+                    else if (templates?.Any() == true)
+                    {
+                        <MudGrid>
+                            @foreach (var template in templates)
+                            {
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudCard Style="height: 100%;">
+                                        <MudCardContent>
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                                <MudText Typo="Typo.h6" Class="flex-grow-1">@template.Name</MudText>
+                                                <div>
+                                                    <MudChip T="string" Size="Size.Small" 
+                                                             Color="@(template.Scope == "Lesson" ? Color.Primary : Color.Secondary)">
+                                                        @(template.Scope == "Lesson" ? "LEKTION" : "KURS")
+                                                    </MudChip>
+                                                </div>
+                                            </div>
+                                            <MudText Typo="Typo.body2" Class="mb-3" Style="color: var(--mud-palette-text-secondary);">
+                                                Skapad @template.CreatedAt.ToString("yyyy-MM-dd")
+                                                @if (template.UpdatedAt != template.CreatedAt)
+                                                {
+                                                    <br /><text>Uppdaterad @template.UpdatedAt.ToString("yyyy-MM-dd")</text>
+                                                }
+                                            </MudText>
+                                            @if (!string.IsNullOrEmpty(template.Team))
+                                            {
+                                                <div style="display: flex; align-items: center; color: var(--mud-palette-text-secondary); margin-bottom: 8px;">
+                                                    <MudIcon Icon="Icons.Material.Filled.Group" Size="Size.Small" Class="mr-1" /> 
+                                                    <MudText Typo="Typo.caption">Team-mall</MudText>
+                                                </div>
+                                            }
+                                        </MudCardContent>
+                                        <MudCardActions>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Primary" 
+                                                       OnClick="@(() => ViewTemplate(template))">
+                                                Visa
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Secondary" 
+                                                       OnClick="@(() => EditTemplate(template))">
+                                                Redigera
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Success" 
+                                                       StartIcon="Icons.Material.Filled.ContentCopy"
+                                                       OnClick="@(() => DuplicateTemplate(template))">
+                                                Duplicera
+                                            </MudButton>
+                                        </MudCardActions>
+                                    </MudCard>
+                                </MudItem>
+                            }
+                        </MudGrid>
+
+                        @if (templateResponse?.HasNext == true || templateResponse?.HasPrevious == true)
+                        {
+                            <MudGrid Class="mt-4">
+                                <MudItem xs="12" Class="text-center">
+                                    <MudButton Disabled="@(templateResponse?.HasPrevious != true)"
+                                               OnClick="@(() => LoadTemplates(currentPage - 1))"
+                                               StartIcon="Icons.Material.Filled.ArrowBack">
+                                        Föregående
+                                    </MudButton>
+                                    <MudText Typo="Typo.body1" Class="mx-4" Style="display: inline;">
+                                        Sida @currentPage av @((int)Math.Ceiling((double)(templateResponse?.TotalCount ?? 0) / pageSize))
+                                    </MudText>
+                                    <MudButton Disabled="@(templateResponse?.HasNext != true)"
+                                               OnClick="@(() => LoadTemplates(currentPage + 1))"
+                                               EndIcon="Icons.Material.Filled.ArrowForward">
+                                        Nästa
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        }
+                    }
+                    else if (!isLoading)
+                    {
+                        <MudPaper Class="pa-8 text-center" Style="background-color: var(--mud-palette-grey-lighten5);">
+                            <MudIcon Icon="Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Inga mallar hittades</MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                                Börja genom att skapa din första mall!
+                            </MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="Icons.Material.Filled.Add"
+                                       OnClick="OpenCreateDialog">
+                                Skapa mall
+                            </MudButton>
+                        </MudPaper>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<Template>? templates;
+    private TemplateListResponse? templateResponse;
+    private bool isLoading = false;
+    private string? filterScope;
+    private string searchText = string.Empty;
+    private int currentPage = 1;
+    private int pageSize = 12;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTemplates();
+    }
+
+    private async Task LoadTemplates(int page = 1)
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            currentPage = page;
+            templateResponse = await TemplatesService.GetTemplatesAsync(filterScope, searchText, null, page, pageSize);
+            templates = templateResponse?.Templates;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid hämtning av mallar: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<CreateTemplateDialog>("Skapa ny mall", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadTemplates();
+        }
+    }
+
+    private async Task ViewTemplate(Template template)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Template", template },
+            { "IsReadOnly", true }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large };
+
+        await DialogService.ShowAsync<ViewTemplateDialog>("Visa mall", parameters, options);
+    }
+
+    private async Task EditTemplate(Template template)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Template", template }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<EditTemplateDialog>("Redigera mall", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadTemplates();
+        }
+    }
+
+    private async Task DuplicateTemplate(Template template)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Template", template }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<DuplicateTemplateDialog>("Duplicera mall", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Mall duplicerad framgångsrikt!", Severity.Success);
+        }
+    }
+}
