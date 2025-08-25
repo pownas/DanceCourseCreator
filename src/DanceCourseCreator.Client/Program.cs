@@ -20,6 +20,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPatternsService, PatternsService>();
 builder.Services.AddScoped<ILessonsService, LessonsService>();
 builder.Services.AddScoped<ICoursesService, CoursesService>();
+builder.Services.AddScoped<ITemplatesService, TemplatesService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // Add authorization

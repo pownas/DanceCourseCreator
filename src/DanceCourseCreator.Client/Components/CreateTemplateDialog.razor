@@ -1,0 +1,254 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ITemplatesService TemplatesService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-4">Skapa ny mall</MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Grundläggande information</MudText>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="templateRequest.Name" 
+                                              Label="Mallnamn" 
+                                              Required="true"
+                                              Error="@(!string.IsNullOrEmpty(nameError))"
+                                              ErrorText="@nameError"
+                                              Placeholder="T.ex. 'Nybörjarlektion struktur'" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect @bind-Value="templateRequest.Scope" 
+                                           Label="Malltyp"
+                                           Required="true">
+                                    <MudSelectItem Value="@("Lesson")">Lektionsmall</MudSelectItem>
+                                    <MudSelectItem Value="@("Course")">Kursmall</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Mallinnehåll</MudText>
+                        @if (templateRequest.Scope == "Lesson")
+                        {
+                            <MudText Typo="Typo.body2" Class="mb-3" Color="Color.Secondary">
+                                Konfigurera standardstruktur för dina lektioner
+                            </MudText>
+                            <MudGrid>
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="lessonLevel" Label="Nivå">
+                                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="lessonDuration" Label="Längd (minuter)" T="int">
+                                        <MudSelectItem Value="60">60 minuter</MudSelectItem>
+                                        <MudSelectItem Value="75">75 minuter</MudSelectItem>
+                                        <MudSelectItem Value="90">90 minuter</MudSelectItem>
+                                        <MudSelectItem Value="120">120 minuter</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="lessonNotes" 
+                                                  Label="Anteckningar/instruktioner" 
+                                                  Lines="3"
+                                                  Placeholder="Allmänna tips för denna typ av lektion..." />
+                                </MudItem>
+                            </MudGrid>
+                        }
+                        else if (templateRequest.Scope == "Course")
+                        {
+                            <MudText Typo="Typo.body2" Class="mb-3" Color="Color.Secondary">
+                                Konfigurera standardstruktur för dina kurser
+                            </MudText>
+                            <MudGrid>
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="courseLevel" Label="Nivå">
+                                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="courseDurationWeeks" Label="Kurslängd (veckor)" T="int">
+                                        <MudSelectItem Value="4">4 veckor</MudSelectItem>
+                                        <MudSelectItem Value="6">6 veckor</MudSelectItem>
+                                        <MudSelectItem Value="8">8 veckor</MudSelectItem>
+                                        <MudSelectItem Value="10">10 veckor</MudSelectItem>
+                                        <MudSelectItem Value="12">12 veckor</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudText Typo="Typo.subtitle2" Class="mb-2">Kursmål</MudText>
+                                    <MudGrid>
+                                        @for (int i = 0; i < courseGoals.Count; i++)
+                                        {
+                                            var index = i; // Capture for closure
+                                            <MudItem xs="11">
+                                                <MudTextField @bind-Value="courseGoals[index]" 
+                                                              Label="@($"Mål {index + 1}")" 
+                                                              Placeholder="T.ex. 'Lära grundläggande WCS-rörelser'" />
+                                            </MudItem>
+                                            <MudItem xs="1">
+                                                <MudIconButton Icon="Icons.Material.Filled.Remove" 
+                                                               Color="Color.Error" 
+                                                               OnClick="@(() => courseGoals.RemoveAt(index))" />
+                                            </MudItem>
+                                        }
+                                        <MudItem xs="12">
+                                            <MudButton StartIcon="Icons.Material.Filled.Add" 
+                                                       OnClick="@(() => courseGoals.Add(""))"
+                                                       Variant="Variant.Outlined">
+                                                Lägg till mål
+                                            </MudButton>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                            </MudGrid>
+                        }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Avbryt</MudButton>
+        <MudButton Color="Color.Primary" 
+                   OnClick="CreateTemplate" 
+                   Disabled="@isCreating"
+                   Variant="Variant.Filled">
+            @if (isCreating)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Skapar...</MudText>
+            }
+            else
+            {
+                <MudText>Skapa mall</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+
+    private CreateTemplateRequest templateRequest = new();
+    private bool isCreating = false;
+    private string nameError = string.Empty;
+
+    // Lesson specific fields
+    private string lessonLevel = "beginner";
+    private int lessonDuration = 75;
+    private string lessonNotes = string.Empty;
+
+    // Course specific fields
+    private string courseLevel = "beginner";
+    private int courseDurationWeeks = 6;
+    private List<string> courseGoals = new() { "" };
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+
+    private async Task CreateTemplate()
+    {
+        // Validate name
+        nameError = string.Empty;
+        if (string.IsNullOrWhiteSpace(templateRequest.Name))
+        {
+            nameError = "Mallnamn krävs";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(templateRequest.Scope))
+        {
+            Snackbar.Add("Malltyp måste väljas", Severity.Error);
+            return;
+        }
+
+        isCreating = true;
+        StateHasChanged();
+
+        try
+        {
+            // Build content based on scope
+            if (templateRequest.Scope == "Lesson")
+            {
+                var lessonContent = new
+                {
+                    level = lessonLevel,
+                    duration = lessonDuration,
+                    sections = new object[]
+                    {
+                        new { name = "Uppvärmning", duration = 10, patterns = new string[0], notes = "Fokus på connection", teachingPoints = new string[0] },
+                        new { name = "Teknikblock", duration = 20, patterns = new string[0], teachingPoints = new string[0], notes = "" },
+                        new { name = "Mönster", duration = 30, patterns = new string[0], teachingPoints = new string[0], notes = "" },
+                        new { name = "Repetition", duration = 10, patterns = new string[0], notes = "Säkerställ förståelse", teachingPoints = new string[0] },
+                        new { name = "Social", duration = 5, patterns = new string[0], notes = "Fri dans", teachingPoints = new string[0] }
+                    },
+                    goals = new string[] { "Utveckla dansfärdigheter", "Förbättra teknik" },
+                    notes = lessonNotes
+                };
+                templateRequest.Content = System.Text.Json.JsonSerializer.Serialize(lessonContent);
+            }
+            else // Course
+            {
+                var cleanGoals = courseGoals.Where(g => !string.IsNullOrWhiteSpace(g)).ToList();
+                if (!cleanGoals.Any())
+                {
+                    cleanGoals.Add("Lära grundläggande WCS");
+                }
+
+                var themesByWeek = new List<string>();
+                for (int i = 0; i < courseDurationWeeks; i++)
+                {
+                    themesByWeek.Add($"Vecka {i + 1} tema");
+                }
+
+                var courseContent = new
+                {
+                    level = courseLevel,
+                    durationWeeks = courseDurationWeeks,
+                    goals = cleanGoals,
+                    themesByWeek = themesByWeek
+                };
+                templateRequest.Content = System.Text.Json.JsonSerializer.Serialize(courseContent);
+            }
+
+            var createdTemplate = await TemplatesService.CreateTemplateAsync(templateRequest);
+            if (createdTemplate != null)
+            {
+                Snackbar.Add("Mall skapad framgångsrikt!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(createdTemplate));
+            }
+            else
+            {
+                Snackbar.Add("Fel vid skapande av mall", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid skapande av mall: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isCreating = false;
+            StateHasChanged();
+        }
+    }
+}
