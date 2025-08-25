@@ -31,6 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -51,5 +54,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
 }
