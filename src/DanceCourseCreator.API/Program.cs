@@ -89,13 +89,33 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Default route for controllers
 app.MapDefaultEndpoints();
 
-// Ensure database is created
+// Ensure database is created and seed demo user
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DanceCourseDbContext>();
     context.Database.EnsureCreated();
+    
+    // Ensure demo user exists for testing
+    var demoEmail = "demo@dancecourse.com";
+    var demoUser = await context.Users.FirstOrDefaultAsync(u => u.Email == demoEmail);
+    if (demoUser == null)
+    {
+        demoUser = new DanceCourseCreator.API.Models.User
+        {
+            Id = "demo-user-id",
+            Name = "Demo User",
+            Email = demoEmail,
+            Role = DanceCourseCreator.API.Models.UserRole.Instructor,
+            HashedPassword = BCrypt.Net.BCrypt.HashPassword("demo123"),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        context.Users.Add(demoUser);
+        await context.SaveChangesAsync();
+    }
 }
 
 // Configure the HTTP request pipeline.
