@@ -8,6 +8,8 @@ using DanceCourseCreator.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Add Entity Framework
 builder.Services.AddDbContext<DanceCourseDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=database.sqlite"));
@@ -86,6 +88,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Ensure database is created
 using (var scope = app.Services.CreateScope())
