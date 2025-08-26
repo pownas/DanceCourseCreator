@@ -4,5 +4,6 @@
     <Project Path="src/DanceCourseCreator.Client/DanceCourseCreator.Client.csproj" />
     <Project Path="src/DanceCourseCreator.AppHost/DanceCourseCreator.AppHost.csproj" Id="35856b8b-69dc-4837-b7d1-770b2106055c" />
     <Project Path="src/DanceCourseCreator.ServiceDefaults/DanceCourseCreator.ServiceDefaults.csproj" />
+    <Project Path="src/DanceCourseCreator.Tests.E2E/DanceCourseCreator.Tests.E2E.csproj" />
   </Folder>
 </Solution>
