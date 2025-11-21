@@ -1,6 +1,6 @@
 # Dance Course Creator - Playwright E2E Tests
 
-This project contains Playwright end-to-end tests for the Dance Course Creator application.
+This project contains comprehensive Playwright end-to-end tests for the Dance Course Creator application, including automated screenshot capture for documentation and regression testing.
 
 ## Prerequisites
 
@@ -20,10 +20,23 @@ This project contains Playwright end-to-end tests for the Dance Course Creator a
    dotnet build
    
    # Install Playwright browsers
+   pwsh bin/Debug/net8.0/playwright.ps1 install chromium
+   ```
+   
+   Alternative installation:
+   ```bash
    node bin/Debug/net8.0/.playwright/package/cli.js install chromium
    ```
 
 2. **Start the applications**:
+   
+   **Option 1 - Using Aspire AppHost (Recommended):**
+   ```bash
+   cd src/DanceCourseCreator.AppHost
+   dotnet run
+   ```
+   
+   **Option 2 - Manual start:**
    
    Terminal 1 - API:
    ```bash
@@ -45,9 +58,27 @@ cd src/DanceCourseCreator.Tests.E2E
 dotnet test
 ```
 
-### Run Smoke Tests Only
+### Run Tests by Category
 ```bash
-cd src/DanceCourseCreator.Tests.E2E
+# Navigation tests
+dotnet test --filter "TestCategory=Navigation"
+
+# Pattern library tests
+dotnet test --filter "TestCategory=Patterns"
+
+# Course tests
+dotnet test --filter "TestCategory=Courses"
+
+# Lesson tests
+dotnet test --filter "TestCategory=Lessons"
+
+# Template tests
+dotnet test --filter "TestCategory=Templates"
+
+# All tests that capture screenshots
+dotnet test --filter "TestCategory=Screenshots"
+
+# Smoke tests only
 dotnet test --filter "TestCategory=Smoke"
 ```
 
@@ -57,9 +88,62 @@ cd src/DanceCourseCreator.Tests.E2E
 dotnet test --logger "console;verbosity=detailed"
 ```
 
+## Test Files
+
+### HomeAndNavigationTests.cs
+Tests for home page and main navigation functionality:
+- Home page loading and content verification
+- Navigation through all main sections (Patterns, Lessons, Courses, Templates)
+- Quick action buttons functionality
+
+### PatternLibraryTests.cs
+Tests for pattern library browsing and interaction:
+- Pattern library loading and display
+- Filtering by type (Pattern/Exercise)
+- Filtering by level (Beginner, Improver, etc.)
+- Search functionality
+- Viewing pattern details
+
+### CourseCreationTests.cs
+Tests for course creation workflow:
+- Opening create course dialog
+- Filling form with course details
+- Adding course goals
+- Saving new courses
+- Empty state handling
+
+### CourseEditingTests.cs
+Tests for course editing workflow:
+- Opening edit dialog for existing courses
+- Modifying course details
+- Adding additional goals
+- Saving changes
+- Viewing course details
+- Canceling edits
+
+### LessonAndTemplateTests.cs
+Tests for lesson and template workflows:
+- Lesson page loading and navigation
+- Creating new lessons
+- Template page loading
+- Creating new templates
+- Viewing and editing templates
+- Duplicating templates
+
+### DemoLoginSmokeTests.cs
+Basic smoke tests for login and navigation:
+- Demo user login flow
+- Basic page navigation
+
 ## Test Categories
 
-- **Smoke**: Basic functionality tests that verify the application loads and core navigation works
+- **Navigation**: Tests related to page navigation and routing
+- **Patterns**: Tests for pattern library functionality
+- **Courses**: Tests for course creation and management
+- **Lessons**: Tests for lesson planning
+- **Templates**: Tests for template management
+- **Screenshots**: All tests that capture screenshots
+- **Smoke**: Basic functionality tests
 
 ## Demo User Credentials
 
@@ -70,13 +154,73 @@ The tests use a demo user that is automatically created when the API starts:
 
 ## Screenshots
 
-Tests automatically capture screenshots and save them to the `screenshots/` folder:
+Tests automatically capture screenshots organized by category in the `screenshots/` folder:
 
-- `01-home-page.png` - Initial home page
-- `02-login-page.png` - Login page
-- `03-after-login-attempt.png` - After attempting login
+### Navigation Screenshots (`screenshots/navigation/`)
+- `01-home-page-initial.png` - Initial home page view
+- `02-patterns-page.png` - Patterns/library page
+- `03-lessons-page.png` - Lessons page
 - `04-courses-page.png` - Courses page
-- `05-final-home-page.png` - Final home page
+- `05-templates-page.png` - Templates page
+- `06-back-to-home.png` - Return to home page
+- `07-quick-actions-visible.png` - Quick action buttons
+- `08-after-quick-action-click.png` - After clicking quick action
+
+### Pattern Library Screenshots (`screenshots/patterns/`)
+- `01-patterns-library-initial.png` - Initial patterns page
+- `02-before-type-filter.png` - Before applying type filter
+- `03-type-filter-dropdown-open.png` - Type filter dropdown
+- `04-after-type-filter-applied.png` - After filtering by type
+- `05-level-filter-dropdown-open.png` - Level filter dropdown
+- `06-after-level-filter-applied.png` - After filtering by level
+- `07-before-search.png` - Before search
+- `08-search-text-entered.png` - Search text entered
+- `09-after-search-applied.png` - After search applied
+- `10-before-view-pattern.png` - Before viewing pattern details
+- `11-pattern-details-dialog.png` - Pattern details dialog
+
+### Course Creation Screenshots (`screenshots/course-creation/`)
+- `01-courses-page-initial.png` - Courses page
+- `02-create-course-dialog-open.png` - Create dialog
+- `03-create-form-empty.png` - Empty form
+- `04-create-form-name-filled.png` - Name field filled
+- `05-level-dropdown-open.png` - Level selection dropdown
+- `06-level-selected.png` - Level selected
+- `07-duration-filled.png` - Duration field filled
+- `08-goal-entered.png` - Goal text entered
+- `09-goal-added-to-list.png` - Goal added to list
+- `10-form-complete-before-save.png` - Complete form before save
+- `11-after-course-created.png` - After course saved
+- `12-courses-list-state.png` - Courses list state
+- `13-empty-state-visible.png` - Empty state message
+
+### Course Editing Screenshots (`screenshots/course-editing/`)
+- `01-courses-list-before-edit.png` - Courses list
+- `02-edit-course-dialog-open.png` - Edit dialog opened
+- `03-edit-form-initial-state.png` - Initial edit form
+- `04-edit-name-modified.png` - Name modified
+- `05-edit-duration-modified.png` - Duration modified
+- `06-edit-new-goal-entered.png` - New goal entered
+- `07-edit-new-goal-added.png` - New goal added
+- `08-edit-form-before-save.png` - Before saving changes
+- `09-after-course-edited.png` - After changes saved
+- `10-view-course-details.png` - Viewing course details
+- `11-edit-dialog-before-cancel.png` - Before canceling edit
+- `12-after-cancel-back-to-list.png` - After canceling
+
+### Lesson & Template Screenshots (`screenshots/lessons-templates/`)
+- `01-lessons-page-initial.png` - Lessons page
+- `02-create-lesson-dialog-open.png` - Create lesson dialog
+- `03-lessons-before-filter.png` - Before filtering lessons
+- `04-lessons-search-entered.png` - Search text entered
+- `05-lessons-after-filter.png` - After filter applied
+- `06-templates-page-initial.png` - Templates page
+- `07-create-template-dialog-open.png` - Create template dialog
+- `08-templates-list.png` - Templates list
+- `09-template-details-dialog.png` - Template details
+- `10-edit-template-dialog.png` - Edit template dialog
+- `11-template-menu-open.png` - Template context menu
+- `12-duplicate-template-dialog.png` - Duplicate template dialog
 
 ## Troubleshooting
 

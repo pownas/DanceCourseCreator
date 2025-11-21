@@ -416,3 +416,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Playwright test screenshots (generated during test runs)
+**/screenshots/
+*.png
+!wwwroot/**/*.png
