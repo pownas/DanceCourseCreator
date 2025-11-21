@@ -46,6 +46,7 @@ public class DanceCourseDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Type).HasConversion<string>();
             entity.Property(e => e.Level).HasConversion<string>();
+            entity.Property(e => e.DanceStyle).HasConversion<string>();
             entity.HasOne(e => e.Creator)
                   .WithMany(u => u.CreatedPatterns)
                   .HasForeignKey(e => e.CreatedBy)
@@ -78,6 +79,7 @@ public class DanceCourseDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Level).HasConversion<string>();
+            entity.Property(e => e.DanceStyle).HasConversion<string>();
             entity.Property(e => e.Type).HasConversion<string>();
             entity.HasOne(e => e.Creator)
                   .WithMany(u => u.CreatedCourses)
@@ -90,6 +92,7 @@ public class DanceCourseDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Scope).HasConversion<string>();
+            entity.Property(e => e.DanceStyle).HasConversion<string>();
             entity.HasOne(e => e.OwnerUser)
                   .WithMany()
                   .HasForeignKey(e => e.Owner)
