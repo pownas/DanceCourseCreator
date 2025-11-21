@@ -205,6 +205,36 @@ dotnet build                  # Build entire solution
 dotnet clean                  # Clean build artifacts
 ```
 
+### End-to-End Testing with Playwright
+
+The application includes comprehensive Playwright E2E tests with automatic screenshot capture for documentation and regression testing.
+
+**Setup and Running Tests:**
+```bash
+cd src/DanceCourseCreator.Tests.E2E
+
+# First time setup - install Playwright browsers
+dotnet build
+pwsh bin/Debug/net8.0/playwright.ps1 install chromium
+
+# Run all tests
+dotnet test
+
+# Run specific test categories
+dotnet test --filter "TestCategory=Navigation"
+dotnet test --filter "TestCategory=Patterns"
+dotnet test --filter "TestCategory=Courses"
+```
+
+**Test Coverage:**
+- **Home & Navigation** - Main page and navigation flows
+- **Pattern Library** - Browsing, filtering, and searching patterns
+- **Course Creation** - Complete course creation workflow
+- **Course Editing** - Modifying existing courses
+- **Lessons & Templates** - Lesson and template management
+
+See [E2E Test Documentation](src/DanceCourseCreator.Tests.E2E/README.md) for detailed information on test structure, categories, and screenshot organization.
+
 ### API Documentation & Testing
 
 When running the API in development mode:
