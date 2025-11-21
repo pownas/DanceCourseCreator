@@ -4,10 +4,10 @@ using Microsoft.Playwright.MSTest;
 namespace DanceCourseCreator.Tests.E2E;
 
 /// <summary>
-/// Tests for pattern library browsing and interaction with screenshots.
+/// Tests for turbank browsing and interaction with screenshots.
 /// </summary>
 [TestClass]
-public class PatternLibraryTests : PageTest
+public class TurbankTests : PageTest
 {
     private const string BaseUrl = "http://localhost:5034";
     private const string ScreenshotsDir = "screenshots/patterns";
@@ -21,11 +21,11 @@ public class PatternLibraryTests : PageTest
     [TestMethod]
     [TestCategory("Patterns")]
     [TestCategory("Screenshots")]
-    public async Task PatternLibrary_LoadAndBrowse_ShouldDisplayPatterns()
+    public async Task Turbank_LoadAndBrowse_ShouldDisplayPatterns()
     {
         // Navigate to patterns page
         await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 30000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
 
         // Capture initial patterns page
         await Page.ScreenshotAsync(new()
@@ -35,18 +35,18 @@ public class PatternLibraryTests : PageTest
         });
 
         // Verify key elements
-        await Expect(Page.GetByText("Mönster- och övningsbibliotek")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Turbank")).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" })).ToBeVisibleAsync();
     }
 
     [TestMethod]
     [TestCategory("Patterns")]
     [TestCategory("Screenshots")]
-    public async Task PatternLibrary_FilterByType_ShouldWork()
+    public async Task Turbank_FilterByType_ShouldWork()
     {
         // Navigate to patterns page
         await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 30000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
 
         // Wait for patterns to load
         await Page.WaitForTimeoutAsync(1000);
@@ -89,11 +89,11 @@ public class PatternLibraryTests : PageTest
     [TestMethod]
     [TestCategory("Patterns")]
     [TestCategory("Screenshots")]
-    public async Task PatternLibrary_FilterByLevel_ShouldWork()
+    public async Task Turbank_FilterByLevel_ShouldWork()
     {
         // Navigate to patterns page
         await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 30000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
         await Page.WaitForTimeoutAsync(1000);
 
         // Click on Level dropdown
@@ -127,11 +127,11 @@ public class PatternLibraryTests : PageTest
     [TestMethod]
     [TestCategory("Patterns")]
     [TestCategory("Screenshots")]
-    public async Task PatternLibrary_SearchPatterns_ShouldWork()
+    public async Task Turbank_SearchPatterns_ShouldWork()
     {
         // Navigate to patterns page
         await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 30000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot before search
@@ -168,11 +168,11 @@ public class PatternLibraryTests : PageTest
     [TestMethod]
     [TestCategory("Patterns")]
     [TestCategory("Screenshots")]
-    public async Task PatternLibrary_ViewPatternDetails_ShouldOpenDialog()
+    public async Task Turbank_ViewPatternDetails_ShouldOpenDialog()
     {
         // Navigate to patterns page
         await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 30000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
         await Page.WaitForTimeoutAsync(1500);
 
         // Take screenshot before clicking view

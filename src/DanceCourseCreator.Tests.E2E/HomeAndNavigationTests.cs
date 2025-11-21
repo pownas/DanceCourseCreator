@@ -52,13 +52,13 @@ public class HomeAndNavigationTests : PageTest
 
         // Navigate to Patterns page
         await Page.GetByRole(AriaRole.Link, new() { Name = "Mönster" }).First.ClickAsync();
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 10000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 10000 });
         await Page.ScreenshotAsync(new()
         {
             Path = $"{ScreenshotsDir}/02-patterns-page.png",
             FullPage = true
         });
-        await Expect(Page.GetByText("Mönster- och övningsbibliotek")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Turbank")).ToBeVisibleAsync();
 
         // Navigate to Lessons page
         await Page.GetByRole(AriaRole.Link, new() { Name = "Lektioner" }).First.ClickAsync();
@@ -122,7 +122,7 @@ public class HomeAndNavigationTests : PageTest
         await komIgangButton.ClickAsync();
         
         // Wait for navigation to patterns page
-        await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 10000 });
+        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 10000 });
         
         // Take screenshot after navigation
         await Page.ScreenshotAsync(new()
