@@ -68,7 +68,7 @@ DanceCourseCreator är implementerad som en modern .NET 8-applikation med:
 ### 1.3 Observerade gaps
 
 ❌ **Användargränssnitt för kursbygge**: Flödet för att bygga en komplett kurs från turbanken finns inte fullt utvecklat i UI  
-❌ **Turbank-integration**: Saknar tydlig "turbank"-vy som stödjer kursbyggande  
+❌ **Turbank-integration**: Saknar tydlig "turbank"-vy som stöder kursbyggande  
 ❌ **Visuell progression**: Ingen visuell representation av kurstidslinje och täckning  
 ❌ **Rekommendationssystem**: Begränsad intelligens för att föreslå turer baserat på kontext  
 ❌ **Dra-och-släpp-interface**: Ingen intuitiv dragfunktionalitet för att bygga lektioner/kurser  
@@ -381,19 +381,19 @@ Mall: "Standard 75-min Beginner Lesson"
 
 **MudBlazor DropZone-exempel**:
 ```razor
-<MudDropContainer T="PatternOrExercise" 
+<MudDropContainer T="PatternOrExerciseItem" 
                   Items="@availablePatterns" 
-                  ItemsSelector="@((item, dropzone) => item.Section == dropzone)"
+                  ItemsSelector="@((item, dropzone) => item.AssignedSection == dropzone)"
                   ItemDropped="@OnPatternDropped">
     
     <ChildContent>
         <!-- Uppvärmning -->
-        <MudDropZone T="PatternOrExercise" Identifier="Warmup" Class="mud-height-full">
+        <MudDropZone T="PatternOrExerciseItem" Identifier="Warmup" Class="mud-height-full">
             <MudText>Uppvärmning (@GetSectionDuration("Warmup") min)</MudText>
         </MudDropZone>
         
         <!-- Teknik -->
-        <MudDropZone T="PatternOrExercise" Identifier="Technique" Class="mud-height-full">
+        <MudDropZone T="PatternOrExerciseItem" Identifier="Technique" Class="mud-height-full">
             <MudText>Teknik (@GetSectionDuration("Technique") min)</MudText>
         </MudDropZone>
         
@@ -402,11 +402,20 @@ Mall: "Standard 75-min Beginner Lesson"
     
     <ItemRenderer>
         <MudPaper Class="pa-2 ma-2">
-            <MudText>@context.Name</MudText>
-            <MudChip Size="Size.Small">@context.EstimatedMinutes min</MudChip>
+            <MudText>@context.Pattern.Name</MudText>
+            <MudChip Size="Size.Small">@context.Pattern.EstimatedMinutes min</MudChip>
         </MudPaper>
     </ItemRenderer>
 </MudDropContainer>
+
+@code {
+    // Wrapper class för att hålla pattern och dess tilldelade sektion
+    public class PatternOrExerciseItem
+    {
+        public PatternOrExercise Pattern { get; set; }
+        public string AssignedSection { get; set; }
+    }
+}
 ```
 
 **Backend-stöd**:
@@ -554,6 +563,15 @@ Steg 5: Spara och exportera
 
 **Backend-logik för att generera kursförslag**:
 ```csharp
+// Request DTO
+public class CourseGenerationRequest
+{
+    public string Name { get; set; }
+    public DanceLevel Level { get; set; }
+    public int DurationWeeks { get; set; }
+    public List<string> FocusAreas { get; set; } // t.ex. ["Fundamentals", "Musicality"]
+}
+
 public class CourseGenerator
 {
     public Course GenerateCourse(CourseGenerationRequest request)
@@ -749,13 +767,13 @@ public class CourseCoverageMetrics
 
 **C. Spaced repetition-plan**
 
-Strukturerad repetitionsplanering:
+Strukturerad repetitionsplanering baserad på algoritmer för distribuerad inlärning:
 ```csharp
 public class RepetitionSchedule
 {
     public string PatternId { get; set; }
     public DateTime IntroducedAt { get; set; } // Vecka det introducerades
-    public List<DateTime> RepetitionDates { get; set; } // Föreslagna repetitioner
+    public List<DateTime> RepetitionDates { get; set; } // Föreslagna repetitioner baserade på 1-2-4-8 veckorsmönster
     public RepetitionStatus Status { get; set; }
 }
 
@@ -763,7 +781,7 @@ public enum RepetitionStatus
 {
     NotIntroduced,
     RecentlyIntroduced, // < 1 vecka sedan
-    NeedsRepetition,    // 1-2 veckor sedan
+    NeedsRepetition,    // 1-2 veckor sedan, föreslå repetition
     WellEstablished     // > 3 repetitioner med 2+ veckors spacing
 }
 ```
@@ -1191,7 +1209,6 @@ Mallar och teamsamarbete skapar nätverkseffekter och ökar värdet för alla an
 
 ---
 
-**Sammanställd av**: GitHub Copilot Coding Agent  
 **Baserad på**: Kravspecifikation v1.0, befintlig kod-analys, WCS-pedagogiska best practices
 
 **Nästa steg**: Börja med Sprint 1 - Turbank och Lektionsbyggare (se avsnitt 11.1)
