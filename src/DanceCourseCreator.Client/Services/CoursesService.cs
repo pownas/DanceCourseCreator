@@ -6,7 +6,7 @@ namespace DanceCourseCreator.Client.Services;
 
 public interface ICoursesService
 {
-    Task<List<Course>?> GetCoursesAsync(string? level = null, string? search = null);
+    Task<List<Course>?> GetCoursesAsync(string? level = null, string? danceStyle = null, string? search = null);
     Task<Course?> GetCourseAsync(string id);
     Task<Course?> CreateCourseAsync(CreateCourseRequest request);
     Task<Course?> UpdateCourseAsync(string id, Course request);
@@ -34,7 +34,7 @@ public class CoursesService : ICoursesService
         }
     }
 
-    public async Task<List<Course>?> GetCoursesAsync(string? level = null, string? search = null)
+    public async Task<List<Course>?> GetCoursesAsync(string? level = null, string? danceStyle = null, string? search = null)
     {
         try
         {
@@ -44,6 +44,9 @@ public class CoursesService : ICoursesService
             
             if (!string.IsNullOrEmpty(level))
                 queryParams.Add($"level={Uri.EscapeDataString(level)}");
+            
+            if (!string.IsNullOrEmpty(danceStyle))
+                queryParams.Add($"danceStyle={Uri.EscapeDataString(danceStyle)}");
                 
             if (!string.IsNullOrEmpty(search))
                 queryParams.Add($"search={Uri.EscapeDataString(search)}");

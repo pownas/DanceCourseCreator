@@ -38,6 +38,7 @@ public class PatternOrExercise
     public string Name { get; set; } = string.Empty;
     public List<string> Aliases { get; set; } = new();
     public string Level { get; set; } = string.Empty;
+    public string DanceStyle { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public List<string> Steps { get; set; } = new();
     public List<string> Counts { get; set; } = new();
@@ -69,6 +70,7 @@ public class CreatePatternRequest
     public string Name { get; set; } = string.Empty;
     public List<string> Aliases { get; set; } = new();
     public string Level { get; set; } = string.Empty;
+    public string DanceStyle { get; set; } = "WestCoastSwing";
     public string Description { get; set; } = string.Empty;
     public List<string> Steps { get; set; } = new();
     public List<string> Counts { get; set; } = new();
@@ -135,6 +137,7 @@ public class Course
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;
+    public string DanceStyle { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public int DurationWeeks { get; set; }
     public int PlannedLessonCount { get; set; }
@@ -154,6 +157,7 @@ public class CreateCourseRequest
 {
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = "beginner";
+    public string DanceStyle { get; set; } = "WestCoastSwing";
     public string Type { get; set; } = "Weekly";
     public int DurationWeeks { get; set; } = 6;
     public int PlannedLessonCount { get; set; } = 6;
