@@ -32,18 +32,18 @@ Testerna är organiserade i separata filer baserat på funktionsområde:
 - Demonstrerar hur användare navigerar mellan olika delar
 - Dokumenterar alla tillgängliga sektioner
 
-### 2. PatternLibraryTests.cs
-**Syfte:** Testa mönsterbiblioteket och dess filtreringsfunktioner
+### 2. TurbankTests.cs
+**Syfte:** Testa turbanken och dess filtreringsfunktioner
 
 **Användarflöden som testas:**
-- Ladda och visa mönsterbiblioteket
+- Ladda och visa turbanken
 - Filtrera mönster efter typ (Mönster/Övning)
 - Filtrera mönster efter nivå (Nybörjare, Förbättrare, etc.)
 - Söka efter specifika mönster
 - Visa detaljerad information om ett mönster
 
 **Screenshots som genereras:**
-- Mönsterbiblioteket med alla mönster
+- Turbanken med alla mönster
 - Filter-dropdowns öppna
 - Resultat efter filtrering
 - Sökfunktion i användning
@@ -164,7 +164,7 @@ Alla screenshots organiseras i underkataloger baserat på funktionsområde:
 ```
 screenshots/
 ├── navigation/          # Navigering och startsida
-├── patterns/            # Mönsterbibliotek
+├── patterns/            # Turbank
 ├── course-creation/     # Kursskapande
 ├── course-editing/      # Kursredigering
 └── lessons-templates/   # Lektioner och mallar

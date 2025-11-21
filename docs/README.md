@@ -38,6 +38,20 @@ Innehåller:
 ---
 
 ## 📚 Implementeringsguider för specifika funktioner
+Denna katalog innehåller detaljerade implementeringsguider och analyser för nyckelkomponenter i DanceCourseCreator-systemet.
+
+## Tillgängliga dokument
+
+### [🔍 Analys: Förbättrat danskursflöde](./Analys-Danskursflode.md)
+Omfattande analys och förslag för att skapa ett intuitivt och flexibelt flöde för att bygga danskurser:
+- Nulägesanalys av systemet och identifierade förbättringsområden
+- Användarbehov och ideala arbetsflöden
+- Konkreta förslag för turbank, lektionsbyggare och kursplanering
+- Dataorganisation och nya API-endpoints
+- 4-fas implementeringsplan med konkreta sprint-mål
+- Diskussion av möjligheter, utmaningar och nästa steg
+
+**Omfattar**: UC1-UC8, användarflödesdesign, turbanksintegration, kursgenereringsprocess
 
 ### [📋 Implementering: Mallsystem](./Implementering-Mallsystem.md)
 Beskriver implementeringen av template-systemet som möjliggör för instruktörer att:
@@ -88,6 +102,8 @@ Tillgänglighetsstatus och compliance-nivå:
 - [📖 Fullständig kravspecifikation](../Kravspecifikation.md) - Omfattande kravdokumentation med alla FR/NFR
 - [🏗️ Projekt-README](../README.md) - Översikt, getting started, och teknisk stack
 - [📜 LICENSE](../LICENSE) - MIT License
+- [🏗️ .NET 8 Implementation](../README.md) - Teknisk översikt av .NET-implementeringen
+- [♿ WCAG Compliance](./WCAG-Compliance-Report.md) - Tillgänglighetsrapport
 
 ## Utvecklingsinformation
 

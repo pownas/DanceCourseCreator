@@ -13,7 +13,7 @@ This implementation fulfills the requirement to create comprehensive Playwright 
 - Navigation through all main sections (Patterns, Lessons, Courses, Templates)
 - Quick action button functionality
 
-**PatternLibraryTests.cs** - 5 tests
+**TurbankTests.cs** - 5 tests
 - Pattern library loading and display
 - Filtering by type (Pattern/Exercise)
 - Filtering by level (Beginner, Improver, Intermediate, Advanced)
@@ -48,7 +48,7 @@ All tests capture detailed screenshots at key interaction points:
 - All main section pages
 - Quick action workflows
 
-**Pattern Library Screenshots** (11 screenshots)
+**Turbank Screenshots** (11 screenshots)
 - Initial library view
 - Filter dropdowns (type, level)
 - Filtered results
