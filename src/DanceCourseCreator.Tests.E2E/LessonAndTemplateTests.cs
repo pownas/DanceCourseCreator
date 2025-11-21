@@ -36,7 +36,7 @@ public class LessonAndTemplateTests : PageTest
 
         // Verify key elements
         await Expect(Page.GetByText("Lektionsplaner")).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { NameString = "Skapa lektionsplan" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Skapa lektionsplan" })).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -50,7 +50,7 @@ public class LessonAndTemplateTests : PageTest
         await Page.WaitForTimeoutAsync(1000);
 
         // Click "Skapa lektionsplan" button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Skapa lektionsplan" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Skapa lektionsplan" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot with create lesson dialog open
@@ -96,7 +96,7 @@ public class LessonAndTemplateTests : PageTest
             });
 
             // Click filter button
-            await Page.GetByRole(AriaRole.Button, new() { NameString = "Filtrera" }).ClickAsync();
+            await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
             await Page.WaitForTimeoutAsync(1000);
 
             // Take screenshot after filter
@@ -126,7 +126,7 @@ public class LessonAndTemplateTests : PageTest
 
         // Verify key elements
         await Expect(Page.GetByText("Lektionsmallar")).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { NameString = "Skapa mall" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Skapa mall" })).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -140,7 +140,7 @@ public class LessonAndTemplateTests : PageTest
         await Page.WaitForTimeoutAsync(1000);
 
         // Click "Skapa mall" button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Skapa mall" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Skapa mall" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot with create template dialog open
@@ -172,7 +172,7 @@ public class LessonAndTemplateTests : PageTest
         });
 
         // Try to find and click "Visa" button for first template
-        var visaButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Visa" }).First;
+        var visaButton = Page.GetByRole(AriaRole.Button, new() { Name = "Visa" }).First;
         if (await visaButton.IsVisibleAsync())
         {
             await visaButton.ClickAsync();
@@ -198,7 +198,7 @@ public class LessonAndTemplateTests : PageTest
         await Page.WaitForTimeoutAsync(1500);
 
         // Try to find and click "Redigera" button for first template
-        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Redigera" }).First;
+        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { Name = "Redigera" }).First;
         if (await redigeraButton.IsVisibleAsync())
         {
             await redigeraButton.ClickAsync();
@@ -224,7 +224,7 @@ public class LessonAndTemplateTests : PageTest
         await Page.WaitForTimeoutAsync(1500);
 
         // Try to find and click more options (three dots) for first template
-        var moreButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Mer" }).Or(
+        var moreButton = Page.GetByRole(AriaRole.Button, new() { Name = "Mer" }).Or(
             Page.Locator("button[aria-label='more']")
         ).First;
         

@@ -51,7 +51,7 @@ public class HomeAndNavigationTests : PageTest
         await Page.WaitForSelectorAsync("text=Välkommen till WCS Kursskapare", new() { Timeout = 30000 });
 
         // Navigate to Patterns page
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Mönster" }).First.ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Mönster" }).First.ClickAsync();
         await Page.WaitForSelectorAsync("text=Mönster- och övningsbibliotek", new() { Timeout = 10000 });
         await Page.ScreenshotAsync(new()
         {
@@ -61,7 +61,7 @@ public class HomeAndNavigationTests : PageTest
         await Expect(Page.GetByText("Mönster- och övningsbibliotek")).ToBeVisibleAsync();
 
         // Navigate to Lessons page
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Lektioner" }).First.ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Lektioner" }).First.ClickAsync();
         await Page.WaitForSelectorAsync("text=Lektionsplaner", new() { Timeout = 10000 });
         await Page.ScreenshotAsync(new()
         {
@@ -71,7 +71,7 @@ public class HomeAndNavigationTests : PageTest
         await Expect(Page.GetByText("Lektionsplaner")).ToBeVisibleAsync();
 
         // Navigate to Courses page
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Kurser" }).First.ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Kurser" }).First.ClickAsync();
         await Page.WaitForSelectorAsync("text=Kursplaner", new() { Timeout = 10000 });
         await Page.ScreenshotAsync(new()
         {
@@ -81,7 +81,7 @@ public class HomeAndNavigationTests : PageTest
         await Expect(Page.GetByText("Kursplaner")).ToBeVisibleAsync();
 
         // Navigate to Templates page
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Mallar" }).First.ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Mallar" }).First.ClickAsync();
         await Page.WaitForSelectorAsync("text=Lektionsmallar", new() { Timeout = 10000 });
         await Page.ScreenshotAsync(new()
         {
@@ -91,7 +91,7 @@ public class HomeAndNavigationTests : PageTest
         await Expect(Page.GetByText("Lektionsmallar")).ToBeVisibleAsync();
 
         // Navigate back to Home
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Hem" }).First.ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Hem" }).First.ClickAsync();
         await Page.WaitForSelectorAsync("text=Välkommen till WCS Kursskapare", new() { Timeout = 10000 });
         await Page.ScreenshotAsync(new()
         {
@@ -118,7 +118,7 @@ public class HomeAndNavigationTests : PageTest
         });
 
         // Click "Kom igång" button for pattern library
-        var komIgangButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Kom igång" }).First;
+        var komIgangButton = Page.GetByRole(AriaRole.Button, new() { Name = "Kom igång" }).First;
         await komIgangButton.ClickAsync();
         
         // Wait for navigation to patterns page

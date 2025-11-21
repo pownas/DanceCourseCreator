@@ -35,7 +35,7 @@ public class CourseCreationTests : PageTest
         });
 
         // Click "Skapa kursplan" button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Skapa kursplan" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Skapa kursplan" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot with create dialog open
@@ -59,7 +59,7 @@ public class CourseCreationTests : PageTest
         await Page.WaitForSelectorAsync("text=Kursplaner", new() { Timeout = 30000 });
 
         // Click "Skapa kursplan" button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Skapa kursplan" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Skapa kursplan" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot of empty form
@@ -93,7 +93,7 @@ public class CourseCreationTests : PageTest
             FullPage = true
         });
 
-        await Page.GetByRole(AriaRole.Option, new() { NameString = "Nybörjare" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Nybörjare" }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot after level selected
@@ -128,7 +128,7 @@ public class CourseCreationTests : PageTest
         });
 
         // Click "Lägg till" button to add the goal
-        var addGoalButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Lägg till" });
+        var addGoalButton = Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till" });
         if (await addGoalButton.IsVisibleAsync())
         {
             await addGoalButton.ClickAsync();
@@ -150,7 +150,7 @@ public class CourseCreationTests : PageTest
         });
 
         // Click "Spara" button
-        var saveButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Spara" });
+        var saveButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara" });
         if (await saveButton.IsVisibleAsync())
         {
             await saveButton.ClickAsync();

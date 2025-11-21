@@ -36,7 +36,7 @@ public class CourseEditingTests : PageTest
         });
 
         // Try to find and click "Redigera" button for first course
-        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Redigera" }).First;
+        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { Name = "Redigera" }).First;
         if (await redigeraButton.IsVisibleAsync())
         {
             await redigeraButton.ClickAsync();
@@ -65,7 +65,7 @@ public class CourseEditingTests : PageTest
         await Page.WaitForTimeoutAsync(1500);
 
         // Find and click "Redigera" button for first course
-        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Redigera" }).First;
+        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { Name = "Redigera" }).First;
         if (await redigeraButton.IsVisibleAsync())
         {
             await redigeraButton.ClickAsync();
@@ -119,7 +119,7 @@ public class CourseEditingTests : PageTest
                 });
 
                 // Click "Lägg till" button
-                var addGoalButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Lägg till" });
+                var addGoalButton = Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till" });
                 if (await addGoalButton.IsVisibleAsync())
                 {
                     await addGoalButton.ClickAsync();
@@ -142,7 +142,7 @@ public class CourseEditingTests : PageTest
             });
 
             // Click "Spara" button
-            var saveButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Spara" });
+            var saveButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara" });
             if (await saveButton.IsVisibleAsync())
             {
                 await saveButton.ClickAsync();
@@ -169,7 +169,7 @@ public class CourseEditingTests : PageTest
         await Page.WaitForTimeoutAsync(1500);
 
         // Try to find and click "Visa" button for first course
-        var visaButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Visa" }).First;
+        var visaButton = Page.GetByRole(AriaRole.Button, new() { Name = "Visa" }).First;
         if (await visaButton.IsVisibleAsync())
         {
             await visaButton.ClickAsync();
@@ -195,7 +195,7 @@ public class CourseEditingTests : PageTest
         await Page.WaitForTimeoutAsync(1500);
 
         // Find and click "Redigera" button for first course
-        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Redigera" }).First;
+        var redigeraButton = Page.GetByRole(AriaRole.Button, new() { Name = "Redigera" }).First;
         if (await redigeraButton.IsVisibleAsync())
         {
             await redigeraButton.ClickAsync();
@@ -209,7 +209,7 @@ public class CourseEditingTests : PageTest
             });
 
             // Click "Avbryt" button
-            var cancelButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Avbryt" });
+            var cancelButton = Page.GetByRole(AriaRole.Button, new() { Name = "Avbryt" });
             if (await cancelButton.IsVisibleAsync())
             {
                 await cancelButton.ClickAsync();

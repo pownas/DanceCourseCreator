@@ -36,7 +36,7 @@ public class PatternLibraryTests : PageTest
 
         // Verify key elements
         await Expect(Page.GetByText("Mönster- och övningsbibliotek")).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Button, new() { NameString = "Lägg till mönster" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" })).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -71,11 +71,11 @@ public class PatternLibraryTests : PageTest
         });
 
         // Select "Mönster" option
-        await Page.GetByRole(AriaRole.Option, new() { NameString = "Mönster" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Mönster" }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Click filter button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot after filtering
@@ -109,11 +109,11 @@ public class PatternLibraryTests : PageTest
         });
 
         // Select "Nybörjare" option
-        await Page.GetByRole(AriaRole.Option, new() { NameString = "Nybörjare" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Nybörjare" }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Click filter button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot after filtering
@@ -154,7 +154,7 @@ public class PatternLibraryTests : PageTest
         });
 
         // Click filter/search button
-        await Page.GetByRole(AriaRole.Button, new() { NameString = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot after search
@@ -183,7 +183,7 @@ public class PatternLibraryTests : PageTest
         });
 
         // Try to find and click "Visa" button for first pattern
-        var visaButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Visa" }).First;
+        var visaButton = Page.GetByRole(AriaRole.Button, new() { Name = "Visa" }).First;
         if (await visaButton.IsVisibleAsync())
         {
             await visaButton.ClickAsync();
@@ -197,7 +197,7 @@ public class PatternLibraryTests : PageTest
             });
 
             // Close dialog
-            var closeButton = Page.GetByRole(AriaRole.Button, new() { NameString = "Stäng" }).Or(Page.Locator("button[aria-label='Close']"));
+            var closeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Stäng" }).Or(Page.Locator("button[aria-label='Close']"));
             if (await closeButton.IsVisibleAsync())
             {
                 await closeButton.First.ClickAsync();
