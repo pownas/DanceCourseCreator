@@ -135,7 +135,9 @@ public class Course
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
     public int DurationWeeks { get; set; }
+    public int PlannedLessonCount { get; set; }
     public List<string> Goals { get; set; } = new();
     public List<string> ThemesByWeek { get; set; } = new();
     public List<string> LessonIds { get; set; } = new();
@@ -144,13 +146,17 @@ public class Course
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public int ActualLessonCount { get; set; }
+    public int TotalPlannedMinutes { get; set; }
 }
 
 public class CreateCourseRequest
 {
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = "beginner";
+    public string Type { get; set; } = "Weekly";
     public int DurationWeeks { get; set; } = 6;
+    public int PlannedLessonCount { get; set; } = 6;
     public List<string> Goals { get; set; } = new();
     public List<string> ThemesByWeek { get; set; } = new();
 }

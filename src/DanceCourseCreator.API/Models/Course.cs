@@ -15,7 +15,11 @@ public class Course
     [Required]
     public DanceLevel Level { get; set; }
     
+    public CourseType Type { get; set; } = CourseType.Weekly;
+    
     public int DurationWeeks { get; set; }
+    
+    public int PlannedLessonCount { get; set; }
     
     public string GoalsJson { get; set; } = "[]";
     
@@ -55,4 +59,10 @@ public class Course
     // Navigation properties
     public User? Creator { get; set; }
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+}
+
+public enum CourseType
+{
+    Weekly,      // Veckokurs: 4-20 lektioner à 1 timme per vecka
+    Weekend      // Helgkurs: 1-2 dagar, 4 timmar per dag
 }

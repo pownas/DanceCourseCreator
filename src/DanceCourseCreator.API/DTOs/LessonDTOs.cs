@@ -32,7 +32,7 @@ public class CreateLessonRequest
     public string? CourseId { get; set; }
     public DateTime? Date { get; set; }
     
-    [Range(15, 480, ErrorMessage = "Duration must be between 15 and 480 minutes")]
+    [Range(60, 300, ErrorMessage = "Lektionslängd måste vara mellan 60 och 300 minuter (1-5 timmar)")]
     public int Duration { get; set; } = 75; // Default to 75 minutes
     
     public List<LessonSectionDto> Sections { get; set; } = new();
