@@ -98,7 +98,7 @@
                                             
                                             <MudText Typo="Typo.body2" Class="mb-1">
                                                 <MudIcon Icon="Icons.Material.Filled.Class" Size="Size.Small" Class="mr-1" />
-                                                @course.ActualLessonCount / @course.PlannedLessonCount lektioner
+                                                @(course.ActualLessonCount) / @(course.PlannedLessonCount > 0 ? course.PlannedLessonCount : 0) lektioner
                                             </MudText>
                                             
                                             <MudText Typo="Typo.body2" Class="mb-2">

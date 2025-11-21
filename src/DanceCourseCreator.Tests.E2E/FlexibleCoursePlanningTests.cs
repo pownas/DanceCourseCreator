@@ -50,7 +50,7 @@ public class FlexibleCoursePlanningTests : PageTest
         await courseTypeDropdown.ClickAsync();
         await Page.WaitForTimeoutAsync(500);
         
-        await Page.GetByRole(AriaRole.Option, new() { NameString = "Veckokurs" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Veckokurs" }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot with weekly course selected
@@ -82,7 +82,7 @@ public class FlexibleCoursePlanningTests : PageTest
         await courseTypeDropdown.ClickAsync();
         await Page.WaitForTimeoutAsync(500);
         
-        await Page.GetByRole(AriaRole.Option, new() { NameString = "Helgkurs" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Helgkurs" }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot with weekend course selected
@@ -170,9 +170,9 @@ public class FlexibleCoursePlanningTests : PageTest
         });
 
         // Verify key duration options are available
-        await Expect(Page.GetByRole(AriaRole.Option, new() { NameString = "60 minuter" })).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Option, new() { NameString = "240 minuter" })).ToBeVisibleAsync();
-        await Expect(Page.GetByRole(AriaRole.Option, new() { NameString = "300 minuter" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Option, new() { Name = "60 minuter" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Option, new() { Name = "240 minuter" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Option, new() { Name = "300 minuter" })).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -249,7 +249,7 @@ public class FlexibleCoursePlanningTests : PageTest
         var courseTypeDropdown = Page.Locator("label:has-text('Kurstyp')").Locator("..").Locator("input").First;
         await courseTypeDropdown.ClickAsync();
         await Page.WaitForTimeoutAsync(500);
-        await Page.GetByRole(AriaRole.Option, new() { NameString = "Veckokurs" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Veckokurs" }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Set lesson count to 10
