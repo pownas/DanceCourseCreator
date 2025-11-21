@@ -2,6 +2,13 @@
 
 Denna katalog innehåller detaljerade implementeringsguider och planer för DanceCourseCreator-systemet.
 
+## 🚀 Kom igång
+
+### [⚡ SNABBSTART](./SNABBSTART.md)
+**Börja här!** Välj din roll (utvecklare, PO, designer, QA) och få direkt vägledning för vad du ska göra härnäst.
+
+---
+
 ## 🗺️ Projektplanering
 
 ### [🎯 Implementeringsplan](./Implementeringsplan.md)
