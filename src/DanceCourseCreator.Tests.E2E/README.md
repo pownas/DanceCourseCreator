@@ -166,7 +166,7 @@ Tests automatically capture screenshots organized by category in the `screenshot
 - `07-quick-actions-visible.png` - Quick action buttons
 - `08-after-quick-action-click.png` - After clicking quick action
 
-### Pattern Library Screenshots (`screenshots/patterns/`)
+### Turbank Screenshots (`screenshots/patterns/`)
 - `01-patterns-library-initial.png` - Initial patterns page
 - `02-before-type-filter.png` - Before applying type filter
 - `03-type-filter-dropdown-open.png` - Type filter dropdown

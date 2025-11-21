@@ -117,7 +117,7 @@ public class HomeAndNavigationTests : PageTest
             FullPage = true
         });
 
-        // Click "Kom igång" button for pattern library
+        // Click "Kom igång" button for turbank
         var komIgangButton = Page.GetByRole(AriaRole.Button, new() { Name = "Kom igång" }).First;
         await komIgangButton.ClickAsync();
         
