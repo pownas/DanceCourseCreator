@@ -78,6 +78,7 @@ public class DanceCourseDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Level).HasConversion<string>();
+            entity.Property(e => e.Type).HasConversion<string>();
             entity.HasOne(e => e.Creator)
                   .WithMany(u => u.CreatedCourses)
                   .HasForeignKey(e => e.CreatedBy)
