@@ -107,6 +107,7 @@ public class PatternsController : ControllerBase
             Name = pattern.Name,
             Aliases = pattern.Aliases,
             Level = pattern.Level.ToString(),
+            DanceStyle = pattern.DanceStyle.ToString(),
             Description = pattern.Description,
             Steps = pattern.Steps,
             Counts = pattern.Counts,
@@ -243,10 +244,16 @@ public class PatternsController : ControllerBase
             return BadRequest("Invalid dance level");
         }
 
+        if (!Enum.TryParse<DanceStyle>(request.DanceStyle, true, out var danceStyle))
+        {
+            return BadRequest("Invalid dance style");
+        }
+
         pattern.Type = type;
         pattern.Name = request.Name;
         pattern.Aliases = request.Aliases;
         pattern.Level = level;
+        pattern.DanceStyle = danceStyle;
         pattern.Description = request.Description;
         pattern.Steps = request.Steps;
         pattern.Counts = request.Counts;
@@ -274,6 +281,7 @@ public class PatternsController : ControllerBase
             Name = pattern.Name,
             Aliases = pattern.Aliases,
             Level = pattern.Level.ToString(),
+            DanceStyle = pattern.DanceStyle.ToString(),
             Description = pattern.Description,
             Steps = pattern.Steps,
             Counts = pattern.Counts,
