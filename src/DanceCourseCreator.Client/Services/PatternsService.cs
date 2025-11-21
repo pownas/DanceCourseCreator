@@ -6,7 +6,7 @@ namespace DanceCourseCreator.Client.Services;
 
 public interface IPatternsService
 {
-    Task<List<PatternOrExercise>?> GetPatternsAsync(string? type = null, string? level = null, string? search = null, List<string>? tags = null);
+    Task<List<PatternOrExercise>?> GetPatternsAsync(string? type = null, string? level = null, string? danceStyle = null, string? search = null, List<string>? tags = null);
     Task<PatternOrExercise?> GetPatternAsync(string id);
     Task<PatternOrExercise?> CreatePatternAsync(CreatePatternRequest request);
     Task<PatternOrExercise?> UpdatePatternAsync(string id, CreatePatternRequest request);
@@ -33,7 +33,7 @@ public class PatternsService : IPatternsService
         }
     }
 
-    public async Task<List<PatternOrExercise>?> GetPatternsAsync(string? type = null, string? level = null, string? search = null, List<string>? tags = null)
+    public async Task<List<PatternOrExercise>?> GetPatternsAsync(string? type = null, string? level = null, string? danceStyle = null, string? search = null, List<string>? tags = null)
     {
         try
         {
@@ -46,6 +46,9 @@ public class PatternsService : IPatternsService
                 
             if (!string.IsNullOrEmpty(level))
                 queryParams.Add($"level={Uri.EscapeDataString(level)}");
+            
+            if (!string.IsNullOrEmpty(danceStyle))
+                queryParams.Add($"danceStyle={Uri.EscapeDataString(danceStyle)}");
                 
             if (!string.IsNullOrEmpty(search))
                 queryParams.Add($"search={Uri.EscapeDataString(search)}");
