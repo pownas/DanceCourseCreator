@@ -37,16 +37,36 @@
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="12" md="6">
+                                <MudSelect @bind-Value="courseRequest.Type" 
+                                           Label="Kurstyp"
+                                           Required="true"
+                                           T="string">
+                                    <MudSelectItem Value="@("Weekly")">Veckokurs (regelbunden träning)</MudSelectItem>
+                                    <MudSelectItem Value="@("Weekend")">Helgkurs (intensivkurs)</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudNumericField @bind-Value="courseRequest.PlannedLessonCount" 
+                                                 Label="Antal lektioner (1-20)"
+                                                 Required="true"
+                                                 Min="1"
+                                                 Max="20"
+                                                 HideSpinButtons="false"
+                                                 T="int" />
+                            </MudItem>
+                            <MudItem xs="12" md="6">
                                 <MudSelect @bind-Value="courseRequest.DurationWeeks" 
                                            Label="Kurslängd (veckor)"
                                            Required="true"
                                            T="int">
+                                    <MudSelectItem Value="1">1 vecka (intensiv/helg)</MudSelectItem>
                                     <MudSelectItem Value="4">4 veckor</MudSelectItem>
                                     <MudSelectItem Value="6">6 veckor</MudSelectItem>
                                     <MudSelectItem Value="8">8 veckor</MudSelectItem>
                                     <MudSelectItem Value="10">10 veckor</MudSelectItem>
                                     <MudSelectItem Value="12">12 veckor</MudSelectItem>
                                     <MudSelectItem Value="15">15 veckor</MudSelectItem>
+                                    <MudSelectItem Value="20">20 veckor</MudSelectItem>
                                 </MudSelect>
                             </MudItem>
                         </MudGrid>
@@ -148,7 +168,9 @@
             {
                 Name = Course.Name,
                 Level = Course.Level,
+                Type = Course.Type,
                 DurationWeeks = Course.DurationWeeks,
+                PlannedLessonCount = Course.PlannedLessonCount,
                 Goals = new List<string>(Course.Goals),
                 ThemesByWeek = new List<string>(Course.ThemesByWeek)
             };
@@ -213,7 +235,9 @@
                     Id = Course.Id,
                     Name = courseRequest.Name,
                     Level = courseRequest.Level,
+                    Type = courseRequest.Type,
                     DurationWeeks = courseRequest.DurationWeeks,
+                    PlannedLessonCount = courseRequest.PlannedLessonCount,
                     Goals = courseRequest.Goals,
                     ThemesByWeek = courseRequest.ThemesByWeek,
                     LessonIds = Course.LessonIds,
@@ -221,7 +245,9 @@
                     RepetitionPlan = Course.RepetitionPlan,
                     CreatedBy = Course.CreatedBy,
                     CreatedAt = Course.CreatedAt,
-                    UpdatedAt = Course.UpdatedAt
+                    UpdatedAt = Course.UpdatedAt,
+                    ActualLessonCount = Course.ActualLessonCount,
+                    TotalPlannedMinutes = Course.TotalPlannedMinutes
                 };
                 
                 result = await CoursesService.UpdateCourseAsync(Course.Id, updatedCourse);

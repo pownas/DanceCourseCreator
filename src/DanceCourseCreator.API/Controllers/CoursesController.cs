@@ -44,7 +44,9 @@ public class CoursesController : ControllerBase
             Id = c.Id,
             Name = c.Name,
             Level = c.Level.ToString(),
+            Type = c.Type.ToString(),
             DurationWeeks = c.DurationWeeks,
+            PlannedLessonCount = c.PlannedLessonCount,
             Goals = c.Goals,
             ThemesByWeek = c.ThemesByWeek,
             LessonIds = c.LessonIds,
@@ -52,7 +54,9 @@ public class CoursesController : ControllerBase
             RepetitionPlan = c.RepetitionPlan,
             CreatedBy = c.CreatedBy,
             CreatedAt = c.CreatedAt,
-            UpdatedAt = c.UpdatedAt
+            UpdatedAt = c.UpdatedAt,
+            ActualLessonCount = c.Lessons.Count,
+            TotalPlannedMinutes = c.Lessons.Sum(l => l.Duration)
         }).ToList();
 
         return Ok(courseDtos);
@@ -75,7 +79,9 @@ public class CoursesController : ControllerBase
             Id = course.Id,
             Name = course.Name,
             Level = course.Level.ToString(),
+            Type = course.Type.ToString(),
             DurationWeeks = course.DurationWeeks,
+            PlannedLessonCount = course.PlannedLessonCount,
             Goals = course.Goals,
             ThemesByWeek = course.ThemesByWeek,
             LessonIds = course.LessonIds,
@@ -83,7 +89,9 @@ public class CoursesController : ControllerBase
             RepetitionPlan = course.RepetitionPlan,
             CreatedBy = course.CreatedBy,
             CreatedAt = course.CreatedAt,
-            UpdatedAt = course.UpdatedAt
+            UpdatedAt = course.UpdatedAt,
+            ActualLessonCount = course.Lessons.Count,
+            TotalPlannedMinutes = course.Lessons.Sum(l => l.Duration)
         };
 
         return Ok(courseDto);
@@ -104,6 +112,11 @@ public class CoursesController : ControllerBase
         {
             return BadRequest("Ogiltig dansnivå");
         }
+        
+        if (!Enum.TryParse<CourseType>(request.Type, true, out var courseType))
+        {
+            return BadRequest("Ogiltig kurstyp");
+        }
 
         // Ensure ThemesByWeek has the right number of entries
         var themesByWeek = request.ThemesByWeek.ToList();
@@ -120,7 +133,9 @@ public class CoursesController : ControllerBase
         {
             Name = request.Name,
             Level = level,
+            Type = courseType,
             DurationWeeks = request.DurationWeeks,
+            PlannedLessonCount = request.PlannedLessonCount,
             Goals = request.Goals,
             ThemesByWeek = themesByWeek,
             CreatedBy = userId
@@ -134,7 +149,9 @@ public class CoursesController : ControllerBase
             Id = course.Id,
             Name = course.Name,
             Level = course.Level.ToString(),
+            Type = course.Type.ToString(),
             DurationWeeks = course.DurationWeeks,
+            PlannedLessonCount = course.PlannedLessonCount,
             Goals = course.Goals,
             ThemesByWeek = course.ThemesByWeek,
             LessonIds = course.LessonIds,
@@ -142,7 +159,9 @@ public class CoursesController : ControllerBase
             RepetitionPlan = course.RepetitionPlan,
             CreatedBy = course.CreatedBy,
             CreatedAt = course.CreatedAt,
-            UpdatedAt = course.UpdatedAt
+            UpdatedAt = course.UpdatedAt,
+            ActualLessonCount = 0,
+            TotalPlannedMinutes = 0
         };
 
         return CreatedAtAction(nameof(GetCourse), new { id = course.Id }, courseDto);
@@ -171,6 +190,11 @@ public class CoursesController : ControllerBase
         {
             return BadRequest("Ogiltig dansnivå");
         }
+        
+        if (!Enum.TryParse<CourseType>(request.Type, true, out var courseType))
+        {
+            return BadRequest("Ogiltig kurstyp");
+        }
 
         // Ensure ThemesByWeek has the right number of entries
         var themesByWeek = request.ThemesByWeek.ToList();
@@ -185,7 +209,9 @@ public class CoursesController : ControllerBase
 
         course.Name = request.Name;
         course.Level = level;
+        course.Type = courseType;
         course.DurationWeeks = request.DurationWeeks;
+        course.PlannedLessonCount = request.PlannedLessonCount;
         course.Goals = request.Goals;
         course.ThemesByWeek = themesByWeek;
         course.LessonIds = request.LessonIds;
@@ -194,13 +220,18 @@ public class CoursesController : ControllerBase
         course.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        
+        // Reload course with lessons to calculate totals
+        await _context.Entry(course).Collection(c => c.Lessons).LoadAsync();
 
         var courseDto = new CourseDto
         {
             Id = course.Id,
             Name = course.Name,
             Level = course.Level.ToString(),
+            Type = course.Type.ToString(),
             DurationWeeks = course.DurationWeeks,
+            PlannedLessonCount = course.PlannedLessonCount,
             Goals = course.Goals,
             ThemesByWeek = course.ThemesByWeek,
             LessonIds = course.LessonIds,
@@ -208,7 +239,9 @@ public class CoursesController : ControllerBase
             RepetitionPlan = course.RepetitionPlan,
             CreatedBy = course.CreatedBy,
             CreatedAt = course.CreatedAt,
-            UpdatedAt = course.UpdatedAt
+            UpdatedAt = course.UpdatedAt,
+            ActualLessonCount = course.Lessons.Count,
+            TotalPlannedMinutes = course.Lessons.Sum(l => l.Duration)
         };
 
         return Ok(courseDto);

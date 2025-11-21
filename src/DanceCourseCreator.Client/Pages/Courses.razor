@@ -85,9 +85,25 @@
                                             </CardHeaderActions>
                                         </MudCardHeader>
                                         <MudCardContent>
-                                            <MudText Typo="Typo.body2" Class="mb-2">
+                                            <div class="mb-2">
+                                                <MudChip T="string" Color="GetCourseTypeColor(course.Type)" Size="Size.Small" Icon="@Icons.Material.Filled.EventNote">
+                                                    @GetCourseTypeDisplayName(course.Type)
+                                                </MudChip>
+                                            </div>
+                                            
+                                            <MudText Typo="Typo.body2" Class="mb-1">
                                                 <MudIcon Icon="Icons.Material.Filled.Schedule" Size="Size.Small" Class="mr-1" />
                                                 @course.DurationWeeks veckor
+                                            </MudText>
+                                            
+                                            <MudText Typo="Typo.body2" Class="mb-1">
+                                                <MudIcon Icon="Icons.Material.Filled.Class" Size="Size.Small" Class="mr-1" />
+                                                @(course.ActualLessonCount) / @(course.PlannedLessonCount > 0 ? course.PlannedLessonCount : 0) lektioner
+                                            </MudText>
+                                            
+                                            <MudText Typo="Typo.body2" Class="mb-2">
+                                                <MudIcon Icon="Icons.Material.Filled.Timer" Size="Size.Small" Class="mr-1" />
+                                                @FormatTotalTime(course.TotalPlannedMinutes) planerad tid
                                             </MudText>
                                             
                                             @if (course.Goals.Any())
@@ -96,17 +112,17 @@
                                                     <strong>Mål:</strong>
                                                 </MudText>
                                                 <MudList T="string" Dense="true" Class="pa-0">
-                                                    @foreach (var goal in course.Goals.Take(3))
+                                                    @foreach (var goal in course.Goals.Take(2))
                                                     {
                                                         <MudListItem T="string" Class="px-0 py-1">
                                                             <MudText Typo="Typo.body2">• @goal</MudText>
                                                         </MudListItem>
                                                     }
-                                                    @if (course.Goals.Count > 3)
+                                                    @if (course.Goals.Count > 2)
                                                     {
                                                         <MudListItem T="string" Class="px-0 py-1">
                                                             <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                                                ... och @(course.Goals.Count - 3) fler
+                                                                ... och @(course.Goals.Count - 2) fler
                                                             </MudText>
                                                         </MudListItem>
                                                     }
@@ -249,6 +265,50 @@
             "advanced" => "Avancerad",
             _ => level
         };
+    }
+    
+    private Color GetCourseTypeColor(string type)
+    {
+        return type.ToLower() switch
+        {
+            "weekly" => Color.Primary,
+            "weekend" => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+    
+    private string GetCourseTypeDisplayName(string type)
+    {
+        return type.ToLower() switch
+        {
+            "weekly" => "Veckokurs",
+            "weekend" => "Helgkurs",
+            _ => type
+        };
+    }
+    
+    private string FormatTotalTime(int totalMinutes)
+    {
+        if (totalMinutes == 0)
+        {
+            return "0 min";
+        }
+        
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+        
+        if (hours > 0 && minutes > 0)
+        {
+            return $"{hours}h {minutes}min";
+        }
+        else if (hours > 0)
+        {
+            return $"{hours}h";
+        }
+        else
+        {
+            return $"{minutes}min";
+        }
     }
 }
 
