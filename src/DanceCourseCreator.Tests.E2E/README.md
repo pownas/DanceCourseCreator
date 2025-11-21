@@ -96,8 +96,8 @@ Tests for home page and main navigation functionality:
 - Navigation through all main sections (Patterns, Lessons, Courses, Templates)
 - Quick action buttons functionality
 
-### PatternLibraryTests.cs
-Tests for pattern library browsing and interaction:
+### TurbankTests.cs
+Tests for turbank browsing and interaction:
 - Pattern library loading and display
 - Filtering by type (Pattern/Exercise)
 - Filtering by level (Beginner, Improver, etc.)
@@ -138,7 +138,7 @@ Basic smoke tests for login and navigation:
 ## Test Categories
 
 - **Navigation**: Tests related to page navigation and routing
-- **Patterns**: Tests for pattern library functionality
+- **Patterns**: Tests for turbank functionality
 - **Courses**: Tests for course creation and management
 - **Lessons**: Tests for lesson planning
 - **Templates**: Tests for template management
@@ -166,7 +166,7 @@ Tests automatically capture screenshots organized by category in the `screenshot
 - `07-quick-actions-visible.png` - Quick action buttons
 - `08-after-quick-action-click.png` - After clicking quick action
 
-### Pattern Library Screenshots (`screenshots/patterns/`)
+### Turbank Screenshots (`screenshots/patterns/`)
 - `01-patterns-library-initial.png` - Initial patterns page
 - `02-before-type-filter.png` - Before applying type filter
 - `03-type-filter-dropdown-open.png` - Type filter dropdown

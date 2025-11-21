@@ -14,7 +14,7 @@ This is a **complete, functional application** built with modern .NET 8 technolo
 - Role-based access control (Instructor, Editor, Reader, Admin)
 - Protected routes and authorization policies
 
-**📚 Pattern & Exercise Library**
+**📚 Turbank**
 - Complete CRUD operations for West Coast Swing patterns and exercises
 - Rich metadata system including:
   - Step-by-step instructions and descriptions
@@ -145,7 +145,7 @@ Built with MudBlazor for consistent Material Design:
 
 The application comes with authentic West Coast Swing content and sample data:
 
-**Pattern Library includes:**
+**Turbank includes:**
 - **Sugar Push** - The fundamental WCS pattern with detailed instruction
 - **Left Side Pass** - Essential pattern with variations and teaching points
 - **Right Side Pass** - Core pattern with timing and connection notes
@@ -168,7 +168,7 @@ Each pattern and exercise includes:
 1. **Launch Application** - Access the Blazor WebAssembly interface
 2. **User Registration** - Create account with secure authentication
 3. **Explore Dashboard** - Overview of library statistics and quick actions
-4. **Browse Pattern Library** - View all available patterns and exercises
+4. **Browse Turbank** - View all available patterns and exercises
 5. **Advanced Search** - Filter by level, type, tags, or search terms
 6. **Pattern Details** - View comprehensive information for each pattern
 7. **Lesson Planning** - Create and organize lesson plans
@@ -228,7 +228,7 @@ dotnet test --filter "TestCategory=Courses"
 
 **Test Coverage:**
 - **Home & Navigation** - Main page and navigation flows
-- **Pattern Library** - Browsing, filtering, and searching patterns
+- **Turbank** - Browsing, filtering, and searching patterns
 - **Course Creation** - Complete course creation workflow
 - **Course Editing** - Modifying existing courses
 - **Lessons & Templates** - Lesson and template management
@@ -268,7 +268,7 @@ This application successfully demonstrates:
 
 ### ✅ Fully Implemented Features
 1. **Complete Authentication System** - JWT-based with user registration and role management
-2. **Pattern & Exercise Library** - Full CRUD operations with rich metadata and search
+2. **Turbank** - Full CRUD operations with rich metadata and search
 3. **Lesson Management** - Create, organize, and manage individual lesson plans
 4. **Course Management** - Design and track multi-week course series
 5. **Modern UI/UX** - Responsive Blazor WebAssembly interface with Material Design
