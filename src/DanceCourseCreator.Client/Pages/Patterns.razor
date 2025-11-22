@@ -3,7 +3,7 @@
 @inject IPatternsService PatternsService
 @inject IDialogService DialogService
 
-<PageTitle>Mönster - WCS Kursskapare</PageTitle>
+<PageTitle>Mönster - Kursskapare</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
@@ -12,7 +12,7 @@
                 <MudCardHeader>
                     <CardHeaderContent>
                         <MudText Typo="Typo.h4">Turbank</MudText>
-                        <MudText Typo="Typo.body1" Color="Color.Secondary">Utforska din samling av West Coast Swing-mönster och övningar</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Utforska din samling av dansmönster och övningar för olika dansstilar</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudButton Variant="Variant.Filled"
@@ -26,13 +26,13 @@
                 <MudCardContent>
                     <!-- Filters -->
                     <MudGrid Class="mb-4">
-                        <MudItem xs="12" sm="3">
+                        <MudItem xs="12" sm="2">
                             <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(async () => { filterType = null; await LoadPatterns(); })">>
                                 <MudSelectItem Value="@("pattern")">Mönster</MudSelectItem>
                                 <MudSelectItem Value="@("exercise")">Övning</MudSelectItem>
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" sm="3">
+                        <MudItem xs="12" sm="2">
                             <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadPatterns(); })">>
                                 <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
                                 <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
@@ -40,7 +40,19 @@
                                 <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" sm="4">
+                        <MudItem xs="12" sm="3">
+                            <MudSelect @bind-Value="filterDanceStyle" Label="Dansstil" Clearable="true" OnClearButtonClick="@(async () => { filterDanceStyle = null; await LoadPatterns(); })">
+                                <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
+                                <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
+                                <MudSelectItem Value="@("Fox")">Fox</MudSelectItem>
+                                <MudSelectItem Value="@("Foxtrot")">Foxtrot</MudSelectItem>
+                                <MudSelectItem Value="@("Lindy")">Lindy Hop</MudSelectItem>
+                                <MudSelectItem Value="@("Balboa")">Balboa</MudSelectItem>
+                                <MudSelectItem Value="@("Blues")">Blues</MudSelectItem>
+                                <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
                             <MudTextField @bind-Value="searchText" 
                                           Label="Sök mönster..." 
                                           Adornment="Adornment.End" 
@@ -89,6 +101,12 @@
                                                     <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="GetTypeColor(pattern.Type)">
                                                         @(pattern.Type?.ToUpperInvariant() == "PATTERN" ? "MÖNSTER" : "ÖVNING")
                                                     </MudChip>
+                                                    @if (!string.IsNullOrEmpty(pattern.DanceStyle))
+                                                    {
+                                                        <MudChip T="string" Size="Size.Small" Color="Color.Info">
+                                                            @GetDanceStyleDisplayName(pattern.DanceStyle)
+                                                        </MudChip>
+                                                    }
                                                 </div>
                                             </div>
                                             <MudText Typo="Typo.body2" Class="mb-3" Style="color: var(--mud-palette-text-secondary);">
@@ -147,6 +165,7 @@
     private bool isLoading = false;
     private string? filterType;
     private string? filterLevel;
+    private string? filterDanceStyle;
     private string searchText = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -160,7 +179,7 @@
         try
         {
             var searchValue = string.IsNullOrWhiteSpace(searchText) ? null : searchText;
-            patterns = await PatternsService.GetPatternsAsync(filterType, filterLevel, searchValue);
+            patterns = await PatternsService.GetPatternsAsync(filterType, filterLevel, filterDanceStyle, searchValue);
         }
         catch (Exception)
         {
@@ -191,6 +210,22 @@
             "pattern" => Color.Primary,
             "exercise" => Color.Secondary,
             _ => Color.Default
+        };
+    }
+    
+    private string GetDanceStyleDisplayName(string danceStyle)
+    {
+        return danceStyle switch
+        {
+            "WestCoastSwing" => "West Coast Swing",
+            "Bugg" => "Bugg",
+            "Fox" => "Fox",
+            "Foxtrot" => "Foxtrot",
+            "Lindy" => "Lindy Hop",
+            "Balboa" => "Balboa",
+            "Blues" => "Blues",
+            "Other" => "Annan",
+            _ => danceStyle
         };
     }
 

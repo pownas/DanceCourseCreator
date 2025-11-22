@@ -3,7 +3,7 @@
 @inject ICoursesService CoursesService
 @inject IDialogService DialogService
 
-<PageTitle>Kurser - WCS Kursskapare</PageTitle>
+<PageTitle>Kurser - Kursskapare</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
@@ -12,7 +12,7 @@
                 <MudCardHeader>
                     <CardHeaderContent>
                         <MudText Typo="Typo.h4">Kursplaner</MudText>
-                        <MudText Typo="Typo.body1" Color="Color.Secondary">Skapa och hantera fleraveckors kursplaner för West Coast Swing</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Skapa och hantera fleraveckors kursplaner för olika dansstilar</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudButton Variant="Variant.Filled"
@@ -26,12 +26,24 @@
                 <MudCardContent>
                     <!-- Filters -->
                     <MudGrid Class="mb-4">
-                        <MudItem xs="12" sm="4">
+                        <MudItem xs="12" sm="3">
                             <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadCourses(); })">>
                                 <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
                                 <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
                                 <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
                                 <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="3">
+                            <MudSelect @bind-Value="filterDanceStyle" Label="Dansstil" Clearable="true" OnClearButtonClick="@(async () => { filterDanceStyle = null; await LoadCourses(); })">
+                                <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
+                                <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
+                                <MudSelectItem Value="@("Fox")">Fox</MudSelectItem>
+                                <MudSelectItem Value="@("Foxtrot")">Foxtrot</MudSelectItem>
+                                <MudSelectItem Value="@("Lindy")">Lindy Hop</MudSelectItem>
+                                <MudSelectItem Value="@("Balboa")">Balboa</MudSelectItem>
+                                <MudSelectItem Value="@("Blues")">Blues</MudSelectItem>
+                                <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="4">
@@ -74,9 +86,14 @@
                                         <MudCardHeader>
                                             <CardHeaderContent>
                                                 <MudText Typo="Typo.h6">@course.Name</MudText>
-                                                <MudChip T="string" Color="GetLevelColor(course.Level)" Size="Size.Small" Class="mt-1">
-                                                    @GetLevelDisplayName(course.Level)
-                                                </MudChip>
+                                                <div class="d-flex gap-2 mt-1">
+                                                    <MudChip T="string" Color="GetLevelColor(course.Level)" Size="Size.Small">
+                                                        @GetLevelDisplayName(course.Level)
+                                                    </MudChip>
+                                                    <MudChip T="string" Color="Color.Info" Size="Size.Small">
+                                                        @GetDanceStyleDisplayName(course.DanceStyle)
+                                                    </MudChip>
+                                                </div>
                                             </CardHeaderContent>
                                             <CardHeaderActions>
                                                 <MudIconButton Icon="Icons.Material.Filled.MoreVert" 
@@ -179,6 +196,7 @@
     private List<Course>? courses;
     private bool isLoading = false;
     private string? filterLevel;
+    private string? filterDanceStyle;
     private string? searchText;
 
     protected override async Task OnInitializedAsync()
@@ -191,7 +209,7 @@
         isLoading = true;
         try
         {
-            courses = await CoursesService.GetCoursesAsync(filterLevel, searchText);
+            courses = await CoursesService.GetCoursesAsync(filterLevel, filterDanceStyle, searchText);
         }
         catch (Exception)
         {
@@ -264,6 +282,22 @@
             "intermediate" => "Medel",
             "advanced" => "Avancerad",
             _ => level
+        };
+    }
+    
+    private string GetDanceStyleDisplayName(string danceStyle)
+    {
+        return danceStyle switch
+        {
+            "WestCoastSwing" => "West Coast Swing",
+            "Bugg" => "Bugg",
+            "Fox" => "Fox",
+            "Foxtrot" => "Foxtrot",
+            "Lindy" => "Lindy Hop",
+            "Balboa" => "Balboa",
+            "Blues" => "Blues",
+            "Other" => "Annan",
+            _ => danceStyle
         };
     }
     

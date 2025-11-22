@@ -7,6 +7,7 @@ public class CourseDto
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;
+    public string DanceStyle { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public int DurationWeeks { get; set; }
     public int PlannedLessonCount { get; set; }
@@ -31,6 +32,9 @@ public class CreateCourseRequest
     [Required]
     public string Level { get; set; } = string.Empty;
     
+    [Required]
+    public string DanceStyle { get; set; } = "WestCoastSwing";
+    
     public string Type { get; set; } = "Weekly";
     
     [Range(1, 52, ErrorMessage = "Kurslängden måste vara mellan 1 och 52 veckor")]
@@ -51,6 +55,9 @@ public class UpdateCourseRequest
     
     [Required]
     public string Level { get; set; } = string.Empty;
+    
+    [Required]
+    public string DanceStyle { get; set; } = string.Empty;
     
     public string Type { get; set; } = "Weekly";
     

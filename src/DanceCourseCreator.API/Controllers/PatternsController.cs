@@ -24,6 +24,7 @@ public class PatternsController : ControllerBase
     public async Task<ActionResult<IEnumerable<PatternDto>>> GetPatterns(
         [FromQuery] string? type = null,
         [FromQuery] string? level = null,
+        [FromQuery] string? danceStyle = null,
         [FromQuery] string? search = null,
         [FromQuery] List<string>? tags = null)
     {
@@ -37,6 +38,11 @@ public class PatternsController : ControllerBase
         if (!string.IsNullOrEmpty(level) && Enum.TryParse<DanceLevel>(level, true, out var danceLevel))
         {
             query = query.Where(p => p.Level == danceLevel);
+        }
+
+        if (!string.IsNullOrEmpty(danceStyle) && Enum.TryParse<DanceStyle>(danceStyle, true, out var style))
+        {
+            query = query.Where(p => p.DanceStyle == style);
         }
 
         if (!string.IsNullOrEmpty(search))
@@ -61,6 +67,7 @@ public class PatternsController : ControllerBase
             Name = p.Name,
             Aliases = p.Aliases,
             Level = p.Level.ToString(),
+            DanceStyle = p.DanceStyle.ToString(),
             Description = p.Description,
             Steps = p.Steps,
             Counts = p.Counts,
@@ -100,6 +107,7 @@ public class PatternsController : ControllerBase
             Name = pattern.Name,
             Aliases = pattern.Aliases,
             Level = pattern.Level.ToString(),
+            DanceStyle = pattern.DanceStyle.ToString(),
             Description = pattern.Description,
             Steps = pattern.Steps,
             Counts = pattern.Counts,
@@ -143,12 +151,18 @@ public class PatternsController : ControllerBase
             return BadRequest("Invalid dance level");
         }
 
+        if (!Enum.TryParse<DanceStyle>(request.DanceStyle, true, out var danceStyle))
+        {
+            return BadRequest("Invalid dance style");
+        }
+
         var pattern = new PatternOrExercise
         {
             Type = type,
             Name = request.Name,
             Aliases = request.Aliases,
             Level = level,
+            DanceStyle = danceStyle,
             Description = request.Description,
             Steps = request.Steps,
             Counts = request.Counts,
@@ -178,6 +192,7 @@ public class PatternsController : ControllerBase
             Name = pattern.Name,
             Aliases = pattern.Aliases,
             Level = pattern.Level.ToString(),
+            DanceStyle = pattern.DanceStyle.ToString(),
             Description = pattern.Description,
             Steps = pattern.Steps,
             Counts = pattern.Counts,
@@ -229,10 +244,16 @@ public class PatternsController : ControllerBase
             return BadRequest("Invalid dance level");
         }
 
+        if (!Enum.TryParse<DanceStyle>(request.DanceStyle, true, out var danceStyle))
+        {
+            return BadRequest("Invalid dance style");
+        }
+
         pattern.Type = type;
         pattern.Name = request.Name;
         pattern.Aliases = request.Aliases;
         pattern.Level = level;
+        pattern.DanceStyle = danceStyle;
         pattern.Description = request.Description;
         pattern.Steps = request.Steps;
         pattern.Counts = request.Counts;
@@ -260,6 +281,7 @@ public class PatternsController : ControllerBase
             Name = pattern.Name,
             Aliases = pattern.Aliases,
             Level = pattern.Level.ToString(),
+            DanceStyle = pattern.DanceStyle.ToString(),
             Description = pattern.Description,
             Steps = pattern.Steps,
             Counts = pattern.Counts,

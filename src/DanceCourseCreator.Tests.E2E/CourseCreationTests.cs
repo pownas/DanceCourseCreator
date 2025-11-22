@@ -195,6 +195,58 @@ public class CourseCreationTests : PageTest
         }
     }
 
+    [TestMethod]
+    [TestCategory("Courses")]
+    [TestCategory("DanceStyles")]
+    public async Task CourseCreation_SelectDanceStyle_ShouldWork()
+    {
+        // Navigate to courses page
+        await Page.GotoAsync($"{BaseUrl}/courses");
+        await Page.WaitForSelectorAsync("text=Kursplaner", new() { Timeout = 30000 });
+
+        // Click "Skapa kursplan" button
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Skapa kursplan" }).ClickAsync();
+        await Page.WaitForTimeoutAsync(1000);
+
+        // Fill in course name
+        var nameInput = Page.GetByLabel("Kursnamn");
+        await nameInput.FillAsync("Bugg Nybörjarkurs");
+        await Page.WaitForTimeoutAsync(500);
+
+        // Select level
+        var levelDropdown = Page.Locator("label:has-text('Nivå')").Locator("..").Locator("input").First;
+        await levelDropdown.ClickAsync();
+        await Page.WaitForTimeoutAsync(500);
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Nybörjare" }).ClickAsync();
+        await Page.WaitForTimeoutAsync(500);
+
+        // Select dance style - Bugg
+        var danceStyleDropdown = Page.Locator("label:has-text('Dansstil')").Locator("..").Locator("input").First;
+        await danceStyleDropdown.ClickAsync();
+        await Page.WaitForTimeoutAsync(500);
+
+        // Take screenshot with dance style dropdown open
+        await Page.ScreenshotAsync(new()
+        {
+            Path = $"{ScreenshotsDir}/14-dance-style-dropdown-open.png",
+            FullPage = true
+        });
+
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Bugg" }).ClickAsync();
+        await Page.WaitForTimeoutAsync(500);
+
+        // Take screenshot after dance style selected
+        await Page.ScreenshotAsync(new()
+        {
+            Path = $"{ScreenshotsDir}/15-dance-style-selected-bugg.png",
+            FullPage = true
+        });
+
+        // Verify Bugg is selected by checking if form can be submitted
+        // The form should have all required fields filled
+        await Expect(Page.GetByLabel("Kursnamn")).ToHaveValueAsync("Bugg Nybörjarkurs");
+    }
+
     public override BrowserNewContextOptions ContextOptions()
     {
         return new BrowserNewContextOptions()

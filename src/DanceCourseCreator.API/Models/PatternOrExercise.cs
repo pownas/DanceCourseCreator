@@ -26,6 +26,9 @@ public class PatternOrExercise
     [Required]
     public DanceLevel Level { get; set; }
     
+    [Required]
+    public DanceStyle DanceStyle { get; set; } = DanceStyle.WestCoastSwing;
+    
     public string Description { get; set; } = string.Empty;
     
     public string StepsJson { get; set; } = "[]";

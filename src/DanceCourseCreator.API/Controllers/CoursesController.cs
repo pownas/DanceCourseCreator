@@ -23,6 +23,7 @@ public class CoursesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourses(
         [FromQuery] string? level = null,
+        [FromQuery] string? danceStyle = null,
         [FromQuery] string? search = null)
     {
         var query = _context.Courses.AsQueryable();
@@ -30,6 +31,11 @@ public class CoursesController : ControllerBase
         if (!string.IsNullOrEmpty(level) && Enum.TryParse<DanceLevel>(level, true, out var danceLevel))
         {
             query = query.Where(c => c.Level == danceLevel);
+        }
+
+        if (!string.IsNullOrEmpty(danceStyle) && Enum.TryParse<DanceStyle>(danceStyle, true, out var style))
+        {
+            query = query.Where(c => c.DanceStyle == style);
         }
 
         if (!string.IsNullOrEmpty(search))
@@ -44,6 +50,7 @@ public class CoursesController : ControllerBase
             Id = c.Id,
             Name = c.Name,
             Level = c.Level.ToString(),
+            DanceStyle = c.DanceStyle.ToString(),
             Type = c.Type.ToString(),
             DurationWeeks = c.DurationWeeks,
             PlannedLessonCount = c.PlannedLessonCount,
@@ -79,6 +86,7 @@ public class CoursesController : ControllerBase
             Id = course.Id,
             Name = course.Name,
             Level = course.Level.ToString(),
+            DanceStyle = course.DanceStyle.ToString(),
             Type = course.Type.ToString(),
             DurationWeeks = course.DurationWeeks,
             PlannedLessonCount = course.PlannedLessonCount,
@@ -113,6 +121,11 @@ public class CoursesController : ControllerBase
             return BadRequest("Ogiltig dansnivå");
         }
         
+        if (!Enum.TryParse<DanceStyle>(request.DanceStyle, true, out var danceStyle))
+        {
+            return BadRequest("Ogiltig dansstil");
+        }
+        
         if (!Enum.TryParse<CourseType>(request.Type, true, out var courseType))
         {
             return BadRequest("Ogiltig kurstyp");
@@ -133,6 +146,7 @@ public class CoursesController : ControllerBase
         {
             Name = request.Name,
             Level = level,
+            DanceStyle = danceStyle,
             Type = courseType,
             DurationWeeks = request.DurationWeeks,
             PlannedLessonCount = request.PlannedLessonCount,
@@ -149,6 +163,7 @@ public class CoursesController : ControllerBase
             Id = course.Id,
             Name = course.Name,
             Level = course.Level.ToString(),
+            DanceStyle = course.DanceStyle.ToString(),
             Type = course.Type.ToString(),
             DurationWeeks = course.DurationWeeks,
             PlannedLessonCount = course.PlannedLessonCount,
@@ -191,6 +206,11 @@ public class CoursesController : ControllerBase
             return BadRequest("Ogiltig dansnivå");
         }
         
+        if (!Enum.TryParse<DanceStyle>(request.DanceStyle, true, out var danceStyle))
+        {
+            return BadRequest("Ogiltig dansstil");
+        }
+        
         if (!Enum.TryParse<CourseType>(request.Type, true, out var courseType))
         {
             return BadRequest("Ogiltig kurstyp");
@@ -209,6 +229,7 @@ public class CoursesController : ControllerBase
 
         course.Name = request.Name;
         course.Level = level;
+        course.DanceStyle = danceStyle;
         course.Type = courseType;
         course.DurationWeeks = request.DurationWeeks;
         course.PlannedLessonCount = request.PlannedLessonCount;
@@ -229,6 +250,7 @@ public class CoursesController : ControllerBase
             Id = course.Id,
             Name = course.Name,
             Level = course.Level.ToString(),
+            DanceStyle = course.DanceStyle.ToString(),
             Type = course.Type.ToString(),
             DurationWeeks = course.DurationWeeks,
             PlannedLessonCount = course.PlannedLessonCount,

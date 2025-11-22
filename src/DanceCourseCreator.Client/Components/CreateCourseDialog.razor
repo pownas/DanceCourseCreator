@@ -37,6 +37,21 @@
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="12" md="6">
+                                <MudSelect @bind-Value="courseRequest.DanceStyle" 
+                                           Label="Dansstil"
+                                           Required="true"
+                                           T="string">
+                                    <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
+                                    <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
+                                    <MudSelectItem Value="@("Fox")">Fox</MudSelectItem>
+                                    <MudSelectItem Value="@("Foxtrot")">Foxtrot</MudSelectItem>
+                                    <MudSelectItem Value="@("Lindy")">Lindy Hop</MudSelectItem>
+                                    <MudSelectItem Value="@("Balboa")">Balboa</MudSelectItem>
+                                    <MudSelectItem Value="@("Blues")">Blues</MudSelectItem>
+                                    <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
                                 <MudSelect @bind-Value="courseRequest.Type" 
                                            Label="Kurstyp"
                                            Required="true"
@@ -168,6 +183,7 @@
             {
                 Name = Course.Name,
                 Level = Course.Level,
+                DanceStyle = Course.DanceStyle,
                 Type = Course.Type,
                 DurationWeeks = Course.DurationWeeks,
                 PlannedLessonCount = Course.PlannedLessonCount,
@@ -235,6 +251,7 @@
                     Id = Course.Id,
                     Name = courseRequest.Name,
                     Level = courseRequest.Level,
+                    DanceStyle = courseRequest.DanceStyle,
                     Type = courseRequest.Type,
                     DurationWeeks = courseRequest.DurationWeeks,
                     PlannedLessonCount = courseRequest.PlannedLessonCount,

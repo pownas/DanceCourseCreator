@@ -15,6 +15,9 @@ public class Course
     [Required]
     public DanceLevel Level { get; set; }
     
+    [Required]
+    public DanceStyle DanceStyle { get; set; } = DanceStyle.WestCoastSwing;
+    
     public CourseType Type { get; set; } = CourseType.Weekly;
     
     public int DurationWeeks { get; set; }
