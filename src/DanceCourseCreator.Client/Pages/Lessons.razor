@@ -2,6 +2,7 @@
 @* @attribute [Authorize] *@
 @inject ILessonsService LessonsService
 @inject IPatternsService PatternsService
+@inject ITemplatesService TemplatesService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -103,6 +104,12 @@
                                                    Color="Color.Secondary" 
                                                    OnClick="() => EditLesson(lesson)">
                                             Edit
+                                        </MudButton>
+                                        <MudButton Size="Size.Small" 
+                                                   Color="Color.Tertiary" 
+                                                   StartIcon="Icons.Material.Filled.ContentCopy"
+                                                   OnClick="() => SaveAsTemplate(lesson)">
+                                            Save as Template
                                         </MudButton>
                                         <MudSpacer />
                                         <MudIconButton Size="Size.Small" 
@@ -253,6 +260,24 @@
             {
                 Snackbar.Add("Failed to delete lesson", Severity.Error);
             }
+        }
+    }
+
+    private async Task SaveAsTemplate(Lesson lesson)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ResourceId", lesson.Id },
+            { "ResourceType", "Lesson" }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<SaveAsTemplateDialog>("Save as Template", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Template created successfully! View it in the Templates page.", Severity.Success);
         }
     }
 }

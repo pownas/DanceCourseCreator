@@ -1,0 +1,218 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@using System.Text.Json
+@inject ITemplatesService TemplatesService
+@inject ILessonsService LessonsService
+@inject ICoursesService CoursesService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-2">Spara som mall</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                        Skapa en återanvändbar mall från denna @(ResourceType == "Lesson" ? "lektion" : "kurs")
+                    </MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Mallinformation</MudText>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="templateName" 
+                                              Label="Mallnamn" 
+                                              Required="true"
+                                              Error="@(!string.IsNullOrEmpty(nameError))"
+                                              ErrorText="@nameError"
+                                              Placeholder="@(ResourceType == "Lesson" ? "T.ex. 'Standard 75-min Nybörjarlektion'" : "T.ex. 'Standard 6-veckors Nybörjarkurs'")" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSwitch T="bool" @bind-Checked="isTeamTemplate" Color="Color.Primary">
+                                    Dela med team
+                                </MudSwitch>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    Team-mallar är tillgängliga för alla medlemmar i ditt team
+                                </MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Info">
+                        <strong>Vad sparas?</strong><br/>
+                        @if (ResourceType == "Lesson")
+                        {
+                            <text>
+                                Lektionens struktur, sektioner, varaktighet och anteckningar sparas som mall. 
+                                Specifika datum och kurskopplingar inkluderas inte.
+                            </text>
+                        }
+                        else
+                        {
+                            <text>
+                                Kursens struktur, mål, längd, nivå och teman per vecka sparas som mall. 
+                                Specifika lektioner och datum inkluderas inte.
+                            </text>
+                        }
+                    </MudAlert>
+                </MudItem>
+
+                @if (isSaving)
+                {
+                    <MudItem xs="12" Class="text-center">
+                        <MudProgressCircular Indeterminate="true" />
+                        <MudText Typo="Typo.body1" Class="mt-2">Sparar mall...</MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Disabled="@isSaving">Avbryt</MudButton>
+        <MudButton Color="Color.Primary" 
+                   OnClick="SaveAsTemplate" 
+                   Disabled="@isSaving"
+                   Variant="Variant.Filled"
+                   StartIcon="Icons.Material.Filled.Save">
+            @if (isSaving)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Sparar...</MudText>
+            }
+            else
+            {
+                <MudText>Spara som mall</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [Parameter] public string ResourceId { get; set; } = string.Empty;
+    [Parameter] public string ResourceType { get; set; } = string.Empty; // "Lesson" or "Course"
+
+    private string templateName = string.Empty;
+    private bool isTeamTemplate = false;
+    private bool isSaving = false;
+    private string nameError = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        // Suggest a name based on resource type
+        if (ResourceType == "Lesson")
+        {
+            templateName = $"Lektionsmall {DateTime.Now:yyyy-MM-dd}";
+        }
+        else
+        {
+            templateName = $"Kursmall {DateTime.Now:yyyy-MM-dd}";
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+
+    private async Task SaveAsTemplate()
+    {
+        // Validate name
+        nameError = string.Empty;
+        if (string.IsNullOrWhiteSpace(templateName))
+        {
+            nameError = "Mallnamn krävs";
+            return;
+        }
+
+        isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            string contentJson;
+            
+            if (ResourceType == "Lesson")
+            {
+                var lesson = await LessonsService.GetLessonAsync(ResourceId);
+                if (lesson == null)
+                {
+                    Snackbar.Add("Kunde inte hämta lektion", Severity.Error);
+                    return;
+                }
+                
+                // Convert lesson to template content
+                var lessonContent = new
+                {
+                    duration = lesson.Duration,
+                    sections = lesson.Sections.Select(s => new
+                    {
+                        name = s.Type,
+                        type = s.Type,
+                        items = s.Items,
+                        notes = s.Notes
+                    }).ToArray(),
+                    totalEstimatedMinutes = lesson.TotalEstimatedMinutes,
+                    notes = lesson.Notes
+                };
+                
+                contentJson = JsonSerializer.Serialize(lessonContent);
+            }
+            else // Course
+            {
+                var course = await CoursesService.GetCourseAsync(ResourceId);
+                if (course == null)
+                {
+                    Snackbar.Add("Kunde inte hämta kurs", Severity.Error);
+                    return;
+                }
+                
+                // Convert course to template content
+                var courseContent = new
+                {
+                    level = course.Level,
+                    danceStyle = course.DanceStyle,
+                    type = course.Type,
+                    durationWeeks = course.DurationWeeks,
+                    plannedLessonCount = course.PlannedLessonCount,
+                    goals = course.Goals,
+                    themesByWeek = course.ThemesByWeek
+                };
+                
+                contentJson = JsonSerializer.Serialize(courseContent);
+            }
+
+            var createRequest = new CreateTemplateRequest
+            {
+                Name = templateName,
+                Scope = ResourceType,
+                Content = contentJson,
+                Team = isTeamTemplate ? "default-team" : null // TODO: Get actual team ID from user context
+            };
+
+            var createdTemplate = await TemplatesService.CreateTemplateAsync(createRequest);
+            if (createdTemplate != null)
+            {
+                Snackbar.Add("Mall skapad framgångsrikt!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(createdTemplate));
+            }
+            else
+            {
+                Snackbar.Add("Fel vid skapande av mall", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid skapande av mall: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+        }
+    }
+}
