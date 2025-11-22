@@ -257,6 +257,140 @@ public class LessonAndTemplateTests : PageTest
         }
     }
 
+    [TestMethod]
+    [TestCategory("Templates")]
+    [TestCategory("Integration")]
+    [TestCategory("Screenshots")]
+    public async Task SaveAsTemplate_FromLesson_ShouldCreateTemplate()
+    {
+        // Navigate to lessons page
+        await Page.GotoAsync($"{BaseUrl}/lessons");
+        await Page.WaitForSelectorAsync("text=Lessons", new() { Timeout = 30000 });
+        await Page.WaitForTimeoutAsync(1500);
+
+        // Take screenshot of lessons page
+        await Page.ScreenshotAsync(new()
+        {
+            Path = $"{ScreenshotsDir}/13-save-as-template-lessons-page.png",
+            FullPage = true
+        });
+
+        // Try to find "Spara som mall" button for first lesson
+        var saveAsTemplateButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara som mall" }).First;
+        if (await saveAsTemplateButton.IsVisibleAsync())
+        {
+            await saveAsTemplateButton.ClickAsync();
+            await Page.WaitForTimeoutAsync(1000);
+
+            // Take screenshot with save as template dialog
+            await Page.ScreenshotAsync(new()
+            {
+                Path = $"{ScreenshotsDir}/14-save-as-template-dialog.png",
+                FullPage = true
+            });
+
+            // Verify dialog is visible
+            await Expect(Page.GetByText("Spara som mall")).ToBeVisibleAsync();
+            
+            // Fill in template name
+            var templateNameField = Page.GetByLabel("Mallnamn");
+            if (await templateNameField.IsVisibleAsync())
+            {
+                await templateNameField.FillAsync($"E2E Test Template {DateTime.Now:yyyy-MM-dd-HHmmss}");
+                await Page.WaitForTimeoutAsync(500);
+                
+                // Take screenshot with filled form
+                await Page.ScreenshotAsync(new()
+                {
+                    Path = $"{ScreenshotsDir}/15-save-as-template-filled.png",
+                    FullPage = true
+                });
+                
+                // Click save button
+                var saveButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara som mall" });
+                if (await saveButton.IsVisibleAsync())
+                {
+                    await saveButton.ClickAsync();
+                    await Page.WaitForTimeoutAsync(2000);
+                    
+                    // Take screenshot after save
+                    await Page.ScreenshotAsync(new()
+                    {
+                        Path = $"{ScreenshotsDir}/16-save-as-template-success.png",
+                        FullPage = true
+                    });
+                }
+            }
+        }
+    }
+
+    [TestMethod]
+    [TestCategory("Templates")]
+    [TestCategory("Integration")]
+    [TestCategory("Screenshots")]
+    public async Task SaveAsTemplate_FromCourse_ShouldCreateTemplate()
+    {
+        // Navigate to courses page
+        await Page.GotoAsync($"{BaseUrl}/courses");
+        await Page.WaitForSelectorAsync("text=Kursplaner", new() { Timeout = 30000 });
+        await Page.WaitForTimeoutAsync(1500);
+
+        // Take screenshot of courses page
+        await Page.ScreenshotAsync(new()
+        {
+            Path = $"{ScreenshotsDir}/17-save-as-template-courses-page.png",
+            FullPage = true
+        });
+
+        // Try to find "Spara som mall" button for first course
+        var saveAsTemplateButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara som mall" }).First;
+        if (await saveAsTemplateButton.IsVisibleAsync())
+        {
+            await saveAsTemplateButton.ClickAsync();
+            await Page.WaitForTimeoutAsync(1000);
+
+            // Take screenshot with save as template dialog
+            await Page.ScreenshotAsync(new()
+            {
+                Path = $"{ScreenshotsDir}/18-course-save-as-template-dialog.png",
+                FullPage = true
+            });
+
+            // Verify dialog is visible
+            await Expect(Page.GetByText("Spara som mall")).ToBeVisibleAsync();
+            
+            // Fill in template name
+            var templateNameField = Page.GetByLabel("Mallnamn");
+            if (await templateNameField.IsVisibleAsync())
+            {
+                await templateNameField.FillAsync($"E2E Course Template {DateTime.Now:yyyy-MM-dd-HHmmss}");
+                await Page.WaitForTimeoutAsync(500);
+                
+                // Take screenshot with filled form
+                await Page.ScreenshotAsync(new()
+                {
+                    Path = $"{ScreenshotsDir}/19-course-save-as-template-filled.png",
+                    FullPage = true
+                });
+                
+                // Click save button
+                var saveButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara som mall" });
+                if (await saveButton.IsVisibleAsync())
+                {
+                    await saveButton.ClickAsync();
+                    await Page.WaitForTimeoutAsync(2000);
+                    
+                    // Take screenshot after save
+                    await Page.ScreenshotAsync(new()
+                    {
+                        Path = $"{ScreenshotsDir}/20-course-save-as-template-success.png",
+                        FullPage = true
+                    });
+                }
+            }
+        }
+    }
+
     public override BrowserNewContextOptions ContextOptions()
     {
         return new BrowserNewContextOptions()

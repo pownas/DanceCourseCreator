@@ -109,7 +109,7 @@
                                                    Color="Color.Tertiary" 
                                                    StartIcon="Icons.Material.Filled.ContentCopy"
                                                    OnClick="() => SaveAsTemplate(lesson)">
-                                            Save as Template
+                                            Spara som mall
                                         </MudButton>
                                         <MudSpacer />
                                         <MudIconButton Size="Size.Small" 
@@ -272,12 +272,12 @@
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium };
 
-        var dialog = await DialogService.ShowAsync<SaveAsTemplateDialog>("Save as Template", parameters, options);
+        var dialog = await DialogService.ShowAsync<SaveAsTemplateDialog>("Spara som mall", parameters, options);
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            Snackbar.Add("Template created successfully! View it in the Templates page.", Severity.Success);
+            Snackbar.Add("Mall skapad framgångsrikt! Se den på Mallar-sidan.", Severity.Success);
         }
     }
 }
