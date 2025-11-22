@@ -1,7 +1,9 @@
 @page "/courses"
 @* @attribute [Authorize] *@
 @inject ICoursesService CoursesService
+@inject ITemplatesService TemplatesService
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <PageTitle>Kurser - Kursskapare</PageTitle>
 
@@ -163,6 +165,12 @@
                                                        OnClick="@(() => ViewCourse(course))">
                                                 Visa
                                             </MudButton>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Tertiary" 
+                                                       StartIcon="Icons.Material.Filled.ContentCopy"
+                                                       OnClick="@(() => SaveAsTemplate(course))">
+                                                Spara som mall
+                                            </MudButton>
                                         </MudCardActions>
                                     </MudCard>
                                 </MudItem>
@@ -259,6 +267,24 @@
     {
         // TODO: Implement context menu with options like duplicate, delete, export
         await EditCourse(course);
+    }
+
+    private async Task SaveAsTemplate(Course course)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ResourceId", course.Id },
+            { "ResourceType", "Course" }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium };
+
+        var dialog = await DialogService.ShowAsync<SaveAsTemplateDialog>("Spara som mall", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Mall skapad framgångsrikt! Se den på Mallar-sidan.", Severity.Success);
+        }
     }
 
     private Color GetLevelColor(string level)
