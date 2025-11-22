@@ -1,5 +1,4 @@
 @using MudBlazor
-@using Microsoft.AspNetCore.Components.Web
 @using System.Text.Json
 @inject ITemplatesService TemplatesService
 @inject ILessonsService LessonsService
@@ -191,7 +190,7 @@
                 Name = templateName,
                 Scope = ResourceType,
                 Content = contentJson,
-                Team = isTeamTemplate ? "default-team" : null // TODO: Get actual team ID from user context
+                Team = isTeamTemplate ? null : null // TODO: Get actual team ID from IAuthService.GetCurrentUser().TeamId when team sharing is enabled
             };
 
             var createdTemplate = await TemplatesService.CreateTemplateAsync(createRequest);
