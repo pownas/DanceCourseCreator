@@ -9,10 +9,10 @@
     <MudPaper Class="pa-8">
         <MudForm @ref="form" @onsubmit:preventDefault="true">
             <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
-                Dance Course Creator
+                WCS Kursskapare
             </MudText>
             <MudText Typo="Typo.body1" Align="Align.Center" GutterBottom="true" Class="mb-6">
-                Sign in to your account
+                Logga in på ditt konto
             </MudText>
 
             @if (!string.IsNullOrEmpty(errorMessage))
@@ -23,18 +23,18 @@
             }
 
             <MudTextField @bind-Value="loginRequest.Email"
-                          Label="Email"
+                          Label="E-post"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Email is required"
+                          RequiredError="E-post krävs"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="loginRequest.Password"
-                          Label="Password"
+                          Label="Lösenord"
                           Variant="Variant.Outlined"
                           InputType="InputType.Password"
                           Required="true"
-                          RequiredError="Password is required"
+                          RequiredError="Lösenord krävs"
                           Class="mb-6" />
 
             <MudButton ButtonType="ButtonType.Submit"
@@ -42,15 +42,16 @@
                        Color="Color.Primary"
                        Size="Size.Large"
                        FullWidth="true"
-                       Disabled="isLoading">
+                       Disabled="isLoading"
+                       OnClick="HandleLogin">
                 @if (isLoading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                    <MudText Class="ml-2">Signing in...</MudText>
+                    <MudText Class="ml-2">Loggar in...</MudText>
                 }
                 else
                 {
-                    <MudText>Sign In</MudText>
+                    <MudText>Logga in</MudText>
                 }
             </MudButton>
         </MudForm>
@@ -58,8 +59,8 @@
         <MudDivider Class="my-6" />
 
         <MudText Typo="Typo.body2" Align="Align.Center">
-            Don't have an account?
-            <MudLink Href="/register" Color="Color.Primary">Sign up</MudLink>
+            Har du inget konto?
+            <MudLink Href="/register" Color="Color.Primary">Registrera dig</MudLink>
         </MudText>
     </MudPaper>
 </MudContainer>
@@ -87,12 +88,12 @@
             }
             else
             {
-                errorMessage = "Invalid email or password.";
+                errorMessage = "Ogiltig e-post eller lösenord.";
             }
         }
         catch (Exception)
         {
-            errorMessage = "An error occurred during login. Please try again.";
+            errorMessage = "Ett fel uppstod vid inloggning. Försök igen.";
         }
         finally
         {
