@@ -166,6 +166,12 @@
                                                 Visa
                                             </MudButton>
                                             <MudButton Size="Size.Small" 
+                                                       Color="Color.Info" 
+                                                       StartIcon="Icons.Material.Filled.TrendingUp"
+                                                       OnClick="@(() => ViewProgression(course))">
+                                                Progression
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" 
                                                        Color="Color.Tertiary" 
                                                        StartIcon="Icons.Material.Filled.ContentCopy"
                                                        OnClick="@(() => SaveAsTemplate(course))">
@@ -261,6 +267,25 @@
         // TODO: Navigate to course detail view
         // For now, just edit
         await EditCourse(course);
+    }
+
+    private async Task ViewProgression(Course course)
+    {
+        var parameters = new DialogParameters
+        {
+            { "CourseId", course.Id }
+        };
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Large,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<CourseProgressionDialog>(
+            $"Progression: {course.Name}", 
+            parameters, 
+            options);
     }
 
     private async Task ShowCourseMenu(Course course)

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using DanceCourseCreator.API.Data;
 using DanceCourseCreator.API.DTOs;
 using DanceCourseCreator.API.Models;
+using DanceCourseCreator.API.Services;
 using System.Security.Claims;
 
 namespace DanceCourseCreator.API.Controllers;
@@ -14,10 +15,12 @@ namespace DanceCourseCreator.API.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly DanceCourseDbContext _context;
+    private readonly ProgressionService _progressionService;
 
-    public CoursesController(DanceCourseDbContext context)
+    public CoursesController(DanceCourseDbContext context, ProgressionService progressionService)
     {
         _context = context;
+        _progressionService = progressionService;
     }
 
     [HttpGet]
@@ -295,46 +298,36 @@ public class CoursesController : ControllerBase
     }
 
     /// <summary>
-    /// Get coverage metrics for a course - what fundamental skills are covered
+    /// Get coverage metrics for a course - what fundamental skills are covered (FR-021)
     /// </summary>
     [HttpGet("{id}/coverage")]
-    public async Task<ActionResult<object>> GetCourseCoverage(string id)
+    public async Task<ActionResult<CourseCoverageMetrics>> GetCourseCoverage(string id)
     {
-        var course = await _context.Courses
-            .Include(c => c.Lessons)
-            .ThenInclude(l => l.Sections)
-            .FirstOrDefaultAsync(c => c.Id == id);
-
-        if (course == null)
+        try
         {
-            return NotFound();
+            var coverage = await _progressionService.CalculateCoverageAsync(id);
+            return Ok(coverage);
         }
-
-        // TODO: Implement coverage analysis based on lessons and patterns
-        // This would analyze which fundamental skills (Sugar Push, Whip, Connection, etc.) are covered
-        var coverage = new
+        catch (InvalidOperationException ex)
         {
-            FundamentalsProgress = new
-            {
-                SugarPush = true,
-                LeftSidePass = true,
-                RightSidePass = false,
-                Whip = false,
-                Connection = true,
-                Anchor = true,
-                Stretch = false,
-                Musicality = false
-            },
-            WeeklyProgress = Enumerable.Range(1, course.DurationWeeks)
-                .Select(week => new
-                {
-                    Week = week,
-                    Theme = week <= course.ThemesByWeek.Count ? course.ThemesByWeek[week - 1] : "",
-                    CompletedConcepts = new[] { "Sugar Push", "Connection" }, // Mock data
-                    PlannedConcepts = new[] { "Left Side Pass" } // Mock data
-                }).ToList()
-        };
+            return NotFound(new { message = ex.Message });
+        }
+    }
 
-        return Ok(coverage);
+    /// <summary>
+    /// Analyze course progression and get warnings/recommendations (FR-023)
+    /// </summary>
+    [HttpGet("{id}/progression")]
+    public async Task<ActionResult<ProgressionAnalysis>> GetCourseProgression(string id)
+    {
+        try
+        {
+            var analysis = await _progressionService.AnalyzeProgressionAsync(id);
+            return Ok(analysis);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 }
