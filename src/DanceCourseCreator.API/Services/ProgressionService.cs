@@ -2,6 +2,7 @@ using DanceCourseCreator.API.Data;
 using DanceCourseCreator.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DanceCourseCreator.API.Services;
 
@@ -24,6 +25,19 @@ public class ProgressionService
         "Stretch",
         "Musicality"
     };
+
+    // Localization strings (could be moved to resource files for full i18n support)
+    private static class Messages
+    {
+        public const string MissingFundamentalMessage = "Saknar grundläggande färdighet för {0}: {1}";
+        public const string MissingFundamentalRecommendation = "Lägg till övningar eller turer som täcker {0}";
+        public const string OverloadingMessage = "Vecka {0}: För många nya koncept ({1})";
+        public const string OverloadingRecommendation = "Överväg att sprida ut koncepten över flera veckor eller ta bort {0} koncept";
+        public const string PoorSpacingMessage = "{0}: Repetition för snabbt (vecka {1} till {2})";
+        public const string PoorSpacingRecommendation = "Överväg att öka avståndet mellan repetitioner av {0}";
+        public const string NoRepetitionMessage = "{0}: Ingen repetition i en {1}-veckors kurs";
+        public const string NoRepetitionRecommendation = "Lägg till repetition av {0} för bättre inlärning";
+    }
 
     public ProgressionService(DanceCourseDbContext context)
     {
@@ -202,8 +216,8 @@ public class ProgressionService
                 {
                     Severity = WarningLevel.High,
                     Type = WarningType.MissingFundamental,
-                    Message = $"Saknar grundläggande färdighet för {level}: {skill}",
-                    Recommendation = $"Lägg till övningar eller turer som täcker {skill}"
+                    Message = string.Format(Messages.MissingFundamentalMessage, level, skill),
+                    Recommendation = string.Format(Messages.MissingFundamentalRecommendation, skill)
                 });
             }
         }
@@ -222,8 +236,8 @@ public class ProgressionService
                     Severity = WarningLevel.Medium,
                     Type = WarningType.Overloading,
                     WeekNumber = week.WeekNumber,
-                    Message = $"Vecka {week.WeekNumber}: För många nya koncept ({week.CoveredConcepts.Count})",
-                    Recommendation = $"Överväg att sprida ut koncepten över flera veckor eller ta bort {week.CoveredConcepts.Count - MaxNewConceptsPerWeek} koncept"
+                    Message = string.Format(Messages.OverloadingMessage, week.WeekNumber, week.CoveredConcepts.Count),
+                    Recommendation = string.Format(Messages.OverloadingRecommendation, week.CoveredConcepts.Count - MaxNewConceptsPerWeek)
                 });
             }
         }
@@ -247,8 +261,8 @@ public class ProgressionService
                         {
                             Severity = WarningLevel.Low,
                             Type = WarningType.PoorSpacing,
-                            Message = $"{skill.SkillName}: Repetition för snabbt (vecka {skill.WeeksIntroduced[i - 1]} till {skill.WeeksIntroduced[i]})",
-                            Recommendation = $"Överväg att öka avståndet mellan repetitioner av {skill.SkillName}"
+                            Message = string.Format(Messages.PoorSpacingMessage, skill.SkillName, skill.WeeksIntroduced[i - 1], skill.WeeksIntroduced[i]),
+                            Recommendation = string.Format(Messages.PoorSpacingRecommendation, skill.SkillName)
                         });
                     }
                 }
@@ -260,8 +274,8 @@ public class ProgressionService
                 {
                     Severity = WarningLevel.Medium,
                     Type = WarningType.NoRepetition,
-                    Message = $"{skill.SkillName}: Ingen repetition i en {coverage.DurationWeeks}-veckors kurs",
-                    Recommendation = $"Lägg till repetition av {skill.SkillName} för bättre inlärning"
+                    Message = string.Format(Messages.NoRepetitionMessage, skill.SkillName, coverage.DurationWeeks),
+                    Recommendation = string.Format(Messages.NoRepetitionRecommendation, skill.SkillName)
                 });
             }
         }
@@ -324,8 +338,12 @@ public class ProgressionAnalysis
 
 public class ProgressionWarning
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public WarningLevel Severity { get; set; }
+    
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public WarningType Type { get; set; }
+    
     public int? WeekNumber { get; set; }
     public string Message { get; set; } = string.Empty;
     public string Recommendation { get; set; } = string.Empty;
