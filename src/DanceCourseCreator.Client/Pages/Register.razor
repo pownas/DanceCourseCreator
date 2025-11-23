@@ -3,16 +3,16 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Register - Dance Course Creator</PageTitle>
+<PageTitle>Registrera - WCS Kursskapare</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
     <MudPaper Class="pa-8">
         <MudForm @ref="form" @onsubmit:preventDefault="true">
             <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
-                Create Account
+                Skapa konto
             </MudText>
             <MudText Typo="Typo.body1" Align="Align.Center" GutterBottom="true" Class="mb-6">
-                Join Dance Course Creator
+                Gå med i WCS Kursskapare
             </MudText>
 
             @if (!string.IsNullOrEmpty(errorMessage))
@@ -23,50 +23,50 @@
             }
 
             <MudTextField @bind-Value="registerRequest.Name"
-                          Label="Full Name"
+                          Label="Fullständigt namn"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Name is required"
+                          RequiredError="Namn krävs"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="registerRequest.Email"
-                          Label="Email"
+                          Label="E-post"
                           Variant="Variant.Outlined"
                           Required="true"
-                          RequiredError="Email is required"
+                          RequiredError="E-post krävs"
                           Class="mb-4" />
 
             <MudTextField @bind-Value="registerRequest.Password"
-                          Label="Password"
+                          Label="Lösenord"
                           Variant="Variant.Outlined"
                           InputType="InputType.Password"
                           Required="true"
-                          RequiredError="Password is required"
+                          RequiredError="Lösenord krävs"
                           Class="mb-4" />
 
             <MudSelect @bind-Value="registerRequest.Role"
-                       Label="Role"
+                       Label="Roll"
                        Variant="Variant.Outlined"
                        Class="mb-6">
-                <MudSelectItem Value="@("instructor")">Instructor</MudSelectItem>
-                <MudSelectItem Value="@("editor")">Editor</MudSelectItem>
-                <MudSelectItem Value="@("reader")">Reader</MudSelectItem>
+                <MudSelectItem Value="@("instructor")">Instruktör</MudSelectItem>
+                <MudSelectItem Value="@("editor")">Redaktör</MudSelectItem>
+                <MudSelectItem Value="@("reader")">Läsare</MudSelectItem>
             </MudSelect>
 
-            <MudButton ButtonType="ButtonType.Submit"
-                       Variant="Variant.Filled"
+            <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        Size="Size.Large"
                        FullWidth="true"
-                       Disabled="isLoading">
+                       Disabled="isLoading"
+                       OnClick="HandleRegister">
                 @if (isLoading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                    <MudText Class="ml-2">Creating account...</MudText>
+                    <MudText Class="ml-2">Skapar konto...</MudText>
                 }
                 else
                 {
-                    <MudText>Create Account</MudText>
+                    <MudText>Skapa konto</MudText>
                 }
             </MudButton>
         </MudForm>
@@ -74,8 +74,8 @@
         <MudDivider Class="my-6" />
 
         <MudText Typo="Typo.body2" Align="Align.Center">
-            Already have an account?
-            <MudLink Href="/login" Color="Color.Primary">Sign in</MudLink>
+            Har du redan ett konto?
+            <MudLink Href="/login" Color="Color.Primary">Logga in</MudLink>
         </MudText>
     </MudPaper>
 </MudContainer>
@@ -103,12 +103,12 @@
             }
             else
             {
-                errorMessage = "Failed to create account. Please try again.";
+                errorMessage = "Misslyckades med att skapa konto. Försök igen.";
             }
         }
         catch (Exception)
         {
-            errorMessage = "An error occurred during registration. Please try again.";
+            errorMessage = "Ett fel uppstod vid registrering. Försök igen.";
         }
         finally
         {

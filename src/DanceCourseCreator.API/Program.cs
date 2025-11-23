@@ -92,7 +92,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<DanceCourseDbContext>();
     context.Database.EnsureCreated();
     
-    // Ensure demo user exists for testing
+    // Ensure demo user exists for testing - with read-only access
     var demoEmail = "demo@dancecourse.com";
     var demoUser = await context.Users.FirstOrDefaultAsync(u => u.Email == demoEmail);
     if (demoUser == null)
@@ -100,14 +100,22 @@ using (var scope = app.Services.CreateScope())
         demoUser = new DanceCourseCreator.API.Models.User
         {
             Id = "demo-user-id",
-            Name = "Demo User",
+            Name = "Demo Användare",
             Email = demoEmail,
-            Role = DanceCourseCreator.API.Models.UserRole.Instructor,
+            Role = DanceCourseCreator.API.Models.UserRole.Reader,
             HashedPassword = BCrypt.Net.BCrypt.HashPassword("demo123"),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
         context.Users.Add(demoUser);
+        await context.SaveChangesAsync();
+    }
+    else if (demoUser.Role != DanceCourseCreator.API.Models.UserRole.Reader)
+    {
+        // Update existing demo user to Reader role if it has a different role
+        demoUser.Role = DanceCourseCreator.API.Models.UserRole.Reader;
+        demoUser.Name = "Demo Användare";
+        demoUser.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
     }
 }

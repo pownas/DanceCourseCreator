@@ -16,6 +16,30 @@
         </MudText>
     </div>
     
+    <!-- Demo User Info -->
+    <AuthorizeView>
+        <NotAuthorized>
+            <MudAlert Severity="Severity.Info" Class="mb-6" Icon="Icons.Material.Filled.Info">
+                <MudText Typo="Typo.body1" Class="mb-2">
+                    <strong>Prova tjänsten med demoanvändare:</strong>
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    E-post: <strong>demo@dancecourse.com</strong> | Lösenord: <strong>demo123</strong>
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                    Demoanvändaren har enbart läsrättigheter och kan inte redigera innehåll.
+                </MudText>
+                <MudButton Variant="Variant.Text" 
+                           Color="Color.Primary" 
+                           Href="/login"
+                           StartIcon="Icons.Material.Filled.Login"
+                           Class="mt-2">
+                    Logga in
+                </MudButton>
+            </MudAlert>
+        </NotAuthorized>
+    </AuthorizeView>
+    
     <!-- Library Overview Stats -->
     <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
         <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2" />
