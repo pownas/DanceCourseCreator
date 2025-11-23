@@ -28,10 +28,10 @@ Denna analys utvärderar det befintliga DanceCourseCreator-systemet och presente
 
 ### 1.1 Befintlig systemarkitektur
 
-DanceCourseCreator är implementerad som en modern .NET 8-applikation med:
+DanceCourseCreator är implementerad som en modern .NET 10-applikation med:
 
 **Teknisk stack**:
-- Backend: .NET 8 Web API med Entity Framework Core
+- Backend: .NET 10 Web API med Entity Framework Core
 - Frontend: Blazor WebAssembly med MudBlazor
 - Databas: SQLite (skalbar till PostgreSQL/SQL Server)
 - Autentisering: JWT med rollbaserad åtkomstkontroll

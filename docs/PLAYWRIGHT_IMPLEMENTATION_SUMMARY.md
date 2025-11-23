@@ -174,7 +174,7 @@ dotnet test --filter "TestCategory=Screenshots"
 ### Prerequisites for Running
 
 The tests require:
-- .NET 8.0 SDK
+- .NET 10.0 SDK
 - Playwright browsers (auto-installable)
 - API running on http://localhost:5139
 - Client running on http://localhost:5034
