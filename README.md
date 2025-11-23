@@ -54,7 +54,33 @@ This is a **complete, functional application** built with modern .NET 10 technol
 - .NET 10.0 SDK
 - Visual Studio 2022, VS Code with C# extension, or any preferred editor
 
-### Installation & Setup
+### Quick Start with GitHub Codespaces 🌐
+
+The easiest way to get started is using GitHub Codespaces with our automated installation script:
+
+1. **Open in Codespaces**
+   - Click the green "Code" button on GitHub
+   - Select "Codespaces" tab
+   - Click "Create codespace on main"
+
+2. **Run the installation script**
+   ```bash
+   ./app-install.sh
+   ```
+   
+   This automated script will:
+   - ✅ Verify and install .NET 10 SDK
+   - ✅ Restore and build the solution
+   - ✅ Install Entity Framework CLI tools
+   - ✅ Configure HTTPS development certificates
+   - ✅ Install Playwright browsers for E2E tests
+   - ✅ Set up all necessary project scripts
+
+3. **Start developing!**
+   - Follow the on-screen instructions after installation completes
+   - Start the API and Client in separate terminals as shown
+
+### Manual Installation & Setup
 
 1. **Clone the repository**
    ```bash
