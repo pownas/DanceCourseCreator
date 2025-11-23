@@ -26,6 +26,7 @@ builder.Services.AddScoped<IPatternsService, PatternsService>();
 builder.Services.AddScoped<ILessonsService, LessonsService>();
 builder.Services.AddScoped<ICoursesService, CoursesService>();
 builder.Services.AddScoped<ITemplatesService, TemplatesService>();
+builder.Services.AddScoped<ITimeValidationService, TimeValidationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<IObservabilityTestService, ObservabilityTestService>();
 
