@@ -1,6 +1,7 @@
 @using MudBlazor
 @inject ILessonsService LessonsService
 @inject IPatternsService PatternsService
+@inject ITimeValidationService TimeValidationService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
@@ -75,17 +76,33 @@
                                     
                                     <MudPaper Class="pa-3 mb-3 section-paper" Elevation="2">
                                         <div class="d-flex justify-space-between align-center mb-3">
-                                            <MudSelect @bind-Value="section.Type" 
-                                                       Label="Section Type"
-                                                       ReadOnly="ReadOnly"
-                                                       Style="min-width: 200px;">
-                                                <MudSelectItem Value="@("Warmup")">Warmup</MudSelectItem>
-                                                <MudSelectItem Value="@("Technique")">Technique</MudSelectItem>
-                                                <MudSelectItem Value="@("Patterns")">Patterns</MudSelectItem>
-                                                <MudSelectItem Value="@("Combination")">Combination</MudSelectItem>
-                                                <MudSelectItem Value="@("Repetition")">Repetition</MudSelectItem>
-                                                <MudSelectItem Value="@("Social")">Social</MudSelectItem>
-                                            </MudSelect>
+                                            <div class="d-flex align-center gap-3" style="flex-grow: 1;">
+                                                <MudSelect @bind-Value="section.Type" 
+                                                           Label="Section Type"
+                                                           ReadOnly="ReadOnly"
+                                                           Style="min-width: 200px;">
+                                                    <MudSelectItem Value="@("Warmup")">Warmup</MudSelectItem>
+                                                    <MudSelectItem Value="@("Technique")">Technique</MudSelectItem>
+                                                    <MudSelectItem Value="@("Patterns")">Patterns</MudSelectItem>
+                                                    <MudSelectItem Value="@("Combination")">Combination</MudSelectItem>
+                                                    <MudSelectItem Value="@("Repetition")">Repetition</MudSelectItem>
+                                                    <MudSelectItem Value="@("Social")">Social</MudSelectItem>
+                                                </MudSelect>
+                                                
+                                                <MudNumericField @bind-Value="section.AllocatedMinutes" 
+                                                                 Label="Allokerad tid (min)"
+                                                                 Min="0"
+                                                                 Max="120"
+                                                                 ReadOnly="ReadOnly"
+                                                                 Style="min-width: 150px;"
+                                                                 Adornment="Adornment.End"
+                                                                 AdornmentText="min"
+                                                                 OnBlur="OnTimeChanged" />
+                                                
+                                                <MudChip T="string" Size="Size.Small" Color="GetSectionTimeColor(section)">
+                                                    Est: @TimeValidationService.CalculateSectionEstimatedTime(section, patterns) min
+                                                </MudChip>
+                                            </div>
                                             
                                             @if (!ReadOnly)
                                             {
@@ -194,41 +211,91 @@
                         </MudPaper>
                     </MudItem>
 
-                    <!-- Lesson Summary -->
+                    <!-- Lesson Summary and Validation -->
                     @if (lessonRequest.Sections.Any())
                     {
                         <MudItem xs="12">
                             <MudPaper Class="pa-4">
-                                <MudText Typo="Typo.h6" Class="mb-3">Lesson Summary</MudText>
+                                <MudText Typo="Typo.h6" Class="mb-3">Tidsöversikt och validering</MudText>
                                 <MudGrid>
-                                    <MudItem xs="6">
+                                    <MudItem xs="12" md="6">
                                         <MudText Typo="Typo.body1">
-                                            <strong>Total Sections:</strong> @lessonRequest.Sections.Count
+                                            <strong>Totalt antal sektioner:</strong> @lessonRequest.Sections.Count
                                         </MudText>
                                     </MudItem>
-                                    <MudItem xs="6">
+                                    <MudItem xs="12" md="6">
                                         <MudText Typo="Typo.body1">
-                                            <strong>Total Items:</strong> @lessonRequest.Sections.Sum(s => s.Items.Count)
+                                            <strong>Totalt antal moment:</strong> @lessonRequest.Sections.Sum(s => s.Items.Count)
                                         </MudText>
                                     </MudItem>
-                                    <MudItem xs="6">
+                                    <MudItem xs="12" md="6">
                                         <MudText Typo="Typo.body1">
-                                            <strong>Planned Duration:</strong> @lessonRequest.Duration minutes
+                                            <strong>Planerad lektionslängd:</strong> @lessonRequest.Duration minuter
                                         </MudText>
                                     </MudItem>
-                                    <MudItem xs="6">
+                                    <MudItem xs="12" md="6">
                                         <MudText Typo="Typo.body1">
-                                            <strong>Estimated Time:</strong> @CalculateEstimatedTime() minutes
+                                            <strong>Allokerad tid (sektioner):</strong> @lessonRequest.Sections.Sum(s => s.AllocatedMinutes) minuter
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudText Typo="Typo.body1">
+                                            <strong>Estimerad tid (innehåll):</strong> @CalculateEstimatedTime() minuter
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudText Typo="Typo.body1">
+                                            <strong>Tidsskillnad:</strong> @(lessonRequest.Duration - CalculateEstimatedTime()) minuter
                                         </MudText>
                                     </MudItem>
                                 </MudGrid>
-                                
-                                @if (Math.Abs(lessonRequest.Duration - CalculateEstimatedTime()) > 15)
+
+                                @* Time allocation progress bar *@
+                                <MudDivider Class="my-3" />
+                                <MudText Typo="Typo.body2" Class="mb-2">
+                                    <strong>Tidsallokering:</strong>
+                                </MudText>
+                                <MudProgressLinear 
+                                    Value="@GetTimeAllocationPercentage()" 
+                                    Color="@GetTimeAllocationColor()" 
+                                    Size="Size.Large" 
+                                    Class="mb-2">
+                                    <MudText Typo="Typo.body2" Color="Color.Dark">
+                                        @lessonRequest.Sections.Sum(s => s.AllocatedMinutes) / @lessonRequest.Duration min (@GetTimeAllocationPercentage().ToString("F0")%)
+                                    </MudText>
+                                </MudProgressLinear>
+
+                                @* Validation results *@
+                                @if (validationResult != null && validationResult.Messages.Any())
                                 {
-                                    <MudAlert Severity="Severity.Warning" Class="mt-3">
-                                        Warning: There's a significant difference between planned duration (@lessonRequest.Duration min) 
-                                        and estimated time (@CalculateEstimatedTime() min).
-                                    </MudAlert>
+                                    <MudDivider Class="my-3" />
+                                    <MudText Typo="Typo.body2" Class="mb-2">
+                                        <strong>Valideringsresultat:</strong>
+                                    </MudText>
+                                    
+                                    @foreach (var error in validationResult.Errors)
+                                    {
+                                        <MudAlert Severity="Severity.Error" Class="mb-2" Dense="true">
+                                            @error.Message
+                                        </MudAlert>
+                                    }
+                                    
+                                    @foreach (var warning in validationResult.Warnings)
+                                    {
+                                        <MudAlert Severity="Severity.Warning" Class="mb-2" Dense="true">
+                                            @warning.Message
+                                        </MudAlert>
+                                    }
+                                    
+                                    @if (!validationResult.HasErrors && validationResult.Infos.Any())
+                                    {
+                                        @foreach (var info in validationResult.Infos.Take(3))
+                                        {
+                                            <MudAlert Severity="Severity.Info" Class="mb-2" Dense="true">
+                                                @info.Message
+                                            </MudAlert>
+                                        }
+                                    }
                                 }
                             </MudPaper>
                         </MudItem>
@@ -239,19 +306,25 @@
     </DialogContent>
     
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton OnClick="Cancel">Avbryt</MudButton>
         @if (!ReadOnly)
         {
             <MudButton Color="Color.Primary" 
                        Variant="Variant.Filled" 
                        OnClick="Save"
-                       Disabled="isSaving">
+                       Disabled="@(isSaving || !CanSave())">
                 @if (isSaving)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                 }
-                @(IsEdit ? "Update" : "Create") Lesson
+                @(IsEdit ? "Uppdatera" : "Skapa") lektion
             </MudButton>
+            @if (!CanSave() && validationResult != null && validationResult.HasErrors)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error" Class="ml-2">
+                    Lektionen kan inte sparas på grund av valideringsfel
+                </MudText>
+            }
         }
     </DialogActions>
 </MudDialog>
@@ -276,8 +349,17 @@
     [Parameter] public string? LessonId { get; set; }
     [Parameter] public bool ReadOnly { get; set; } = false;
 
+    // UI threshold constants for color coding
+    private const int SectionTimeWarningPercent = 50;
+    private const int SectionTimeInfoPercent = 20;
+    private const int AllocationFullPercent = 100;
+    private const int AllocationGoodPercent = 90;
+    private const int AllocationOkPercent = 70;
+    private const int AllocationLowPercent = 50;
+
     private CreateLessonRequest lessonRequest = new();
     private List<PatternOrExercise>? patterns;
+    private TimeValidationResult? validationResult;
     private bool isLoading = false;
     private bool isSaving = false;
 
@@ -317,6 +399,9 @@
                 // Initialize with default section for new lessons
                 lessonRequest.Sections.Add(new LessonSection { Type = "Warmup" });
             }
+            
+            // Perform initial validation
+            ValidateLesson();
         }
         catch (Exception)
         {
@@ -328,11 +413,27 @@
         }
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender && !ReadOnly)
+        {
+            ValidateLesson();
+        }
+    }
+
     private void Cancel() => MudDialog.Close();
 
     private async Task Save()
     {
         if (ReadOnly) return;
+        
+        // Final validation before save
+        ValidateLesson();
+        if (!CanSave())
+        {
+            Snackbar.Add("Lektionen kan inte sparas på grund av valideringsfel", Severity.Error);
+            return;
+        }
 
         isSaving = true;
         try
@@ -375,6 +476,7 @@
     private void AddSection()
     {
         lessonRequest.Sections.Add(new LessonSection { Type = "Patterns" });
+        ValidateLesson();
     }
 
     private void RemoveSection(int index)
@@ -382,6 +484,7 @@
         if (index >= 0 && index < lessonRequest.Sections.Count)
         {
             lessonRequest.Sections.RemoveAt(index);
+            ValidateLesson();
         }
     }
 
@@ -430,6 +533,7 @@
         if (result is not null && !result.Canceled && result.Data is string selectedPatternId)
         {
             lessonRequest.Sections[sectionIndex].Items.Add(selectedPatternId);
+            ValidateLesson();
         }
     }
 
@@ -439,6 +543,7 @@
             itemIndex >= 0 && itemIndex < lessonRequest.Sections[sectionIndex].Items.Count)
         {
             lessonRequest.Sections[sectionIndex].Items.RemoveAt(itemIndex);
+            ValidateLesson();
         }
     }
 
@@ -468,22 +573,60 @@
 
     private int CalculateEstimatedTime()
     {
-        int total = 0;
-        foreach (var section in lessonRequest.Sections)
+        return TimeValidationService.CalculateEstimatedTime(lessonRequest.Sections, patterns);
+    }
+    
+    private void ValidateLesson()
+    {
+        validationResult = TimeValidationService.ValidateLesson(lessonRequest, patterns);
+    }
+    
+    private bool CanSave()
+    {
+        return validationResult == null || validationResult.IsValid;
+    }
+    
+    private void OnTimeChanged()
+    {
+        ValidateLesson();
+        StateHasChanged();
+    }
+    
+    private Color GetSectionTimeColor(LessonSection section)
+    {
+        if (section.AllocatedMinutes == 0) return Color.Default;
+        
+        var estimated = TimeValidationService.CalculateSectionEstimatedTime(section, patterns);
+        if (estimated == 0) return Color.Info;
+        
+        var diff = Math.Abs(section.AllocatedMinutes - estimated);
+        var diffPercent = (double)diff / estimated * 100;
+        
+        if (diffPercent > SectionTimeWarningPercent)
         {
-            foreach (var itemId in section.Items)
-            {
-                var pattern = patterns?.FirstOrDefault(p => p.Id == itemId);
-                if (pattern != null)
-                {
-                    total += pattern.EstimatedMinutes;
-                }
-                else
-                {
-                    total += 5; // Default estimate for unknown items
-                }
-            }
+            return section.AllocatedMinutes < estimated ? Color.Warning : Color.Success;
         }
-        return total;
+        else if (diffPercent > SectionTimeInfoPercent)
+        {
+            return Color.Info;
+        }
+        return Color.Success;
+    }
+    
+    private double GetTimeAllocationPercentage()
+    {
+        if (lessonRequest.Duration == 0) return 0;
+        var allocated = lessonRequest.Sections.Sum(s => s.AllocatedMinutes);
+        return Math.Min((double)allocated / lessonRequest.Duration * 100, AllocationFullPercent);
+    }
+    
+    private Color GetTimeAllocationColor()
+    {
+        var percentage = GetTimeAllocationPercentage();
+        if (percentage > AllocationFullPercent) return Color.Error;
+        if (percentage >= AllocationGoodPercent) return Color.Success;
+        if (percentage >= AllocationOkPercent) return Color.Info;
+        if (percentage >= AllocationLowPercent) return Color.Warning;
+        return Color.Default;
     }
 }

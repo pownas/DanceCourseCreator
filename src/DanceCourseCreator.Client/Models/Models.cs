@@ -94,6 +94,7 @@ public class LessonSection
     public string Type { get; set; } = string.Empty;
     public List<string> Items { get; set; } = new();
     public string Notes { get; set; } = string.Empty;
+    public int AllocatedMinutes { get; set; } = 0;
 }
 
 public class Lesson
