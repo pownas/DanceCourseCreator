@@ -11,7 +11,8 @@ public interface ICoursesService
     Task<Course?> CreateCourseAsync(CreateCourseRequest request);
     Task<Course?> UpdateCourseAsync(string id, Course request);
     Task<bool> DeleteCourseAsync(string id);
-    Task<object?> GetCourseCoverageAsync(string id);
+    Task<CourseCoverageMetrics?> GetCourseCoverageAsync(string id);
+    Task<ProgressionAnalysis?> GetCourseProgressionAsync(string id);
 }
 
 public class CoursesService : ICoursesService
@@ -142,7 +143,7 @@ public class CoursesService : ICoursesService
         }
     }
 
-    public async Task<object?> GetCourseCoverageAsync(string id)
+    public async Task<CourseCoverageMetrics?> GetCourseCoverageAsync(string id)
     {
         try
         {
@@ -151,7 +152,27 @@ public class CoursesService : ICoursesService
             
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<object>();
+                return await response.Content.ReadFromJsonAsync<CourseCoverageMetrics>();
+            }
+            
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public async Task<ProgressionAnalysis?> GetCourseProgressionAsync(string id)
+    {
+        try
+        {
+            await EnsureAuthenticatedAsync();
+            var response = await _httpClient.GetAsync($"/api/courses/{id}/progression");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ProgressionAnalysis>();
             }
             
             return null;

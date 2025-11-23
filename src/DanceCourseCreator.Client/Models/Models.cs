@@ -217,3 +217,50 @@ public class DuplicateTemplateResponse
     public string ResourceType { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
 }
+// Progression and Coverage models (Phase 1 - FR-020 to FR-023)
+
+public class CourseCoverageMetrics
+{
+    public string CourseId { get; set; } = string.Empty;
+    public string CourseName { get; set; } = string.Empty;
+    public int DurationWeeks { get; set; }
+    public Dictionary<string, SkillCoverage> FundamentalsCoverage { get; set; } = new();
+    public List<WeekProgress> WeeklyProgress { get; set; } = new();
+    public int TotalSkillsCovered { get; set; }
+    public double CoveragePercentage { get; set; }
+}
+
+public class SkillCoverage
+{
+    public string SkillName { get; set; } = string.Empty;
+    public bool IsCovered { get; set; }
+    public List<int> WeeksIntroduced { get; set; } = new();
+    public int RepetitionCount { get; set; }
+}
+
+public class WeekProgress
+{
+    public int WeekNumber { get; set; }
+    public string Theme { get; set; } = string.Empty;
+    public List<string> CoveredConcepts { get; set; } = new();
+    public string LessonId { get; set; } = string.Empty;
+    public int TotalMinutes { get; set; }
+}
+
+public class ProgressionAnalysis
+{
+    public string CourseId { get; set; } = string.Empty;
+    public string CourseName { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty;
+    public List<ProgressionWarning> Warnings { get; set; } = new();
+    public double ProgressionScore { get; set; }
+}
+
+public class ProgressionWarning
+{
+    public string Severity { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public int? WeekNumber { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public string Recommendation { get; set; } = string.Empty;
+}
