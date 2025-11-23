@@ -1,10 +1,10 @@
-# Dance Course Creator - .NET 8
+# Dance Course Creator - .NET 10
 
-En applikation för att skapa danskurser och hantera kursverksamheten för West Coast Swing, nu implementerad med .NET 8 Blazor WebAssembly frontend och Web API backend.
+En applikation för att skapa danskurser och hantera kursverksamheten för West Coast Swing, nu implementerad med .NET 10 Blazor WebAssembly frontend och Web API backend.
 
 ## 🎯 Status - FULLY FUNCTIONAL APPLICATION!
 
-This is a **complete, functional application** built with modern .NET 8 technology stack, successfully converted from the original TypeScript/React/Node.js implementation.
+This is a **complete, functional application** built with modern .NET 10 technology stack, successfully converted from the original TypeScript/React/Node.js implementation.
 
 ### ✅ Implemented Features
 
@@ -51,7 +51,7 @@ This is a **complete, functional application** built with modern .NET 8 technolo
 ## 🚀 Getting Started
 
 ### Prerequisites
-- .NET 8.0 SDK
+- .NET 10.0 SDK
 - Visual Studio 2022, VS Code with C# extension, or any preferred editor
 
 ### Installation & Setup
@@ -89,9 +89,9 @@ This is a **complete, functional application** built with modern .NET 8 technolo
 
 ## 🏗️ Technical Architecture
 
-### .NET 8 Technology Stack
-- **Frontend**: Blazor WebAssembly 8.0 with MudBlazor Material Design components
-- **Backend**: .NET 8 Web API with Entity Framework Core
+### .NET 10 Technology Stack
+- **Frontend**: Blazor WebAssembly 10.0 with MudBlazor Material Design components
+- **Backend**: .NET 10 Web API with Entity Framework Core
 - **Database**: SQLite with Entity Framework Core (easily upgradeable to PostgreSQL/SQL Server)
 - **Authentication**: JWT with BCrypt password hashing
 - **API Documentation**: Swagger/OpenAPI with interactive testing interface
@@ -100,7 +100,7 @@ This is a **complete, functional application** built with modern .NET 8 technolo
 ```
 DanceCourseCreator/
 ├── src/
-│   ├── DanceCourseCreator.API/          # .NET 8 Web API Backend
+│   ├── DanceCourseCreator.API/          # .NET 10 Web API Backend
 │   │   ├── Controllers/                 # API Controllers
 │   │   ├── Models/                      # Entity Models
 │   │   ├── Data/                        # DbContext & Database
@@ -215,7 +215,7 @@ cd src/DanceCourseCreator.Tests.E2E
 
 # First time setup - install Playwright browsers
 dotnet build
-pwsh bin/Debug/net8.0/playwright.ps1 install chromium
+pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 
 # Run all tests
 dotnet test
@@ -258,7 +258,7 @@ The application uses Entity Framework Core with SQLite:
 - Blazor syntax highlighting
 
 **Visual Studio 2022:**
-- Full .NET 8 support
+- Full .NET 10 support
 - Integrated debugging and testing
 - Built-in Blazor development tools
 
@@ -277,7 +277,7 @@ This application successfully demonstrates:
 8. **API Documentation** - Interactive Swagger interface for testing and integration
 
 ### 🚀 Technical Achievements
-1. **Successful Technology Migration** - Complete conversion from TypeScript/React/Node.js to .NET 8
+1. **Successful Technology Migration** - Complete conversion from TypeScript/React/Node.js to .NET 10
 2. **Modern Architecture** - Clean separation between API and client with proper dependency injection
 3. **Production Ready** - Built with enterprise-grade .NET technologies and best practices
 4. **Developer Experience** - Hot reload, comprehensive tooling, and clear documentation
@@ -334,7 +334,7 @@ Areas for contribution:
 
 ### Getting Started with Development
 1. Fork the repository
-2. Set up the .NET 8 development environment
+2. Set up the .NET 10 development environment
 3. Create a feature branch
 4. Make your changes with appropriate tests
 5. Submit a pull request with clear description
@@ -352,7 +352,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔄 Migration from Legacy
 
-**Note**: This is the modern .NET 8 version of Dance Course Creator. The original TypeScript/React/Node.js implementation has been preserved in the `legacy/` directory for reference and historical purposes.
+**Note**: This is the modern .NET 10 version of Dance Course Creator. The original TypeScript/React/Node.js implementation has been preserved in the `legacy/` directory for reference and historical purposes.
 
 The migration maintained:
 - ✅ All existing functionality and features

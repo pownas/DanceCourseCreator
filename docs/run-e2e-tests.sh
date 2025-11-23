@@ -17,7 +17,7 @@ echo ""
 # Check if .NET is installed
 if ! command -v dotnet &> /dev/null; then
     echo "❌ Error: .NET SDK is not installed"
-    echo "Please install .NET 8.0 SDK from https://dotnet.microsoft.com/download"
+    echo "Please install .NET 10.0 SDK from https://dotnet.microsoft.com/download"
     exit 1
 fi
 
@@ -45,7 +45,7 @@ echo "✅ Build successful"
 echo ""
 
 # Check if Playwright browsers are installed
-PLAYWRIGHT_DIR="$TEST_PROJECT/bin/Debug/net8.0/.playwright"
+PLAYWRIGHT_DIR="$TEST_PROJECT/bin/Debug/net10.0/.playwright"
 if [ ! -d "$PLAYWRIGHT_DIR" ]; then
     echo "⚠️  Playwright browsers not installed"
     echo "Installing Playwright Chromium browser..."
@@ -53,15 +53,15 @@ if [ ! -d "$PLAYWRIGHT_DIR" ]; then
     # Try multiple installation methods for cross-platform compatibility
     if command -v pwsh &> /dev/null; then
         echo "Using PowerShell to install Playwright..."
-        pwsh "$TEST_PROJECT/bin/Debug/net8.0/playwright.ps1" install chromium
-    elif command -v node &> /dev/null && [ -f "$TEST_PROJECT/bin/Debug/net8.0/.playwright/package/cli.js" ]; then
+        pwsh "$TEST_PROJECT/bin/Debug/net10.0/playwright.ps1" install chromium
+    elif command -v node &> /dev/null && [ -f "$TEST_PROJECT/bin/Debug/net10.0/.playwright/package/cli.js" ]; then
         echo "Using Node.js to install Playwright..."
-        node "$TEST_PROJECT/bin/Debug/net8.0/.playwright/package/cli.js" install chromium
+        node "$TEST_PROJECT/bin/Debug/net10.0/.playwright/package/cli.js" install chromium
     else
         echo "❌ Could not find PowerShell (pwsh) or Node.js"
         echo "Please install Playwright browsers manually using one of these methods:"
-        echo "  Method 1 (PowerShell): pwsh bin/Debug/net8.0/playwright.ps1 install chromium"
-        echo "  Method 2 (Node.js): node bin/Debug/net8.0/.playwright/package/cli.js install chromium"
+        echo "  Method 1 (PowerShell): pwsh bin/Debug/net10.0/playwright.ps1 install chromium"
+        echo "  Method 2 (Node.js): node bin/Debug/net10.0/.playwright/package/cli.js install chromium"
         exit 1
     fi
     

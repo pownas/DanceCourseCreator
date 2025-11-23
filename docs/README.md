@@ -102,7 +102,7 @@ Tillgänglighetsstatus och compliance-nivå:
 - [📖 Fullständig kravspecifikation](../Kravspecifikation.md) - Omfattande kravdokumentation med alla FR/NFR
 - [🏗️ Projekt-README](../README.md) - Översikt, getting started, och teknisk stack
 - [📜 LICENSE](../LICENSE) - MIT License
-- [🏗️ .NET 8 Implementation](../README.md) - Teknisk översikt av .NET-implementeringen
+- [🏗️ .NET 10 Implementation](../README.md) - Teknisk översikt av .NET-implementeringen
 - [♿ WCAG Compliance](./WCAG-Compliance-Report.md) - Tillgänglighetsrapport
 
 ## Utvecklingsinformation
@@ -116,7 +116,7 @@ Dessa implementeringsguider är avsedda för:
 ## Teknisk arkitektur
 
 Båda implementeringarna baseras på:
-- **.NET 8** för backend-API
+- **.NET 10** för backend-API
 - **Blazor WebAssembly** för frontend
 - **Entity Framework Core** för dataåtkomst
 - **SQLite** för datalagring

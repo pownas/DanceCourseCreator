@@ -11,7 +11,7 @@ Detta dokument innehåller en strukturerad plan för vidareutveckling av DanceCo
 ### Nulägesbedömning
 
 **Vad som är implementerat** (✅):
-- Grundläggande .NET 8 Blazor WebAssembly applikation
+- Grundläggande .NET 10 Blazor WebAssembly applikation
 - Autentisering och JWT-baserad säkerhet
 - Pattern & Exercise Library med CRUD-operationer
 - Sök och filtrering av patterns/övningar
@@ -799,7 +799,7 @@ När nya issues skapas ska de följa denna struktur:
 ## Tekniska riktlinjer
 
 ### Kodstandard
-- .NET 8 coding conventions
+- .NET 10 coding conventions
 - Async/await för alla I/O-operationer
 - Dependency injection för services
 - Repository pattern för data access (valfritt)
