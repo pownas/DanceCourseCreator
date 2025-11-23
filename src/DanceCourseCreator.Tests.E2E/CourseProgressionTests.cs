@@ -13,9 +13,9 @@ public class CourseProgressionTests : PageTest
     private const string ScreenshotsDir = "screenshots/course-progression";
 
     [TestInitialize]
-    public async Task TestInitialize()
+    public void TestInitialize()
     {
-        await Task.Run(() => Directory.CreateDirectory(ScreenshotsDir));
+        Directory.CreateDirectory(ScreenshotsDir);
     }
 
     [TestMethod]
