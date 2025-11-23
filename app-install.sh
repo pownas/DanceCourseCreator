@@ -63,6 +63,7 @@ verify_dotnet_8() {
     fi
     
     log_info "Installing .NET 8 SDK using Microsoft's installation script..."
+    # Note: Using Microsoft's official installation script from dot.net (trusted source)
     curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest --channel 8.0
     
     log_info "Configuring PATH for .NET..."
@@ -115,9 +116,12 @@ install_ef_tools() {
         local dotnet_version=$(dotnet --version | cut -d'.' -f1)
         log_info "Attempting installation with version ${dotnet_version}.0.0..."
         if ! dotnet tool install --global dotnet-ef --version ${dotnet_version}.0.0; then
-            log_error "Failed to install Entity Framework tools after cache clear"
-            log_error "Try manually: dotnet tool install --global dotnet-ef --version ${dotnet_version}.0.0"
-            return 1
+            log_warning "Version ${dotnet_version}.0.0 not available, trying latest version..."
+            if ! dotnet tool install --global dotnet-ef; then
+                log_error "Failed to install Entity Framework tools after all attempts"
+                log_error "Try manually: dotnet tool install --global dotnet-ef"
+                return 1
+            fi
         fi
     fi
     
@@ -162,7 +166,8 @@ install_playwright() {
     dotnet build --verbosity quiet
     
     log_info "Checking if Playwright browsers are already installed..."
-    if [ -d "bin/Debug/net8.0/.playwright/node/linux" ]; then
+    # Check for Playwright installation in multiple possible locations
+    if [ -d "bin/Debug/net8.0/.playwright/node" ] || [ -d "bin/Release/net8.0/.playwright/node" ]; then
         log_success "Playwright browsers are already installed"
         cd ../..
         return 0
