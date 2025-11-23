@@ -69,7 +69,7 @@ The easiest way to get started is using GitHub Codespaces with our automated ins
    ```
    
    This automated script will:
-   - ✅ Verify and install .NET 8 SDK
+   - ✅ Verify and install .NET 10 SDK
    - ✅ Restore and build the solution
    - ✅ Install Entity Framework CLI tools
    - ✅ Configure HTTPS development certificates
