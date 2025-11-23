@@ -19,6 +19,8 @@ public class LessonSection
     }
     
     public string Notes { get; set; } = string.Empty;
+    
+    public int AllocatedMinutes { get; set; } = 0;
 }
 
 public class Lesson
