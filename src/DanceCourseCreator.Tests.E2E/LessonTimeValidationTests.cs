@@ -14,9 +14,9 @@ public class LessonTimeValidationTests : PageTest
     private const string ScreenshotsDir = "screenshots/time-validation";
 
     [TestInitialize]
-    public async Task TestInitialize()
+    public void TestInitialize()
     {
-        await Task.Run(() => Directory.CreateDirectory(ScreenshotsDir));
+        Directory.CreateDirectory(ScreenshotsDir);
     }
 
     [TestMethod]

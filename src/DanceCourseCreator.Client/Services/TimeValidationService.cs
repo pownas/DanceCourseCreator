@@ -21,6 +21,8 @@ public class TimeValidationService : ITimeValidationService
     private const int MaxSectionsCount = 8;
     private const int TimeBufferPercentage = 15; // 15% buffer tolerance
     private const int DefaultItemEstimate = 5; // Default minutes for unknown items
+    private const int AllocationDiffWarningPercentage = 10; // Warn if allocated time differs by more than 10%
+    private const int SectionTimeDiffWarningPercentage = 50; // Warn if section time differs by more than 50%
 
     public TimeValidationResult ValidateLesson(CreateLessonRequest lesson, List<PatternOrExercise>? patterns = null)
     {
@@ -84,7 +86,7 @@ public class TimeValidationService : ITimeValidationService
                 {
                     result.AddError($"Total allokerad tid ({allocatedTime} min) överskrider lektionslängden ({lesson.Duration} min) med {allocationDiff} minuter.");
                 }
-                else if (allocationDiffPercent > 10)
+                else if (allocationDiffPercent > AllocationDiffWarningPercentage)
                 {
                     result.AddWarning($"Total allokerad tid ({allocatedTime} min) är {allocationDiff} minuter mindre än lektionslängden ({lesson.Duration} min).");
                 }
@@ -139,7 +141,7 @@ public class TimeValidationService : ITimeValidationService
                 var sectionDiff = Math.Abs(section.AllocatedMinutes - sectionEstimated);
                 var sectionDiffPercent = sectionEstimated > 0 ? (double)sectionDiff / sectionEstimated * 100 : 0;
 
-                if (sectionDiffPercent > 50)
+                if (sectionDiffPercent > SectionTimeDiffWarningPercentage)
                 {
                     if (section.AllocatedMinutes < sectionEstimated)
                     {

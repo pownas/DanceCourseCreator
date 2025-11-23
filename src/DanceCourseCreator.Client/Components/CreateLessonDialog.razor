@@ -349,6 +349,14 @@
     [Parameter] public string? LessonId { get; set; }
     [Parameter] public bool ReadOnly { get; set; } = false;
 
+    // UI threshold constants for color coding
+    private const int SectionTimeWarningPercent = 50;
+    private const int SectionTimeInfoPercent = 20;
+    private const int AllocationFullPercent = 100;
+    private const int AllocationGoodPercent = 90;
+    private const int AllocationOkPercent = 70;
+    private const int AllocationLowPercent = 50;
+
     private CreateLessonRequest lessonRequest = new();
     private List<PatternOrExercise>? patterns;
     private TimeValidationResult? validationResult;
@@ -594,11 +602,11 @@
         var diff = Math.Abs(section.AllocatedMinutes - estimated);
         var diffPercent = (double)diff / estimated * 100;
         
-        if (diffPercent > 50)
+        if (diffPercent > SectionTimeWarningPercent)
         {
             return section.AllocatedMinutes < estimated ? Color.Warning : Color.Success;
         }
-        else if (diffPercent > 20)
+        else if (diffPercent > SectionTimeInfoPercent)
         {
             return Color.Info;
         }
@@ -609,16 +617,16 @@
     {
         if (lessonRequest.Duration == 0) return 0;
         var allocated = lessonRequest.Sections.Sum(s => s.AllocatedMinutes);
-        return Math.Min((double)allocated / lessonRequest.Duration * 100, 100);
+        return Math.Min((double)allocated / lessonRequest.Duration * 100, AllocationFullPercent);
     }
     
     private Color GetTimeAllocationColor()
     {
         var percentage = GetTimeAllocationPercentage();
-        if (percentage > 100) return Color.Error;
-        if (percentage >= 90) return Color.Success;
-        if (percentage >= 70) return Color.Info;
-        if (percentage >= 50) return Color.Warning;
+        if (percentage > AllocationFullPercent) return Color.Error;
+        if (percentage >= AllocationGoodPercent) return Color.Success;
+        if (percentage >= AllocationOkPercent) return Color.Info;
+        if (percentage >= AllocationLowPercent) return Color.Warning;
         return Color.Default;
     }
 }
