@@ -421,3 +421,11 @@ FodyWeavers.xsd
 **/screenshots/
 *.png
 !wwwroot/**/*.png
+
+# SQLite database files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
