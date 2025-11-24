@@ -1,0 +1,59 @@
+.week-container {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.week-container:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.lesson-card {
+    transition: all 0.2s ease;
+    border-left: 3px solid var(--mud-palette-primary);
+}
+
+.lesson-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    transform: translateX(4px);
+}
+
+/* Timeline styling */
+.mud-timeline-item {
+    animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .mud-timeline {
+        padding-left: 0;
+    }
+    
+    .mud-timeline-item-opposite {
+        flex: 0 0 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .lesson-card:hover {
+        transform: none;
+    }
+}
+
+/* Touch-friendly */
+@media (hover: none) and (pointer: coarse) {
+    .mud-icon-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
