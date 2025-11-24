@@ -142,3 +142,6 @@ app.MapGet("/api/health", () => new { status = "OK", timestamp = DateTime.UtcNow
     .WithOpenApi();
 
 app.Run();
+
+// Make Program accessible for integration tests
+public partial class Program { }
