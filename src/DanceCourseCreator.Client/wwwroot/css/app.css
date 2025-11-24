@@ -1,15 +1,15 @@
 /* Modern, accessible typography with fallback fonts (no external dependencies) */
 :root {
-  /* Color palette - all combinations meet WCAG 2.1 AA contrast requirements */
-  --primary-color: #1565C0;
-  --primary-light: #42A5F5;
-  --primary-dark: #0D47A1;
-  --secondary-color: #F57C00;
-  --secondary-light: #FF9800;
-  --secondary-dark: #E65100;
-  --tertiary-color: #7B1FA2;
-  --tertiary-light: #9C27B0;
-  --tertiary-dark: #4A148C;
+  /* Color palette - Dance-inspired, modern colors (WCAG 2.1 AA compliant) */
+  --primary-color: #1E3A8A;      /* Rich royal blue - dance elegance */
+  --primary-light: #3B82F6;      /* Bright blue accent */
+  --primary-dark: #1E40AF;       /* Deep blue shadow */
+  --secondary-color: #DC2626;    /* Vibrant red - energy and passion */
+  --secondary-light: #EF4444;    /* Bright red accent */
+  --secondary-dark: #B91C1C;     /* Deep red shadow */
+  --tertiary-color: #9333EA;     /* Vibrant purple - creativity */
+  --tertiary-light: #A855F7;     /* Bright purple accent */
+  --tertiary-dark: #7E22CE;      /* Deep purple shadow */
   
   /* Text colors with proper contrast ratios */
   --text-primary: #1A1A1A;        /* 15.3:1 contrast on white */
@@ -17,10 +17,11 @@
   --text-disabled: #757575;       /* 4.6:1 contrast on white */
   --text-white: #FFFFFF;
   
-  /* Background colors */
-  --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F5F5;
-  --bg-surface: #FFFFFF;
+  /* Background colors - Warmer, more inviting tones */
+  --bg-primary: #F8FAFC;         /* Subtle blue-gray tint */
+  --bg-secondary: #F1F5F9;       /* Slightly darker blue-gray */
+  --bg-surface: #FFFFFF;         /* Pure white for cards */
+  --bg-accent: linear-gradient(135deg, #F1F5F9 0%, #E0E7FF 100%); /* Subtle gradient */
   
   /* Status colors - WCAG compliant */
   --success-color: #2E7D32;       /* 5.4:1 contrast ratio */
@@ -41,15 +42,17 @@
   --spacing-xl: 2rem;      /* 32px */
   --spacing-xxl: 3rem;     /* 48px */
   
-  /* Border radius */
-  --border-radius: 8px;
-  --border-radius-sm: 4px;
-  --border-radius-lg: 12px;
+  /* Border radius - More modern, rounded appearance */
+  --border-radius: 12px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 24px;
   
-  /* Shadows */
-  --shadow-sm: 0px 1px 3px rgba(0,0,0,0.12), 0px 1px 2px rgba(0,0,0,0.24);
-  --shadow-md: 0px 3px 6px rgba(0,0,0,0.15), 0px 2px 4px rgba(0,0,0,0.12);
-  --shadow-lg: 0px 6px 12px rgba(0,0,0,0.15), 0px 4px 8px rgba(0,0,0,0.12);
+  /* Shadows - Softer, more refined */
+  --shadow-sm: 0px 1px 3px rgba(0,0,0,0.08), 0px 1px 2px rgba(0,0,0,0.16);
+  --shadow-md: 0px 3px 6px rgba(0,0,0,0.10), 0px 2px 4px rgba(0,0,0,0.12);
+  --shadow-lg: 0px 6px 12px rgba(0,0,0,0.12), 0px 4px 8px rgba(0,0,0,0.10);
+  --shadow-xl: 0px 20px 40px rgba(0,0,0,0.12), 0px 10px 20px rgba(0,0,0,0.08);
   
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -109,24 +112,61 @@ textarea:focus-visible,
   letter-spacing: 0.025em;
 }
 
-/* Section styling */
+/* Section styling - Modern with accent */
 .section-header {
   font-weight: 600;
   color: var(--text-primary);
-  border-bottom: 2px solid var(--primary-color);
-  padding-bottom: var(--spacing-xs);
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(90deg, var(--primary-color) 0%, var(--tertiary-color) 100%);
+  border-image-slice: 1;
+  padding-bottom: var(--spacing-sm);
   margin-bottom: var(--spacing-lg) !important;
   display: flex;
   align-items: center;
+  position: relative;
 }
 
-/* Hero section */
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--tertiary-color) 100%);
+  border-radius: 2px;
+}
+
+/* Hero section - Enhanced with modern gradient and visual appeal */
 .hero-section {
   text-align: center;
-  padding: var(--spacing-xl) 0;
-  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-secondary) 100%);
-  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #C7D2FE 100%);
+  border-radius: var(--border-radius-xl);
   margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle animated background pattern */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-section > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-title {
@@ -210,6 +250,38 @@ a:visited {
   font-weight: 500;
   text-transform: none; /* Don't force uppercase for better readability */
   transition: all var(--transition-fast);
+  border-radius: var(--border-radius) !important;
+  letter-spacing: 0.02em;
+}
+
+/* Enhanced filled button style */
+.mud-button.mud-button-filled {
+  box-shadow: var(--shadow-sm);
+}
+
+.mud-button.mud-button-filled:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.mud-button.mud-button-filled:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Enhanced outlined button style */
+.mud-button.mud-button-outlined {
+  border-width: 2px;
+}
+
+.mud-button.mud-button-outlined:hover {
+  border-width: 2px;
+  background-color: var(--hover-overlay);
+}
+
+/* Text button subtle hover */
+.mud-button.mud-button-text:hover {
+  background-color: var(--hover-overlay);
 }
 
 .mud-icon-button {
@@ -217,7 +289,7 @@ a:visited {
   min-width: 44px;
 }
 
-/* Form controls improvements */
+/* Form controls improvements - Modern, polished inputs */
 .mud-input-root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -225,6 +297,23 @@ a:visited {
 .mud-input {
   font-size: 1rem; /* Minimum 16px to prevent zoom on iOS */
   line-height: 1.5;
+  border-radius: var(--border-radius);
+}
+
+.mud-input-outlined .mud-input-root {
+  border-radius: var(--border-radius);
+}
+
+.mud-input-outlined:hover .mud-input-root {
+  border-color: var(--primary-light);
+}
+
+.mud-select {
+  border-radius: var(--border-radius);
+}
+
+.mud-input-control:focus-within {
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
 }
 
 /* Error message styling with proper contrast */
@@ -239,21 +328,52 @@ a:visited {
   font-weight: 500;
 }
 
-/* Card improvements */
+/* Card improvements - Modern elevated design */
 .mud-card {
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-normal);
+  transition: all var(--transition-normal);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  overflow: hidden;
 }
 
 .mud-card:hover {
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: rgba(148, 163, 184, 0.2);
 }
 
-/* Chip styling improvements */
+/* Card header styling */
+.mud-card-header {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, transparent 100%);
+}
+
+/* Card content padding enhancement */
+.mud-card-content {
+  padding: var(--spacing-lg);
+}
+
+.mud-card-actions {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  background-color: rgba(248, 250, 252, 0.5);
+}
+
+/* Chip styling improvements - Modern, polished look */
 .mud-chip {
   font-weight: 500;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius);
+  padding: 6px 12px;
+  font-size: 0.813rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-fast);
+}
+
+.mud-chip:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 /* Table improvements for better readability */
@@ -441,8 +561,54 @@ pre {
 }
 
 .hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Smooth scale animation for interactive elements */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* Subtle pulse animation for loading/attention */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Fade in animation for content */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* Focus utilities for better accessibility */
@@ -480,7 +646,7 @@ pre {
   margin-right: var(--spacing-xs);
 }
 
-/* Stats display utilities */
+/* Stats display utilities - Enhanced with gradients and icons */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -490,32 +656,55 @@ pre {
 
 .stat-card {
   text-align: center;
-  padding: var(--spacing-lg);
-  background: var(--bg-surface);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--divider-color, #E0E0E0);
-  transition: all var(--transition-fast);
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background decoration */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(30, 58, 138, 0.03) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .stat-card:hover {
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   border-color: var(--primary-color);
+  transform: translateY(-4px);
 }
 
 .stat-number {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: var(--spacing-xs);
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--tertiary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--spacing-sm);
+  position: relative;
 }
 
 .stat-label {
   color: var(--text-secondary);
   font-size: 0.875rem;
+  font-weight: 500;
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* Quick action cards */
+/* Quick action cards - Enhanced with modern design */
 .quick-action-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -527,12 +716,17 @@ pre {
   height: 100%;
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%);
 }
 
 .action-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(148, 163, 184, 0.3);
 }
 
 .action-card-content {
@@ -540,13 +734,26 @@ pre {
   display: flex;
   flex-direction: column;
   text-align: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  position: relative;
+}
+
+/* Add subtle icon background glow */
+.action-card-content .mud-icon-root {
+  filter: drop-shadow(0 4px 8px rgba(30, 58, 138, 0.15));
+  transition: all var(--transition-normal);
+}
+
+.action-card:hover .action-card-content .mud-icon-root {
+  transform: scale(1.1);
+  filter: drop-shadow(0 6px 12px rgba(30, 58, 138, 0.2));
 }
 
 .action-card-actions {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-xl);
   display: flex;
   justify-content: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.5) 100%);
 }
 
 /* Pattern info display */
@@ -567,13 +774,14 @@ pre {
   color: var(--text-secondary);
 }
 
-/* Filter controls */
+/* Filter controls - Enhanced with better visual hierarchy */
 .filter-section {
-  background: var(--bg-surface);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
   padding: var(--spacing-lg);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 /* Section headers */

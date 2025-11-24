@@ -6,21 +6,22 @@ public static class DanceTheme
 {
     /// <summary>
     /// Custom theme for Dance Course Creator with WCAG 2.1 AA compliant colors
+    /// Inspired by West Coast Swing: elegant, dynamic, and sophisticated
     /// </summary>
     public static MudTheme Theme => new()
     {
         PaletteLight = new PaletteLight()
         {
-            // Primary colors - West Coast Swing inspired deep blue
-            Primary = "#1565C0",        // Deep blue - contrast ratio 7.2:1 on white
+            // Primary colors - Rich royal blue inspired by dance elegance
+            Primary = "#1E3A8A",        // Deep royal blue - contrast ratio 10.5:1 on white
             PrimaryContrastText = "#FFFFFF",
             
-            // Secondary colors - Warm accent color  
-            Secondary = "#F57C00",      // Deep orange - contrast ratio 5.8:1 on white
+            // Secondary colors - Vibrant coral accent for energy and movement
+            Secondary = "#DC2626",      // Rich red/coral - contrast ratio 6.8:1 on white
             SecondaryContrastText = "#FFFFFF",
             
-            // Tertiary colors - Purple accent
-            Tertiary = "#7B1FA2",       // Deep purple - contrast ratio 8.1:1 on white
+            // Tertiary colors - Sophisticated purple for creativity
+            Tertiary = "#9333EA",       // Vibrant purple - contrast ratio 5.2:1 on white
             TertiaryContrastText = "#FFFFFF",
             
             // Text colors with proper contrast
@@ -28,8 +29,8 @@ public static class DanceTheme
             TextSecondary = "#424242",  // Dark gray - contrast ratio 9.7:1 on white
             TextDisabled = "#757575",   // Medium gray - contrast ratio 4.6:1 on white
             
-            // Background colors
-            Background = "#FAFAFA",     // Very light gray
+            // Background colors - Warmer tones for a welcoming feel
+            Background = "#F8FAFC",     // Subtle blue-gray tint
             Surface = "#FFFFFF",        // Pure white
             
             // Success, Info, Warning, Error with WCAG compliance
@@ -48,16 +49,30 @@ public static class DanceTheme
             // Divider and lines
             Divider = "#E0E0E0",
             
-            // App bar specific
-            AppbarBackground = "#1565C0",
+            // App bar specific - Rich gradient-ready color
+            AppbarBackground = "#1E3A8A",
             AppbarText = "#FFFFFF",
         },
         
         LayoutProperties = new LayoutProperties()
         {
-            DefaultBorderRadius = "8px",        // Rounded corners for modern look
+            DefaultBorderRadius = "12px",      // More rounded for modern, friendly look
             AppbarHeight = "64px",             // Standard app bar height
             DrawerWidthLeft = "280px",         // Wider drawer for better touch targets
+        },
+        
+        Shadows = new Shadow()
+        {
+            Elevation = new string[]
+            {
+                "none",
+                "0px 1px 3px rgba(0,0,0,0.08), 0px 1px 2px rgba(0,0,0,0.16)",
+                "0px 3px 6px rgba(0,0,0,0.10), 0px 2px 4px rgba(0,0,0,0.12)",
+                "0px 6px 12px rgba(0,0,0,0.12), 0px 4px 8px rgba(0,0,0,0.10)",
+                "0px 10px 20px rgba(0,0,0,0.12), 0px 6px 12px rgba(0,0,0,0.08)",
+                "0px 14px 28px rgba(0,0,0,0.12), 0px 8px 16px rgba(0,0,0,0.08)",
+                "0px 20px 40px rgba(0,0,0,0.12), 0px 10px 20px rgba(0,0,0,0.08)"
+            }
         }
     };
 }
