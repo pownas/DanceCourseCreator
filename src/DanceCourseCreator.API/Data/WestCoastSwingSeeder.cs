@@ -1,5 +1,6 @@
 using DanceCourseCreator.API.Models;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace DanceCourseCreator.API.Data;
 
@@ -250,7 +251,7 @@ public static class WestCoastSwingSeeder
                 TeachingPoints = new List<string>
                 {
                     "Lead turn på count 3",
-                    "Follower maintainar compression",
+                    "Follower maintains compression",
                     "Turn och whip samtidigt",
                     "Finish with solid anchor"
                 },
@@ -313,7 +314,7 @@ public static class WestCoastSwingSeeder
                 Prerequisites = new List<string> { "Whip", "Frame & Connection" },
                 TeachingPoints = new List<string>
                 {
-                    "Både dancer går into basket tillsammans",
+                    "Båda dansare går into basket tillsammans",
                     "Maintain strong frame i basket",
                     "Clean exit till whip",
                     "Return till slot"
@@ -434,7 +435,7 @@ public static class WestCoastSwingSeeder
                 {
                     "Compression är inte push",
                     "Stretch maintainar connection",
-                    "Both partners contributer",
+                    "Both partners contribute",
                     "Smooth transitions"
                 },
                 CommonMistakes = new List<string>
