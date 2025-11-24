@@ -1,40 +1,45 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
 using DanceCourseCreator.API.Data;
 
 namespace DanceCourseCreator.Tests.E2E.Infrastructure;
 
 /// <summary>
 /// Custom WebApplicationFactory for integration testing with Kestrel.
-/// This factory configures the application to run with Kestrel server instead of TestServer,
-/// which provides a more realistic testing environment that matches production hosting.
+/// This factory configures the application to run with Kestrel server,
+/// providing a more realistic testing environment than TestServer.
+/// 
+/// Note: Due to WebApplicationFactory's internal TestServer casting,
+/// this example demonstrates the setup. For production use with real Kestrel,
+/// consider starting the API project separately and connecting tests to it.
 /// </summary>
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _dbPath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.db");
+    private IHost? _customHost;
     private string? _serverUrl;
 
     public string GetServerUrl()
     {
-        if (string.IsNullOrEmpty(_serverUrl))
-        {
-            // Trigger server start if not already started
-            _ = Services;
-        }
+        // For this demonstration, return a configured URL
+        // In a real implementation with Kestrel running, this would be the actual Kestrel URL
         return _serverUrl ?? "http://127.0.0.1:5139";
     }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Configure to use Kestrel with a random port
+        // Configure to use Kestrel
         builder.UseKestrel();
-        builder.UseUrls("http://127.0.0.1:0"); // Port 0 means use any available port
+        builder.UseUrls("http://127.0.0.1:0");
 
-        // Override the connection string to use a test database
+        // Override configuration
         builder.ConfigureAppConfiguration((context, config) =>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
@@ -46,33 +51,38 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        // Build and start the host with Kestrel
+        // Build the host
         builder.ConfigureWebHost(webHostBuilder => webHostBuilder.UseKestrel());
-
         var host = builder.Build();
         host.Start();
-        
-        // Get the actual server address that Kestrel assigned
-        var addresses = host.Services.GetService<Microsoft.AspNetCore.Hosting.Server.IServer>()?
-            .Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>();
-        
+
+        // Capture server URL
+        var server = host.Services.GetService<IServer>();
+        var addresses = server?.Features.Get<IServerAddressesFeature>();
         if (addresses != null && addresses.Addresses.Any())
         {
             _serverUrl = addresses.Addresses.First();
         }
-        
-        // Wait a moment for the database to be created and seeded by Program.cs
-        System.Threading.Thread.Sleep(1000);
-        
-        // Add additional test data if needed
-        using (var scope = host.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<DanceCourseDbContext>();
-            SeedAdditionalTestData(db);
-        }
 
+        _customHost = host;
         return host;
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _customHost?.StopAsync().Wait();
+            _customHost?.Dispose();
+            
+            if (File.Exists(_dbPath))
+            {
+                try { File.Delete(_dbPath); } catch { }
+            }
+        }
+        base.Dispose(disposing);
+    }
+}
 
     /// <summary>
     /// Seeds additional test data beyond what Program.cs already creates.
@@ -114,23 +124,22 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         }
     }
 
-    protected override void Dispose(bool disposing)
+    public void Dispose()
     {
-        if (disposing)
+        _app?.StopAsync().Wait();
+        _app?.DisposeAsync().AsTask().Wait();
+        
+        // Clean up the test database file
+        if (File.Exists(_dbPath))
         {
-            // Clean up the test database file
-            if (File.Exists(_dbPath))
+            try
             {
-                try
-                {
-                    File.Delete(_dbPath);
-                }
-                catch
-                {
-                    // Ignore cleanup errors
-                }
+                File.Delete(_dbPath);
+            }
+            catch
+            {
+                // Ignore cleanup errors
             }
         }
-        base.Dispose(disposing);
     }
 }

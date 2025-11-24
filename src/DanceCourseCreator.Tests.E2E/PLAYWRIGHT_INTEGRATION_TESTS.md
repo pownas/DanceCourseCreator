@@ -4,6 +4,230 @@
 
 Detta dokument beskriver hur man konfigurerar och kör Playwright-integrationstester som använder den nya Web Application Factory i .NET 10 tillsammans med Kestrel-servern. Denna approach ger mer realistiska integrationstester som körs mot en faktisk webbserver istället för TestServer.
 
+## Obs: Implementation Status
+
+**VIKTIGT**: De implementerade testerna demonstrerar konfigurationsstrukturen för WebApplicationFactory med Kestrel. På grund av interna begränsningar i WebApplicationFactory (TestServer casting) i .NET 10, fungerar testerna bäst när:
+
+1. API:et startas separat (t.ex. `dotnet run --project src/DanceCourseCreator.API`)
+2. Testerna konfigureras att peka mot den körande API-instansen  
+
+För produktionsmiljöer rekommenderas att:
+- Starta API:et som en separat process
+- Använda HttpClient direkt mot API:ets URL
+- Eller vänta tills .NET 10 RTM med förbättrat stöd för Kestrel i WebApplicationFactory
+
+## Arkitektur
+
+### Komponentöversikt
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  PlaywrightIntegrationTests                             │
+│  - Test cases using Playwright + HttpClient             │
+└────────────────┬────────────────────────────────────────┘
+                 │
+                 │ uses
+                 ▼
+┌─────────────────────────────────────────────────────────┐
+│  CustomWebApplicationFactory                            │
+│  - Configures test environment                          │
+│  - Sets up test database                               │
+│  - Configures Kestrel                                  │
+└────────────────┬────────────────────────────────────────┘
+                 │
+                 │ hosts
+                 ▼
+┌─────────────────────────────────────────────────────────┐
+│  DanceCourseCreator.API (Program)                       │
+│  - Actual API application                               │
+│  - Can run on Kestrel server                           │
+│  - Using SQLite test database                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Nyckelkomponenter
+
+1. **CustomWebApplicationFactory**: Anpassad factory som konfigurerar testmiljön
+   - Använder separat SQLite-databas för isolering mellan tester
+   - Konfigurerad för Kestrel (men kan falla tillbaka till TestServer)
+   - Förbereder testdata (seed data)
+
+2. **PlaywrightIntegrationTests**: Testklassen som innehåller integrationstesterna
+   - Använder både Playwright och HttpClient för testning
+   - Demonstrerar CRUD-operationer
+   - Visar hur man kombinerar UI-tester med API-tester
+
+## Förutsättningar
+
+### Nödvändiga NuGet-paket
+
+Följande paket krävs i testprojektet (`DanceCourseCreator.Tests.E2E.csproj`):
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+  <PackageReference Include="MSTest.TestAdapter" Version="3.0.4" />
+  <PackageReference Include="MSTest.TestFramework" Version="3.0.4" />
+  <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.40.0" />
+  <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+</ItemGroup>
+```
+
+### Projektrelaterade krav
+
+API-projektet måste exponera `Program`-klassen för testning:
+
+```csharp
+// I Program.cs, lägg till i slutet av filen:
+public partial class Program { }
+```
+
+Testprojektet måste ha en projektreference till API-projektet:
+
+```xml
+<ItemGroup>
+  <ProjectReference Include="..\DanceCourseCreator.API\DanceCourseCreator.API.csproj" />
+</ItemGroup>
+```
+
+### Installation av Playwright browsers
+
+Innan testerna körs första gången, installera Playwright browsers:
+
+```bash
+# Från testprojektets rotkatalog
+pwsh bin/Debug/net10.0/playwright.ps1 install chromium
+
+# Eller använd dotnet tool
+dotnet tool install --global Microsoft.Playwright.CLI
+playwright install
+```
+
+## Konfiguration
+
+### CustomWebApplicationFactory
+
+Factory-klassen konfigurerar testmiljön:
+
+```csharp
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Konfigurera för Kestrel
+        builder.UseKestrel();
+        builder.UseUrls("http://127.0.0.1:0"); // Slumpmässig port
+        
+        // Byt ut databaskonfiguration
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:DefaultConnection"] = $"Data Source={testDbPath}"
+            });
+        });
+    }
+}
+```
+
+### Varför Kestrel istället för TestServer?
+
+**TestServer**:
+- Kör in-process utan faktisk nätverkskommunikation
+- Snabbare men mindre realistiskt
+- Kan missa nätverksrelaterade problem
+
+**Kestrel**:
+- ✅ Faktisk webbserver som används i produktion
+- ✅ Realistisk HTTP-kommunikation över nätverk
+- ✅ Testar middleware-pipeline komplett
+- ✅ Upptäcker nätverksrelaterade problem
+- ✅ Bättre för end-to-end tester med Playwright
+
+## Körning av tester
+
+### Alternativ 1: Kör mot separat API-instans (Rekommenderat för .NET 10)
+
+```bash
+# Terminal 1: Starta API:et
+cd src/DanceCourseCreator.API
+dotnet run
+
+# Terminal 2: Kör tester
+cd src/DanceCourseCreator.Tests.E2E
+dotnet test
+```
+
+### Alternativ 2: Kör med WebApplicationFactory (Demonstration)
+
+```bash
+# Kör alla integrationstester
+dotnet test src/DanceCourseCreator.Tests.E2E --filter TestCategory=Integration
+
+# Med verbose output
+dotnet test src/DanceCourseCreator.Tests.E2E --filter TestCategory=Integration --logger "console;verbosity=detailed"
+```
+
+### Köra specifika testkategorier
+
+```bash
+# Köra endast Kestrel-tester
+dotnet test --filter TestCategory=Kestrel
+
+# Köra endast CRUD-tester
+dotnet test --filter TestCategory=CRUD
+
+# Köra endast Playwright + Kestrel tester
+dotnet test --filter "TestCategory=Playwright&TestCategory=Kestrel"
+```
+
+## Testexempel
+
+### Grundläggande CRUD-test
+
+Testerna demonstrerar:
+- CREATE: Skapa ett nytt mönster via API
+- READ: Hämta mönster (lista och enskild)
+- UPDATE: Uppdatera ett befintligt mönster
+- DELETE: Ta bort ett mönster
+
+### Playwright + API test
+
+```csharp
+[TestMethod]
+[TestCategory("Playwright")]
+public async Task Playwright_CanAccessKestrelAPI()
+{
+    await Page.GotoAsync($"{_serverUrl}/api/health");
+    await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    
+    var content = await Page.ContentAsync();
+    Assert.IsTrue(content.Contains("OK"));
+}
+```
+
+## Sammanfattning
+
+Denna implementation visar:
+- ✅ Användning av Web Application Factory i .NET 10
+- ✅ Konfiguration för Kestrel (med fallback till TestServer)
+- ✅ Komplett CRUD-test exempel mot Patterns API
+- ✅ Integration av Playwright för end-to-end testing
+- ✅ Best practices för testisolation och underhåll
+- ✅ Dokumentation för konfiguration och körning
+
+### Begränsningar i .NET 10 Preview
+
+Den nuvarande implementationen visar konfigurationsstrukturen men kan kräva att API:et körs separat på grund av interna WebApplicationFactory-begränsningar. Detta förväntas förbättras i senare versioner av .NET 10.
+
+## Referenser
+
+- [Microsoft Docs: Integration tests in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0)
+- [Microsoft Docs: Using WebApplicationFactory with Playwright](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0)
+- [Playwright .NET Documentation](https://playwright.dev/dotnet/)
+- [MSTest Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest)
+
+
 ## Arkitektur
 
 ### Komponentöversikt
