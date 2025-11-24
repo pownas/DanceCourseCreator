@@ -174,7 +174,7 @@ start_application() {
     echo ""
     echo -e "${BLUE}💡 Useful Aspire Dashboard features:${NC}"
     echo -e "  • ${YELLOW}Structured Logs:${NC} Real-time application logging"
-    echo -e "  • ${YELLOW}Distributed Tracing:${NC} Request flow across services"  
+    echo -e "  • ${YELLOW}Distributed Tracing:${NC} Request flow across services"
     echo -e "  • ${YELLOW}Metrics:${NC} Performance and health monitoring"
     echo -e "  • ${YELLOW}Resources:${NC} Service status and configuration"
     echo ""
