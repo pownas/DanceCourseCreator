@@ -76,9 +76,21 @@ The easiest way to get started is using GitHub Codespaces with our automated ins
    - ✅ Install Playwright browsers for E2E tests
    - ✅ Set up all necessary project scripts
 
-3. **Start developing!**
-   - Follow the on-screen instructions after installation completes
-   - Start the API and Client in separate terminals as shown
+3. **Start the application**
+   ```bash
+   ./app-start.sh
+   ```
+   
+   This script will:
+   - ✅ Stop any existing .NET processes and free up ports
+   - ✅ Check prerequisites are installed
+   - ✅ Verify the project builds successfully
+   - ✅ Start the Aspire Dashboard with all services (API + Blazor Client)
+   
+   The Aspire Dashboard will open automatically with:
+   - **API Backend** at https://localhost:7177
+   - **Blazor Client** at https://localhost:5001
+   - **Monitoring** with logs, traces, and metrics
 
 ### Manual Installation & Setup
 
@@ -112,6 +124,20 @@ The easiest way to get started is using GitHub Codespaces with our automated ins
    - Open your browser to: https://localhost:5001
    - The database will be automatically created with sample data on first run
    - Register a new account or use the application immediately
+
+### Alternative: Using the Startup Script
+
+For a simpler one-command startup experience with .NET Aspire orchestration:
+
+```bash
+./app-start.sh
+```
+
+This script manages the complete application lifecycle and provides monitoring through the Aspire Dashboard. For help and more options:
+
+```bash
+./app-start.sh --help
+```
 
 ## 🏗️ Technical Architecture
 
