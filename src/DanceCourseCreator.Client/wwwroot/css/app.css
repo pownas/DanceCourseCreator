@@ -379,14 +379,22 @@ a:visited {
 /* Table improvements for better readability */
 .mud-table {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
 }
 
 .mud-table-head {
   font-weight: 600;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.5) 100%);
 }
 
 .mud-table-row:hover {
   background-color: var(--hover-overlay);
+  transition: background-color var(--transition-fast);
+}
+
+.mud-table-cell {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 /* Loading states */
@@ -618,15 +626,27 @@ pre {
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-/* Pattern card styles to replace inline styles */
+/* Pattern card styles - Modern elevated design */
 .pattern-card {
-  transition: all var(--transition-fast);
-  border-radius: var(--border-radius);
+  transition: all var(--transition-normal);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%);
+  overflow: hidden;
 }
 
 .pattern-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.pattern-card .mud-card-header {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.5) 100%);
+}
+
+.pattern-card .mud-card-content {
+  position: relative;
 }
 
 /* Chip utilities */
@@ -791,12 +811,14 @@ pre {
   border-bottom: 2px solid var(--primary-color);
 }
 
-/* Feature list styling */
+/* Feature list styling - Enhanced readability */
 .getting-started-section {
-  background-color: var(--bg-secondary);
+  background: linear-gradient(135deg, #F1F5F9 0%, #E0E7FF 100%);
   padding: var(--spacing-xl);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
   margin-top: var(--spacing-xl);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .feature-list {
@@ -807,6 +829,14 @@ pre {
   display: flex;
   align-items: flex-start;
   margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  transition: all var(--transition-fast);
+}
+
+.feature-item:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(4px);
 }
 
 .feature-icon {
@@ -907,4 +937,408 @@ pre {
     box-shadow: none;
     border: 1px solid #ccc;
   }
+}
+
+/* Alert styling - Modern design */
+.mud-alert {
+  border-radius: var(--border-radius-lg);
+  border-left: 4px solid;
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+}
+
+.mud-alert.mud-alert-info {
+  border-left-color: var(--info-color);
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.08) 0%, rgba(25, 118, 210, 0.03) 100%);
+}
+
+.mud-alert.mud-alert-success {
+  border-left-color: var(--success-color);
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.08) 0%, rgba(46, 125, 50, 0.03) 100%);
+}
+
+.mud-alert.mud-alert-warning {
+  border-left-color: var(--warning-color);
+  background: linear-gradient(135deg, rgba(245, 124, 0, 0.08) 0%, rgba(245, 124, 0, 0.03) 100%);
+}
+
+.mud-alert.mud-alert-error {
+  border-left-color: var(--error-color);
+  background: linear-gradient(135deg, rgba(211, 47, 47, 0.08) 0%, rgba(211, 47, 47, 0.03) 100%);
+}
+
+/* Dialog enhancements */
+.mud-dialog {
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+}
+
+.mud-dialog .mud-dialog-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  padding-bottom: var(--spacing-md);
+}
+
+.mud-dialog .mud-dialog-content {
+  padding: var(--spacing-lg);
+}
+
+.mud-dialog .mud-dialog-actions {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+  background: linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.5) 100%);
+}
+
+/* Progress indicators */
+.mud-progress-linear {
+  border-radius: var(--border-radius);
+  height: 6px;
+  background-color: rgba(148, 163, 184, 0.15);
+}
+
+.mud-progress-linear .mud-progress-linear-bar {
+  border-radius: var(--border-radius);
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--tertiary-color) 100%);
+}
+
+.mud-progress-circular {
+  color: var(--primary-color);
+}
+
+/* Badge styling */
+.mud-badge {
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Divider enhancement */
+.mud-divider {
+  background-color: rgba(148, 163, 184, 0.15);
+}
+
+/* Menu enhancements */
+.mud-menu {
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.mud-menu-item:hover {
+  background-color: var(--hover-overlay);
+  transition: background-color var(--transition-fast);
+}
+
+/* Drawer enhancements */
+.mud-drawer {
+  box-shadow: var(--shadow-xl);
+}
+
+.mud-drawer-content {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+/* AppBar enhancements */
+.mud-appbar {
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.mud-appbar .mud-button {
+  transition: all var(--transition-fast);
+}
+
+.mud-appbar .mud-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Tooltip enhancements */
+.mud-tooltip {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  font-size: 0.813rem;
+  font-weight: 500;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* Snackbar enhancements */
+.mud-snackbar {
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  font-weight: 500;
+}
+
+/* Paper component enhancement */
+.mud-paper {
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.mud-paper.mud-elevation-1 {
+  box-shadow: var(--shadow-sm);
+}
+
+.mud-paper.mud-elevation-2 {
+  box-shadow: var(--shadow-md);
+}
+
+.mud-paper.mud-elevation-4 {
+  box-shadow: var(--shadow-lg);
+}
+
+/* List item enhancements */
+.mud-list-item:hover {
+  background-color: var(--hover-overlay);
+  transition: background-color var(--transition-fast);
+}
+
+.mud-list-item.mud-selected {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(30, 58, 138, 0.05) 100%);
+  border-left: 4px solid var(--primary-color);
+}
+
+/* Expansion panel enhancements */
+.mud-expand-panel {
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+}
+
+.mud-expand-panel-header:hover {
+  background-color: var(--hover-overlay);
+}
+
+/* Switch toggle enhancements */
+.mud-switch {
+  transition: all var(--transition-fast);
+}
+
+.mud-switch.mud-checked .mud-switch-thumb {
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.3);
+}
+
+/* Radio button enhancements */
+.mud-radio {
+  transition: all var(--transition-fast);
+}
+
+.mud-radio.mud-checked {
+  color: var(--primary-color);
+}
+
+/* Checkbox enhancements */
+.mud-checkbox {
+  transition: all var(--transition-fast);
+}
+
+.mud-checkbox.mud-checked {
+  color: var(--primary-color);
+}
+
+/* Slider enhancements */
+.mud-slider .mud-slider-track {
+  background-color: rgba(148, 163, 184, 0.2);
+  height: 4px;
+  border-radius: 2px;
+}
+
+.mud-slider .mud-slider-track-active {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--tertiary-color) 100%);
+}
+
+.mud-slider .mud-slider-thumb {
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+  transition: all var(--transition-fast);
+}
+
+.mud-slider .mud-slider-thumb:hover {
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+  transform: scale(1.1);
+}
+
+/* Enhanced responsive design improvements */
+@media (max-width: 960px) {
+  .hero-section {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .quick-action-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .action-card-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .getting-started-section {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .hero-section {
+    padding: var(--spacing-md);
+  }
+  
+  .section-header {
+    font-size: 1.25rem;
+  }
+  
+  .mud-dialog {
+    margin: var(--spacing-md);
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .quick-action-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1440px) {
+  .mud-container.mud-container-maxwidth-lg {
+    max-width: 1280px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .quick-action-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Print-friendly styles */
+@media print {
+  .mud-appbar,
+  .mud-drawer,
+  .mud-fab,
+  button:not(.print-visible),
+  .mud-button:not(.print-visible) {
+    display: none !important;
+  }
+  
+  .mud-main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .mud-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+  
+  .hero-section {
+    background: white;
+    border: 1px solid #ccc;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* Dark mode support (prepared for future implementation) */
+@media (prefers-color-scheme: dark) {
+  /* These will be activated when dark mode is fully implemented */
+  /* Currently maintaining light mode for consistency */
+}
+
+/* Accessibility - Enhanced focus for keyboard users */
+@supports selector(:focus-visible) {
+  .mud-button:focus:not(:focus-visible),
+  .mud-icon-button:focus:not(:focus-visible),
+  .mud-input:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* Smooth scrolling for modern browsers */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: var(--border-radius-sm);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(30, 58, 138, 0.2);
+  color: var(--text-primary);
+}
+
+::-moz-selection {
+  background-color: rgba(30, 58, 138, 0.2);
+  color: var(--text-primary);
+}
+
+/* Skeleton loader animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(241, 245, 249, 0.5) 25%,
+    rgba(226, 232, 240, 0.5) 50%,
+    rgba(241, 245, 249, 0.5) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--border-radius);
 }
