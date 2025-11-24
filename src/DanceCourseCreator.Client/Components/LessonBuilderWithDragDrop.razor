@@ -579,7 +579,10 @@
                 p.Description.Contains(searchPattern, StringComparison.OrdinalIgnoreCase));
         }
         
-        return filtered.Take(20).ToList(); // Limit to 20 for performance
+        // Limit results for performance, but allow more if filtered
+        var limit = string.IsNullOrWhiteSpace(filterLevel) && string.IsNullOrWhiteSpace(filterType) 
+            && string.IsNullOrWhiteSpace(searchPattern) ? 20 : 50;
+        return filtered.Take(limit).ToList();
     }
 
     private async Task ShowQuickTips()

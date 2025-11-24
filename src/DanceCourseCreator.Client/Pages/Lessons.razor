@@ -181,6 +181,7 @@
     private async Task OpenCreateDialog()
     {
         var parameters = new DialogParameters();
+        // ExtraLarge needed for drag-and-drop interface: pattern selector on left, sections on right
         var options = new DialogOptions() 
         { 
             MaxWidth = MaxWidth.ExtraLarge, 

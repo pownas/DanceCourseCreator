@@ -289,8 +289,9 @@
             l.Date.HasValue
         ).OrderBy(l => l.Date).ToList();
         
-        // Calculate which lessons fall in this week
-        // For now, distribute evenly based on order
+        // TODO: Improve week allocation logic - currently distributes lessons evenly
+        // Future: Use actual lesson dates to determine which week they belong to
+        // Or: Store week number explicitly in lesson metadata
         var lessonsPerWeek = (double)courseLessons.Count / course.DurationWeeks;
         var startIndex = (int)Math.Floor((weekNumber - 1) * lessonsPerWeek);
         var endIndex = (int)Math.Floor(weekNumber * lessonsPerWeek);
