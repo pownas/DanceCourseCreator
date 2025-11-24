@@ -181,21 +181,22 @@
     private async Task OpenCreateDialog()
     {
         var parameters = new DialogParameters();
+        // ExtraLarge needed for drag-and-drop interface: pattern selector on left, sections on right
         var options = new DialogOptions() 
         { 
-            MaxWidth = MaxWidth.Large, 
+            MaxWidth = MaxWidth.ExtraLarge, 
             FullWidth = true,
             CloseButton = true,
             BackdropClick = false
         };
 
-        var dialog = await DialogService.ShowAsync<CreateLessonDialog>("Create New Lesson", parameters, options);
+        var dialog = await DialogService.ShowAsync<LessonBuilderWithDragDrop>("Skapa ny lektion", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)
         {
             await LoadLessons();
-            Snackbar.Add("Lesson created successfully!", Severity.Success);
+            Snackbar.Add("Lektion skapad!", Severity.Success);
         }
     }
 
@@ -207,12 +208,12 @@
 
         var options = new DialogOptions() 
         { 
-            MaxWidth = MaxWidth.Large, 
+            MaxWidth = MaxWidth.ExtraLarge, 
             FullWidth = true,
             CloseButton = true 
         };
 
-        await DialogService.ShowAsync<CreateLessonDialog>("View Lesson", parameters, options);
+        await DialogService.ShowAsync<LessonBuilderWithDragDrop>("Visa lektion", parameters, options);
     }
 
     private async Task EditLesson(Lesson lesson)
@@ -223,19 +224,19 @@
 
         var options = new DialogOptions() 
         { 
-            MaxWidth = MaxWidth.Large, 
+            MaxWidth = MaxWidth.ExtraLarge, 
             FullWidth = true,
             CloseButton = true,
             BackdropClick = false
         };
 
-        var dialog = await DialogService.ShowAsync<CreateLessonDialog>("Edit Lesson", parameters, options);
+        var dialog = await DialogService.ShowAsync<LessonBuilderWithDragDrop>("Redigera lektion", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)
         {
             await LoadLessons();
-            Snackbar.Add("Lesson updated successfully!", Severity.Success);
+            Snackbar.Add("Lektion uppdaterad!", Severity.Success);
         }
     }
 

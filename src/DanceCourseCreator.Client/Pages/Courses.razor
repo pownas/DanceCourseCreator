@@ -264,9 +264,22 @@
 
     private async Task ViewCourse(Course course)
     {
-        // TODO: Navigate to course detail view
-        // For now, just edit
-        await EditCourse(course);
+        var parameters = new DialogParameters
+        {
+            { "CourseId", course.Id },
+            { "ReadOnly", false }
+        };
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.ExtraLarge,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<CourseTimelineBuilder>(
+            $"Kurstidslinje: {course.Name}", 
+            parameters, 
+            options);
     }
 
     private async Task ViewProgression(Course course)
