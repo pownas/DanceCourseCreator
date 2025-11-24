@@ -118,6 +118,9 @@ using (var scope = app.Services.CreateScope())
         demoUser.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
     }
+    
+    // Seed West Coast Swing test data
+    await WestCoastSwingSeeder.SeedAsync(context);
 }
 
 // Configure the HTTP request pipeline.
