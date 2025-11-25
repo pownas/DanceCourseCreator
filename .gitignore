@@ -421,3 +421,4 @@ FodyWeavers.xsd
 **/screenshots/
 *.png
 !wwwroot/**/*.png
+database.sqlite
