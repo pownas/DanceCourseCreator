@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject ICoursesService CoursesService
 @inject ISnackbar Snackbar
+@inject ILogger<CreateCourseDialog> Logger
 
 <MudDialog>
     <DialogContent>
@@ -285,8 +286,14 @@
                 Snackbar.Add("Ett fel inträffade. Försök igen.", Severity.Error);
             }
         }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error saving course: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error saving course: {Message}", ex.Message);
             Snackbar.Add($"Fel: {ex.Message}", Severity.Error);
         }
         finally

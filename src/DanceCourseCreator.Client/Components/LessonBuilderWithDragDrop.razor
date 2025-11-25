@@ -423,7 +423,7 @@
                         Date = lesson.Date,
                         Duration = lesson.Duration,
                         Sections = lesson.Sections ?? new List<LessonSection>(),
-                        Notes = lesson.Notes
+                        Notes = lesson.Notes ?? string.Empty
                     };
                 }
                 else
