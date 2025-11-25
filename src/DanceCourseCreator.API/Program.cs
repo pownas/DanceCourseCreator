@@ -118,6 +118,9 @@ using (var scope = app.Services.CreateScope())
         demoUser.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
     }
+    
+    // Seed West Coast Swing test data
+    await WestCoastSwingSeeder.SeedAsync(context);
 }
 
 // Configure the HTTP request pipeline.
@@ -142,3 +145,6 @@ app.MapGet("/api/health", () => new { status = "OK", timestamp = DateTime.UtcNow
     .WithOpenApi();
 
 app.Run();
+
+// Make Program accessible for integration tests
+public partial class Program { }
