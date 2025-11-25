@@ -7,7 +7,7 @@ namespace DanceCourseCreator.API.Data;
 public static class WestCoastSwingSeeder
 {
     /// <summary>
-    /// Seeds the database with West Coast Swing test data including patterns, exercises, lessons, and a complete course.
+    /// Seeds the database with West Coast Swing test data including patterns, exercises, lessons, and complete courses.
     /// This method is idempotent and can be run multiple times without creating duplicates.
     /// </summary>
     public static async Task SeedAsync(DanceCourseDbContext context)
@@ -24,14 +24,20 @@ public static class WestCoastSwingSeeder
         // Save patterns and exercises before creating lessons
         await context.SaveChangesAsync();
         
-        // Seed lessons
+        // Seed lessons for first course (8 x 90 min)
         var lessonIds = await SeedLessonsAsync(context, instructorId, patternIds, exerciseIds);
         
-        // Save lessons before creating course
+        // Seed lessons for extended course (12 x 60 min)
+        var extendedLessonIds = await SeedExtendedLessonsAsync(context, instructorId, patternIds, exerciseIds);
+        
+        // Save lessons before creating courses
         await context.SaveChangesAsync();
         
-        // Seed course
+        // Seed first course
         await SeedCourseAsync(context, instructorId, lessonIds);
+        
+        // Seed extended course (12 sessions of 1 hour each)
+        await SeedExtendedCourseAsync(context, instructorId, extendedLessonIds);
         
         await context.SaveChangesAsync();
     }
@@ -796,6 +802,330 @@ public static class WestCoastSwingSeeder
                 CreatedBy = creatorId,
                 CreatedAt = DateTime.UtcNow.AddDays(-65),
                 UpdatedAt = DateTime.UtcNow.AddDays(-10)
+            };
+            
+            context.Courses.Add(course);
+            
+            // Update lessons to reference the course
+            foreach (var lessonId in lessonIds)
+            {
+                var lesson = await context.Lessons.FirstOrDefaultAsync(l => l.Id == lessonId);
+                if (lesson != null)
+                {
+                    lesson.CourseId = courseId;
+                }
+            }
+        }
+    }
+    
+    private static async Task<List<string>> SeedExtendedLessonsAsync(
+        DanceCourseDbContext context, 
+        string creatorId, 
+        Dictionary<string, string> patternIds,
+        Dictionary<string, string> exerciseIds)
+    {
+        // 12 lessons for the extended course (60 minutes each)
+        var lessons = new List<Lesson>
+        {
+            // Lektion 1: Introduktion till West Coast Swing
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-01",
+                Duration = 60,
+                Notes = "Introduktion till WCS-dansen och dess historia",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Kort presentation och uppvärmning" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 15, ItemsJson = $"[\"{exerciseIds["frame-connection"]}\"]", Notes = "Grundläggande frame och connection" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 30, ItemsJson = $"[\"{patternIds["starter-step"]}\"]", Notes = "Introduktion till starter step" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Enkel socialdans till lågt tempo" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-90),
+                UpdatedAt = DateTime.UtcNow.AddDays(-90)
+            },
+            
+            // Lektion 2: Sugar Push - kompression och stretch
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-02",
+                Duration = 60,
+                Notes = "Fokus på Sugar Push och push-pull dynamics",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Repetition av starter step" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 15, ItemsJson = $"[\"{exerciseIds["anchor-step"]}\"]", Notes = "Fokus på anchor step" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 30, ItemsJson = $"[\"{patternIds["sugar-push"]}\"]", Notes = "Sugar Push grundligt" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Socialdans med starter step och sugar push" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-83),
+                UpdatedAt = DateTime.UtcNow.AddDays(-83)
+            },
+            
+            // Lektion 3: Left Side Pass
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-03",
+                Duration = 60,
+                Notes = "Introduktion till slot och Left Side Pass",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Uppvärmning med sugar push" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 10, ItemsJson = $"[\"{exerciseIds["frame-connection"]}\"]", Notes = "Frame under rörelse" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 35, ItemsJson = $"[\"{patternIds["left-side-pass"]}\"]", Notes = "Left Side Pass i slot" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Socialdans" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-76),
+                UpdatedAt = DateTime.UtcNow.AddDays(-76)
+            },
+            
+            // Lektion 4: Underarm Turn
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-04",
+                Duration = 60,
+                Notes = "Första rotationen - Underarm Turn",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Repetition left side pass" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 10, ItemsJson = $"[\"{exerciseIds["anchor-step"]}\"]", Notes = "Anchor efter rotation" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 35, ItemsJson = $"[\"{patternIds["underarm-turn"]}\"]", Notes = "Underarm turn teknik" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Socialdans med alla turer hittills" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-69),
+                UpdatedAt = DateTime.UtcNow.AddDays(-69)
+            },
+            
+            // Lektion 5: Repetition och kombinationer
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-05",
+                Duration = 60,
+                Notes = "Repetition av grundturer och kombinationer",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Fri uppvärmning" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Repetition, AllocatedMinutes = 20, ItemsJson = "[]", Notes = "Repetition av alla grundturer" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Combination, AllocatedMinutes = 20, ItemsJson = "[]", Notes = "Kombinera turer i sekvenser" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 15, ItemsJson = "[]", Notes = "Längre socialdans" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-62),
+                UpdatedAt = DateTime.UtcNow.AddDays(-62)
+            },
+            
+            // Lektion 6: Compression & Stretch
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-06",
+                Duration = 60,
+                Notes = "Fördjupning i compression och stretch",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Dynamisk uppvärmning" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 25, ItemsJson = $"[\"{exerciseIds["compression-stretch"]}\"]", Notes = "Compression och stretch övningar" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 20, ItemsJson = $"[\"{patternIds["sugar-push"]}\"]", Notes = "Sugar push med bättre dynamics" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Socialdans" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-55),
+                UpdatedAt = DateTime.UtcNow.AddDays(-55)
+            },
+            
+            // Lektion 7: Whip introduktion
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-07",
+                Duration = 60,
+                Notes = "Introduktion till Whip",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Uppvärmning med grundturer" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 15, ItemsJson = $"[\"{exerciseIds["leading-following"]}\"]", Notes = "Lead och follow för whip" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 30, ItemsJson = $"[\"{patternIds["whip"]}\"]", Notes = "Whip grundsteg" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Öva whip i socialdans" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-48),
+                UpdatedAt = DateTime.UtcNow.AddDays(-48)
+            },
+            
+            // Lektion 8: Tuck Turn
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-08",
+                Duration = 60,
+                Notes = "Tuck Turn - tight rotation",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Repetition av whip" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 15, ItemsJson = $"[\"{exerciseIds["rotations-turns"]}\"]", Notes = "Rotation teknik" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 30, ItemsJson = $"[\"{patternIds["tuck-turn"]}\"]", Notes = "Tuck turn" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Socialdans" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-41),
+                UpdatedAt = DateTime.UtcNow.AddDays(-41)
+            },
+            
+            // Lektion 9: Musicality
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-09",
+                Duration = 60,
+                Notes = "Timing och musicality",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Musikalisk uppvärmning" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 30, ItemsJson = $"[\"{exerciseIds["timing-musicality"]}\"]", Notes = "Musicality övningar" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 25, ItemsJson = "[]", Notes = "Dansa till olika musikstilar" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-34),
+                UpdatedAt = DateTime.UtcNow.AddDays(-34)
+            },
+            
+            // Lektion 10: Whip med rotation
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-10",
+                Duration = 60,
+                Notes = "Whip with Inside Turn",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Repetition av whip" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Technique, AllocatedMinutes = 15, ItemsJson = $"[\"{exerciseIds["rotations-turns"]}\"]", Notes = "Rotation under whip" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 30, ItemsJson = $"[\"{patternIds["whip-inside-turn"]}\"]", Notes = "Whip med inside turn" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 10, ItemsJson = "[]", Notes = "Socialdans" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-27),
+                UpdatedAt = DateTime.UtcNow.AddDays(-27)
+            },
+            
+            // Lektion 11: Basket Whip
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-11",
+                Duration = 60,
+                Notes = "Basket Whip introduktion",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Uppvärmning" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Patterns, AllocatedMinutes = 35, ItemsJson = $"[\"{patternIds["basket-whip"]}\"]", Notes = "Basket whip steg för steg" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 20, ItemsJson = "[]", Notes = "Socialdans med alla turer" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-20),
+                UpdatedAt = DateTime.UtcNow.AddDays(-20)
+            },
+            
+            // Lektion 12: Kursavslutning och sammanfattning
+            new Lesson
+            {
+                Id = "lesson-wcs-ext-12",
+                Duration = 60,
+                Notes = "Kursavslutning - repetition och fri dans",
+                CreatedBy = creatorId,
+                SectionsJson = System.Text.Json.JsonSerializer.Serialize(new[]
+                {
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Warmup, AllocatedMinutes = 5, ItemsJson = "[]", Notes = "Sista uppvärmningen" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Repetition, AllocatedMinutes = 20, ItemsJson = "[]", Notes = "Repetition av alla turer från kursen" },
+                    new { Id = Guid.NewGuid().ToString(), Type = (int)LessonSectionType.Social, AllocatedMinutes = 35, ItemsJson = "[]", Notes = "Avslutande socialdans - visa vad ni lärt er!" }
+                }),
+                TotalEstimatedMinutes = 60,
+                CreatedAt = DateTime.UtcNow.AddDays(-13),
+                UpdatedAt = DateTime.UtcNow.AddDays(-13)
+            }
+        };
+        
+        var lessonIds = new List<string>();
+        
+        foreach (var lesson in lessons)
+        {
+            var existing = await context.Lessons.FirstOrDefaultAsync(l => l.Id == lesson.Id);
+            if (existing == null)
+            {
+                // Store the sections JSON temporarily
+                var sectionsJson = lesson.SectionsJson;
+                // Set to empty array first to avoid EF tracking issues
+                lesson.SectionsJson = "[]";
+                context.Lessons.Add(lesson);
+                await context.SaveChangesAsync();
+                
+                // Detach the lesson to avoid tracking issues
+                context.Entry(lesson).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                
+                // Use raw SQL to update SectionsJson to avoid EF tracking LessonSection entities
+                await context.Database.ExecuteSqlRawAsync(
+                    "UPDATE Lessons SET SectionsJson = {0} WHERE Id = {1}",
+                    sectionsJson, lesson.Id);
+            }
+            lessonIds.Add(lesson.Id);
+        }
+        
+        return lessonIds;
+    }
+    
+    private static async Task SeedExtendedCourseAsync(
+        DanceCourseDbContext context, 
+        string creatorId, 
+        List<string> lessonIds)
+    {
+        const string courseId = "course-wcs-vt26";
+        var existing = await context.Courses.FirstOrDefaultAsync(c => c.Id == courseId);
+        
+        if (existing == null)
+        {
+            var course = new Course
+            {
+                Id = courseId,
+                Name = "West Coast Swing Fortsättningskurs VT26",
+                Level = DanceLevel.Improver,
+                DanceStyle = DanceStyle.WestCoastSwing,
+                Type = CourseType.Weekly,
+                DurationWeeks = 12,
+                PlannedLessonCount = 12,
+                Goals = new List<string>
+                {
+                    "Fördjupa kunskapen i West Coast Swing turer och teknik",
+                    "Utveckla bättre musicality och timing",
+                    "Lära sig mer avancerade variationer av whip",
+                    "Kunna dansa flytande socialt med varierad repertoar"
+                },
+                ThemesByWeek = new List<string>
+                {
+                    "Vecka 1: Introduktion och grundläggande repetition",
+                    "Vecka 2: Sugar Push - kompression och stretch",
+                    "Vecka 3: Left Side Pass fördjupning",
+                    "Vecka 4: Underarm Turn variationer",
+                    "Vecka 5: Repetition och kombinationer",
+                    "Vecka 6: Compression & Stretch fördjupning",
+                    "Vecka 7: Whip introduktion",
+                    "Vecka 8: Tuck Turn",
+                    "Vecka 9: Musicality och timing",
+                    "Vecka 10: Whip med inside turn",
+                    "Vecka 11: Basket Whip",
+                    "Vecka 12: Kursavslutning och fri dans"
+                },
+                LessonIds = lessonIds,
+                CreatedBy = creatorId,
+                CreatedAt = DateTime.UtcNow.AddDays(-95),
+                UpdatedAt = DateTime.UtcNow.AddDays(-12)
             };
             
             context.Courses.Add(course);
