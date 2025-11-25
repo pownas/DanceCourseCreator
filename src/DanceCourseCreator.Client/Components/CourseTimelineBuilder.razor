@@ -267,7 +267,7 @@
         try
         {
             course = await CoursesService.GetCourseAsync(CourseId);
-            allLessons = await LessonsService.GetLessonsAsync();
+            allLessons = await LessonsService.GetLessonsAsync() ?? new List<Lesson>();
         }
         catch (Exception ex)
         {

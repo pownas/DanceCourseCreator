@@ -130,6 +130,9 @@
 @code {
     private List<Lesson>? lessons;
     private bool isLoading = false;
+    private bool hasError = false;
+
+    [Inject] private ILogger<Lessons> Logger { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -139,13 +142,22 @@
     private async Task LoadLessons()
     {
         isLoading = true;
+        hasError = false;
         try
         {
             lessons = await LessonsService.GetLessonsAsync();
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
         {
-            Snackbar.Add("Failed to load lessons", Severity.Error);
+            Logger.LogWarning(ex, "Network error loading lessons: {Message}", ex.Message);
+            hasError = true;
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading lessons: {Message}", ex.Message);
+            hasError = true;
+            Snackbar.Add("Fel vid hämtning av lektioner", Severity.Error);
         }
         finally
         {
@@ -276,7 +288,7 @@
         var dialog = await DialogService.ShowAsync<SaveAsTemplateDialog>("Spara som mall", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             Snackbar.Add("Mall skapad framgångsrikt! Se den på Mallar-sidan.", Severity.Success);
         }
