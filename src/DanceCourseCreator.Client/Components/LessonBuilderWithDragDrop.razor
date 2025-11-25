@@ -4,6 +4,7 @@
 @inject ITimeValidationService TimeValidationService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject ILogger<LessonBuilderWithDragDrop> Logger
 
 <MudDialog>
     <DialogContent>
@@ -404,6 +405,12 @@
             // Load all patterns
             patterns = await PatternsService.GetPatternsAsync();
             
+            if (patterns == null)
+            {
+                Logger.LogWarning("PatternsService returned null, initializing empty patterns list");
+                patterns = new List<PatternOrExercise>();
+            }
+            
             // If editing, load the lesson
             if (LessonId != null)
             {
@@ -415,9 +422,14 @@
                         CourseId = lesson.CourseId,
                         Date = lesson.Date,
                         Duration = lesson.Duration,
-                        Sections = lesson.Sections,
+                        Sections = lesson.Sections ?? new List<LessonSection>(),
                         Notes = lesson.Notes
                     };
+                }
+                else
+                {
+                    Logger.LogWarning("Lesson with ID {LessonId} not found", LessonId);
+                    Snackbar.Add("Lektionen hittades inte", Severity.Warning);
                 }
             }
             else
@@ -434,8 +446,14 @@
             RebuildDropItems();
             RecalculateTime();
         }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error loading lesson data: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error loading lesson data: {Message}", ex.Message);
             Snackbar.Add($"Fel vid laddning: {ex.Message}", Severity.Error);
         }
         finally
@@ -514,45 +532,104 @@
 
     private void OnItemDropped(MudItemDropInfo<DropItem> dropInfo)
     {
-        if (dropInfo.Item == null) return;
-        
-        var item = dropInfo.Item;
-        int newSectionIndex = int.Parse(dropInfo.DropzoneIdentifier);
-        
-        // Remove from old section
-        lessonRequest.Sections[item.SectionIndex].Items.RemoveAt(item.ItemIndex);
-        
-        // Add to new section
-        lessonRequest.Sections[newSectionIndex].Items.Insert(dropInfo.IndexInZone, item.PatternId);
-        
-        // Rebuild
-        RebuildDropItems();
-        RecalculateTime();
+        try
+        {
+            if (dropInfo.Item == null) return;
+            
+            var item = dropInfo.Item;
+            
+            // Validate dropzone identifier
+            if (!int.TryParse(dropInfo.DropzoneIdentifier, out int newSectionIndex))
+            {
+                Logger.LogWarning("Invalid dropzone identifier: {Identifier}", dropInfo.DropzoneIdentifier);
+                return;
+            }
+            
+            // Bounds checking
+            if (item.SectionIndex < 0 || item.SectionIndex >= lessonRequest.Sections.Count)
+            {
+                Logger.LogWarning("Invalid source section index: {Index}", item.SectionIndex);
+                return;
+            }
+            
+            if (newSectionIndex < 0 || newSectionIndex >= lessonRequest.Sections.Count)
+            {
+                Logger.LogWarning("Invalid target section index: {Index}", newSectionIndex);
+                return;
+            }
+            
+            var sourceSection = lessonRequest.Sections[item.SectionIndex];
+            if (item.ItemIndex < 0 || item.ItemIndex >= sourceSection.Items.Count)
+            {
+                Logger.LogWarning("Invalid item index: {Index}", item.ItemIndex);
+                return;
+            }
+            
+            // Remove from old section
+            sourceSection.Items.RemoveAt(item.ItemIndex);
+            
+            // Add to new section with bounds checking
+            var targetSection = lessonRequest.Sections[newSectionIndex];
+            int insertIndex = Math.Min(dropInfo.IndexInZone, targetSection.Items.Count);
+            targetSection.Items.Insert(insertIndex, item.PatternId);
+            
+            // Rebuild
+            RebuildDropItems();
+            RecalculateTime();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error during drag and drop: {Message}", ex.Message);
+            Snackbar.Add("Ett fel uppstod vid förflyttning", Severity.Error);
+        }
     }
 
     private void QuickAddPattern(string patternId)
     {
-        if (currentSectionIndex >= 0 && currentSectionIndex < lessonRequest.Sections.Count)
+        try
         {
-            lessonRequest.Sections[currentSectionIndex].Items.Add(patternId);
-            RebuildDropItems();
-            RecalculateTime();
-            Snackbar.Add("Moment tillagt!", Severity.Success);
+            if (currentSectionIndex >= 0 && currentSectionIndex < lessonRequest.Sections.Count)
+            {
+                lessonRequest.Sections[currentSectionIndex].Items.Add(patternId);
+                RebuildDropItems();
+                RecalculateTime();
+                Snackbar.Add("Moment tillagt!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Välj en sektion först", Severity.Warning);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Snackbar.Add("Välj en sektion först", Severity.Warning);
+            Logger.LogError(ex, "Error adding pattern: {Message}", ex.Message);
+            Snackbar.Add("Ett fel uppstod vid tillägg av moment", Severity.Error);
         }
     }
 
     private void RemoveItemFromSection(int sectionIndex, int itemIndex)
     {
-        var section = lessonRequest.Sections[sectionIndex];
-        if (itemIndex >= 0 && itemIndex < section.Items.Count)
+        try
         {
-            section.Items.RemoveAt(itemIndex);
-            RebuildDropItems();
-            RecalculateTime();
+            // Bounds checking
+            if (sectionIndex < 0 || sectionIndex >= lessonRequest.Sections.Count)
+            {
+                Logger.LogWarning("Invalid section index for removal: {Index}", sectionIndex);
+                return;
+            }
+            
+            var section = lessonRequest.Sections[sectionIndex];
+            if (itemIndex >= 0 && itemIndex < section.Items.Count)
+            {
+                section.Items.RemoveAt(itemIndex);
+                RebuildDropItems();
+                RecalculateTime();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error removing item from section: {Message}", ex.Message);
+            Snackbar.Add("Ett fel uppstod vid borttagning", Severity.Error);
         }
     }
 

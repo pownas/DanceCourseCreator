@@ -3,6 +3,7 @@
 @inject ILessonsService LessonsService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject ILogger<CourseTimelineBuilder> Logger
 
 <MudDialog>
     <DialogContent>
@@ -267,10 +268,23 @@
         try
         {
             course = await CoursesService.GetCourseAsync(CourseId);
+            
+            if (course == null)
+            {
+                Logger.LogWarning("Course with ID {CourseId} not found", CourseId);
+                Snackbar.Add("Kursen hittades inte", Severity.Warning);
+            }
+            
             allLessons = await LessonsService.GetLessonsAsync() ?? new List<Lesson>();
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error loading course data: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error loading course data: {Message}", ex.Message);
             Snackbar.Add($"Fel vid laddning: {ex.Message}", Severity.Error);
         }
         finally
