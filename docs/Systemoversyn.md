@@ -231,14 +231,21 @@ Följande funktioner efterfrågas i issue men saknas helt i nuvarande kravspecif
 ```csharp
 public class Schedule
 {
-    public string Id { get; set; }
+    [Key]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    
+    [Required]
     public string CourseId { get; set; }
+    
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string RecurrencePattern { get; set; } // Weekly, BiWeekly, etc.
     public TimeSpan DefaultStartTime { get; set; }
     public int DefaultDurationMinutes { get; set; }
     public string Location { get; set; }
+    
+    // Navigation properties
+    public Course? Course { get; set; }
 }
 ```
 
@@ -301,8 +308,16 @@ public class CourseRegistration
     public string CourseId { get; set; }
     public string ParticipantEmail { get; set; }
     public string ParticipantName { get; set; }
-    public RegistrationStatus Status { get; set; } // Registered, Waitlist, Cancelled
+    public RegistrationStatus Status { get; set; }
     public DateTime RegisteredAt { get; set; }
+}
+
+public enum RegistrationStatus
+{
+    Registered,   // Bekräftad registrering
+    Waitlist,     // På väntelista
+    Cancelled,    // Avbokad
+    Completed     // Genomfört kursen
 }
 ```
 
