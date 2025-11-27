@@ -1,0 +1,69 @@
+@inherits ErrorBoundary
+
+@if (CurrentException is not null)
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+        <MudAlert Severity="Severity.Error" 
+                  Icon="@Icons.Material.Filled.Error"
+                  Class="mb-4">
+            <MudText Typo="Typo.h6" Class="mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Warning" Class="mr-2" />
+                Ett oväntat fel har uppstått
+            </MudText>
+            <MudText Typo="Typo.body1" Class="mb-3">
+                Vi beklagar det inträffade. Vänligen försök igen eller kontakta support om problemet kvarstår.
+            </MudText>
+            @if (ShowDetails)
+            {
+                <MudExpansionPanel Text="Teknisk information (för utvecklare)">
+                    <MudText Typo="Typo.caption" Style="font-family: monospace; white-space: pre-wrap; overflow-x: auto;">
+                        <strong>Fel:</strong> @CurrentException.Message
+                        @if (CurrentException.StackTrace is not null)
+                        {
+                            <br /><br />
+                            <strong>Stack trace:</strong>
+                            <br />@CurrentException.StackTrace
+                        }
+                    </MudText>
+                </MudExpansionPanel>
+            }
+            <div class="mt-4 d-flex gap-2">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           OnClick="RecoverFromError"
+                           StartIcon="@Icons.Material.Filled.Refresh">
+                    Försök igen
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Secondary" 
+                           Href="/"
+                           StartIcon="@Icons.Material.Filled.Home">
+                    Gå till startsidan
+                </MudButton>
+            </div>
+        </MudAlert>
+    </MudContainer>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter]
+    public bool ShowDetails { get; set; }
+    
+    [Inject] 
+    private ILogger<ErrorBoundaryHandler> Logger { get; set; } = null!;
+
+    protected override Task OnErrorAsync(Exception exception)
+    {
+        Logger.LogError(exception, "An unhandled error occurred in the Blazor component tree: {Message}", exception.Message);
+        return Task.CompletedTask;
+    }
+
+    private void RecoverFromError()
+    {
+        Recover();
+    }
+}

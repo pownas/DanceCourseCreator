@@ -209,9 +209,12 @@
 @code {
     private List<Course>? courses;
     private bool isLoading = false;
+    private bool hasError = false;
     private string? filterLevel;
     private string? filterDanceStyle;
     private string? searchText;
+
+    [Inject] private ILogger<Courses> Logger { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -221,13 +224,22 @@
     private async Task LoadCourses()
     {
         isLoading = true;
+        hasError = false;
         try
         {
             courses = await CoursesService.GetCoursesAsync(filterLevel, filterDanceStyle, searchText);
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
         {
-            // Handle error - could show snackbar
+            Logger.LogWarning(ex, "Network error loading courses: {Message}", ex.Message);
+            hasError = true;
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading courses: {Message}", ex.Message);
+            hasError = true;
+            Snackbar.Add("Ett fel uppstod vid hämtning av kurser.", Severity.Error);
         }
         finally
         {
@@ -319,7 +331,7 @@
         var dialog = await DialogService.ShowAsync<SaveAsTemplateDialog>("Spara som mall", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result is not null && !result.Canceled)
         {
             Snackbar.Add("Mall skapad framgångsrikt! Se den på Mallar-sidan.", Severity.Success);
         }

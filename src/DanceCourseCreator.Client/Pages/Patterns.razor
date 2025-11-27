@@ -163,10 +163,15 @@
 @code {
     private List<PatternOrExercise>? patterns;
     private bool isLoading = false;
+    private bool hasError = false;
+    private string? errorMessage;
     private string? filterType;
     private string? filterLevel;
     private string? filterDanceStyle;
     private string searchText = string.Empty;
+
+    [Inject] private ILogger<Patterns> Logger { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -176,14 +181,26 @@
     private async Task LoadPatterns()
     {
         isLoading = true;
+        hasError = false;
+        errorMessage = null;
         try
         {
             var searchValue = string.IsNullOrWhiteSpace(searchText) ? null : searchText;
             patterns = await PatternsService.GetPatternsAsync(filterType, filterLevel, filterDanceStyle, searchValue);
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
         {
-            // Handle error
+            Logger.LogWarning(ex, "Network error loading patterns: {Message}", ex.Message);
+            hasError = true;
+            errorMessage = "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.";
+            Snackbar.Add(errorMessage, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading patterns: {Message}", ex.Message);
+            hasError = true;
+            errorMessage = "Ett oväntat fel uppstod vid hämtning av mönster.";
+            Snackbar.Add(errorMessage, Severity.Error);
         }
         finally
         {

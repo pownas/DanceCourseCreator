@@ -4,6 +4,7 @@
 @inject ILessonsService LessonsService
 @inject ICoursesService CoursesService
 @inject ISnackbar Snackbar
+@inject ILogger<SaveAsTemplateDialog> Logger
 
 <MudDialog>
     <DialogContent>
@@ -204,8 +205,14 @@
                 Snackbar.Add("Fel vid skapande av mall", Severity.Error);
             }
         }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error creating template: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error creating template: {Message}", ex.Message);
             Snackbar.Add($"Fel vid skapande av mall: {ex.Message}", Severity.Error);
         }
         finally

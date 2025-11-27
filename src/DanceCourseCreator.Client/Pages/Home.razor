@@ -178,6 +178,9 @@
     private int _beginnerCount = 0;
     private int _improverCount = 0;
     private int _exerciseCount = 0;
+    private bool _hasError = false;
+
+    [Inject] private ILogger<Home> Logger { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -188,6 +191,7 @@
     {
         try
         {
+            _hasError = false;
             var patterns = await PatternsService.GetPatternsAsync();
             if (patterns != null)
             {
@@ -196,14 +200,31 @@
                 _improverCount = patterns.Count(p => p.Level?.ToLower() == "improver");
                 _exerciseCount = patterns.Count(p => p.Type?.ToLower() == "exercise");
             }
+            else
+            {
+                // API returned null, use fallback
+                Logger.LogWarning("PatternsService returned null, using fallback values");
+                SetFallbackValues();
+            }
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
         {
-            // Handle error silently for now
-            _totalPatterns = 6; // Fallback values from legacy
-            _beginnerCount = 4;
-            _improverCount = 1;
-            _exerciseCount = 2;
+            Logger.LogWarning(ex, "Network error loading patterns, using fallback values: {Message}", ex.Message);
+            SetFallbackValues();
         }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error loading statistics: {Message}", ex.Message);
+            SetFallbackValues();
+            _hasError = true;
+        }
+    }
+
+    private void SetFallbackValues()
+    {
+        _totalPatterns = 6;
+        _beginnerCount = 4;
+        _improverCount = 1;
+        _exerciseCount = 2;
     }
 }
