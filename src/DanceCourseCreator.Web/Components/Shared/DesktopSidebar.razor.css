@@ -1,0 +1,113 @@
+/* DesktopSidebar.razor.css - Desktop sidebar styling */
+
+.desktop-sidebar {
+    height: 100vh;
+    position: fixed;
+    top: var(--toolbar-height, 64px);
+    left: 0;
+    z-index: 1100;
+    transition: width var(--layout-transition, 0.2s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.desktop-sidebar.expanded {
+    width: var(--sidebar-width, 240px);
+}
+
+.desktop-sidebar.collapsed {
+    width: var(--sidebar-collapsed-width, 64px);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--toolbar-height, 64px));
+    padding-top: var(--layout-spacing-md, 16px);
+}
+
+/* Navigation items */
+.nav-item {
+    min-height: var(--touch-target-min, 44px);
+    transition: background-color 0.15s ease;
+}
+
+.nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.nav-item:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+/* Settings navigation at bottom */
+.settings-nav {
+    margin-top: auto;
+    margin-bottom: var(--layout-spacing-md, 16px);
+}
+
+/* Tooltip for collapsed state */
+::deep .mud-nav-link {
+    position: relative;
+}
+
+/* Hover effect for mini drawer */
+::deep .desktop-sidebar.collapsed .mud-nav-link:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #333;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 1300;
+    pointer-events: none;
+}
+
+/* Icon alignment */
+::deep .mud-nav-link .mud-icon-root {
+    min-width: 24px;
+}
+
+/* Scrollbar styling */
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    .nav-item:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .sidebar-nav::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Print - hide sidebar */
+@media print {
+    .desktop-sidebar {
+        display: none !important;
+    }
+}

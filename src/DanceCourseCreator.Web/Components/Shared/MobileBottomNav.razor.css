@@ -1,0 +1,128 @@
+/* MobileBottomNav.razor.css - Bottom navigation styling */
+
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1200;
+    /* Safe area for devices with notches/gestures */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottom-nav-paper {
+    background-color: var(--mud-palette-surface);
+    border-radius: 0;
+}
+
+.bottom-nav-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: var(--layout-spacing-xs, 4px) var(--layout-spacing-sm, 8px);
+    gap: var(--layout-spacing-xs, 4px);
+}
+
+/* Navigation buttons */
+.nav-button {
+    min-width: var(--touch-target-min, 44px);
+    min-height: var(--touch-target-min, 44px);
+    flex: 1;
+    max-width: 72px;
+    transition: transform 0.1s ease;
+}
+
+.nav-button:active {
+    transform: scale(0.95);
+}
+
+/* Focus state for accessibility */
+.nav-button:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+    border-radius: 50%;
+}
+
+/* FAB menu button */
+.fab-menu {
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Navigation labels */
+.nav-labels {
+    display: flex;
+    justify-content: space-around;
+    padding-bottom: var(--layout-spacing-sm, 8px);
+}
+
+.nav-label {
+    flex: 1;
+    max-width: 72px;
+    text-align: center;
+    font-size: 0.625rem;
+    color: var(--mud-palette-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-label.active {
+    color: var(--mud-palette-primary);
+    font-weight: 500;
+}
+
+/* Ripple effect on touch */
+::deep .mud-icon-button {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hide on larger screens */
+@media (min-width: 960px) {
+    .mobile-bottom-nav {
+        display: none;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 480px) and (orientation: landscape) {
+    .nav-labels {
+        display: none;
+    }
+    
+    .bottom-nav-container {
+        padding: var(--layout-spacing-xs, 4px);
+    }
+    
+    .nav-button {
+        min-height: 40px;
+    }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    .bottom-nav-paper {
+        background-color: #1e1e1e;
+    }
+    
+    .fab-menu {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Print - hide bottom nav */
+@media print {
+    .mobile-bottom-nav {
+        display: none !important;
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .nav-button:active {
+        transform: none;
+    }
+}

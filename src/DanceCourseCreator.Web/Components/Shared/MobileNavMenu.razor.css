@@ -1,0 +1,54 @@
+/* MobileNavMenu.razor.css - Mobile navigation menu styling */
+
+.mobile-nav-menu {
+    padding: var(--layout-spacing-md, 16px) 0;
+}
+
+/* Navigation links */
+::deep .mud-nav-link {
+    min-height: var(--touch-target-min, 44px);
+    padding-left: var(--layout-spacing-md, 16px);
+    padding-right: var(--layout-spacing-md, 16px);
+    margin: var(--layout-spacing-xs, 4px) 0;
+    border-radius: 0;
+    font-size: 1rem;
+}
+
+/* Hover effect */
+::deep .mud-nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Active state */
+::deep .mud-nav-link.active {
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+    border-left: 4px solid var(--mud-palette-primary);
+}
+
+/* Focus state for accessibility */
+::deep .mud-nav-link:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: -2px;
+}
+
+/* Icon sizing */
+::deep .mud-nav-link .mud-icon-root {
+    font-size: 1.5rem;
+    margin-right: var(--layout-spacing-md, 16px);
+}
+
+/* Divider */
+::deep .mud-divider {
+    margin: var(--layout-spacing-md, 16px) 0;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    ::deep .mud-nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    ::deep .mud-nav-link.active {
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.15);
+    }
+}
