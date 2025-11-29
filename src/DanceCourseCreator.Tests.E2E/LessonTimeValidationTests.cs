@@ -77,7 +77,7 @@ public class LessonTimeValidationTests : PageTest
         // Verify time allocation field exists
         var timeAllocationFields = Page.GetByLabel(new System.Text.RegularExpressions.Regex("Allokerad tid|Allocated.*min"));
         var count = await timeAllocationFields.CountAsync();
-        Assert.IsTrue(count > 0, "Time allocation fields should be visible");
+        Assert.IsGreaterThan(count, 0, "Time allocation fields should be visible");
     }
 
     [TestMethod]
