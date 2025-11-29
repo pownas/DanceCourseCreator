@@ -67,7 +67,7 @@ public class PlaywrightIntegrationTests : PageTest
 
         // Assert
         Assert.IsTrue(response.IsSuccessStatusCode, $"Health check failed with status {response.StatusCode}");
-        Assert.IsTrue(content.Contains("OK"), "Health check response should contain 'OK'");
+        Assert.Contains("OK", content, StringComparison.Ordinal, "Health check response should contain 'OK'");
         
         Console.WriteLine($"✓ Health check passed: {content}");
     }
@@ -124,7 +124,7 @@ public class PlaywrightIntegrationTests : PageTest
         
         var allPatterns = await getAllResponse.Content.ReadFromJsonAsync<JsonElement>();
         var patternsArray = allPatterns.EnumerateArray().ToList();
-        Assert.IsTrue(patternsArray.Count >= 2, "Should have at least 2 patterns (seeded + created)");
+        Assert.IsGreaterThanOrEqualTo(patternsArray.Count, 2, "Should have at least 2 patterns (seeded + created)");
         
         Console.WriteLine($"✓ Retrieved {patternsArray.Count} patterns");
 
@@ -263,7 +263,7 @@ public class PlaywrightIntegrationTests : PageTest
         var patterns = await response.Content.ReadFromJsonAsync<JsonElement>();
         var patternsArray = patterns.EnumerateArray().ToList();
         
-        Assert.IsTrue(patternsArray.Count > 0, "Should find at least one pattern with 'Sugar' in the name");
+        Assert.IsNotEmpty(patternsArray, "Should find at least one pattern with 'Sugar' in the name");
         
         // Verify all returned patterns contain "Sugar" in name or description
         foreach (var pattern in patternsArray)
