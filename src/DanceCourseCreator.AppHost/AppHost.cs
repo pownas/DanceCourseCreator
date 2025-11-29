@@ -14,7 +14,7 @@ builder.Services.Configure<LoggerFilterOptions>(options =>
 var api = builder.AddProject<Projects.DanceCourseCreator_API>("dancecoursecreator-api")
     .WithHttpHealthCheck("/health");
 
-builder.AddProject<Projects.DanceCourseCreator_Client>("dancecoursecreator-blazorclient")
+builder.AddProject<Projects.DanceCourseCreator_Web>("dancecoursecreator-web")
     .WithHttpHealthCheck("/health")
     .WaitFor(api)
     .WithReference(api);
