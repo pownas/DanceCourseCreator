@@ -16,12 +16,25 @@ Denna katalog innehåller detaljerade implementeringsguider och planer för Danc
 
 Innehåller:
 - Komplett översikt av vad som är implementerat och vad som återstår
-- 14 detaljerade issues med acceptanskriterier
+- 20 detaljerade issues med acceptanskriterier (Issue 1-14 i Fas 1-3, Issue 15-20 i Fas 4)
 - MoSCoW-prioritering (Must/Should/Could/Won't)
 - Tekniska riktlinjer och kodstandard
 - Estimat och tidsplanering
 
 **Börja här** för att förstå projektets roadmap och nästa steg.
+
+### [🔎 Systemöversyn](./Systemoversyn.md)
+**Systemanalys och utökad kravspecifikation** - Omfattande analys av nuvarande system.
+
+Innehåller:
+- Analys av nuvarande funktionalitet och flöden
+- Dokumenterade styrkor och svagheter
+- Identifierade saknade funktioner
+- Utökade krav för Fas 4 (deltagarhantering, schemaläggning, kalenderintegration)
+- Nya funktionella krav FR-100 till FR-150
+- Riskanalys och rekommendationer
+
+**Använd detta** för att förstå nya krav för deltagarhantering och schemaläggning.
 
 ### [📋 Issues-översikt](./Issues-Oversikt.md)
 Snabb referensguide över alla planerade issues.

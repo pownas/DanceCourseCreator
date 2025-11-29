@@ -51,6 +51,23 @@ Detta dokument innehåller en snabböversikt över alla planerade issues för Da
 
 ---
 
+### 🔵 Fas 4 - Deltagarhantering och schemaläggning
+
+> **Not**: Fas 4 är identifierad baserat på [Systemoversyn.md](./Systemoversyn.md) och kräver ytterligare detaljerad planering.
+
+| # | Titel | Estimat | Krav | Status |
+|---|-------|---------|------|--------|
+| 15 | Schemaläggning | 5-7 dagar | FR-100..104 | ⏳ Planerad |
+| 16 | Inbjudningar och bokningsflöden | 6-8 dagar | FR-120..125 | ⏳ Planerad |
+| 17 | Kalenderintegration (iCal, Google, Outlook) | 5-7 dagar | FR-110..114 | ⏳ Planerad |
+| 18 | Deltagarstatistik och närvaro | 4-6 dagar | FR-140..145 | ⏳ Planerad |
+| 19 | Bedömningssystem | 5-7 dagar | FR-130..135 | ⏳ Planerad |
+| 20 | Automatiserad kursplanering | 8-12 dagar | FR-150..154 | ⏳ Planerad |
+
+**Fas 4 Total estimat**: 33-47 dagar (7-10 veckor för 1 utvecklare)
+
+---
+
 ## 📊 Status-symboler
 
 - ⏳ **Planerad** - Issue har identifierats och dokumenterats
@@ -71,6 +88,12 @@ Issue 1 (Templates) → Kan göras parallellt med andra
 Issue 2 (Lektionsbyggare) → Issue 3 (Kursplanering) → Issue 7 (Rekommendationer)
 Issue 2 (Lektionsbyggare) → Issue 4 (Export)
 Issue 4 (Export) → Issue 5 (Delning)
+
+Fas 4 beroenden:
+Fas 3 → Issue 15 (Schemaläggning) → Issue 16 (Bokning) → Issue 18 (Statistik)
+Issue 15 (Schemaläggning) → Issue 17 (Kalender)
+Issue 18 (Statistik) → Issue 19 (Bedömning)
+Fas 3 → Issue 20 (Automatisering)
 ```
 
 ### Oberoende issues (kan göras parallellt):
@@ -136,6 +159,26 @@ Issue 4 (Export) → Issue 5 (Delning)
 
 ---
 
+### Milstolpe 4: Deltagarhantering (Efter Fas 4)
+**Mål**: Fullständig hantering av deltagare, schemaläggning och uppföljning
+- ✅ Schemaläggning av kurser med datum och tider
+- ✅ Inbjudningslänkar och bokningsflöden
+- ✅ Kalenderintegration (iCal, Google, Outlook)
+- ✅ Närvaroregistrering och deltagarstatistik
+- ✅ Bedömningssystem för deltagarutveckling
+- ✅ AI-assisterad kursplanering
+
+**Kriterier för godkänd milstolpe**:
+- Alla Fas 4 issues är klara
+- E-postnotifikationer fungerar tillförlitligt
+- GDPR-compliance för deltagardata verifierad
+- Minst 10 dansskolor/klubbar har testat funktionerna
+- Dokumentation för deltagarhantering färdig
+
+> **Not**: Se [Systemoversyn.md](./Systemoversyn.md) för detaljerade krav (FR-100 serien)
+
+---
+
 ## 📈 Veckovis tidslinje (grov uppskattning)
 
 ### Fas 1: Grundfunktionalitet (Vecka 1-12)
@@ -160,6 +203,14 @@ Issue 4 (Export) → Issue 5 (Delning)
 - **Vecka 29-30**: Issue 14 - PWA
 - **Vecka 31**: Slutlig testning och polish
 - **Vecka 32**: Launch preparation och dokumentation
+
+### Fas 4: Deltagarhantering (Vecka 33-42)
+- **Vecka 33-34**: Issue 15 - Schemaläggning
+- **Vecka 35-36**: Issue 16 - Inbjudningar och bokningsflöden
+- **Vecka 37-38**: Issue 17 - Kalenderintegration
+- **Vecka 39-40**: Issue 18 - Deltagarstatistik och Issue 19 - Bedömning (parallellt)
+- **Vecka 41-42**: Issue 20 - Automatiserad planering
+- **Vecka 43**: Slutlig testning och GDPR-granskning
 
 ---
 
@@ -253,6 +304,7 @@ För frågor om denna implementeringsplan:
 ## 📚 Relaterad dokumentation
 
 - [Implementeringsplan](./Implementeringsplan.md) - Detaljerad plan för varje issue
+- [Systemoversyn](./Systemoversyn.md) - Systemöversyn med utökade krav (Fas 4)
 - [Kravspecifikation](../Kravspecifikation.md) - Fullständiga funktionella krav
 - [README](../README.md) - Projektöversikt och getting started
 - [Implementering: Mallsystem](./Implementering-Mallsystem.md)
@@ -262,5 +314,5 @@ För frågor om denna implementeringsplan:
 
 ---
 
-**Senast uppdaterad**: 2025-11-21  
+**Senast uppdaterad**: 2025-11-27  
 **Nästa granskning**: Vid completion av varje fas

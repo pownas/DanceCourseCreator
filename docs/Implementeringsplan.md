@@ -714,15 +714,20 @@ Konvertera applikationen till en Progressive Web App med offline-stöd.
 Dessa funktioner ligger utanför den initiala scopet men kan övervägas längre fram.
 
 #### Ej prioriterat nu:
-- **Elevhantering** - Hantera deltagare, närvaro, progression per elev
 - **Betalningar och fakturering** - Integration med betalsystem
-- **Anmälningssystem** - Kursregistrering och väntelistor
-- **Fullständigt LMS** - Quizzes, bedömningar, certifikat
+- **Fullständigt LMS** - Quizzes, certifikat (bedömning i begränsad form planeras i Fas 4)
 - **Native mobile apps** - iOS/Android-appar
 - **Video upload och hosting** - Egen videoplattform
 - **Live-videointegration** - Zoom/Teams-integration
 - **Avancerad analytics** - Machine learning för pattern-rekommendationer
 - **Multi-tenant SaaS** - Flera organisationer i samma instance
+
+#### Flyttat till Fas 4 (tidigare WON'T):
+- **Elevhantering** → Issue 16, 18 (Deltagarregistrering, närvaro)
+- **Anmälningssystem** → Issue 16 (Inbjudningar och bokningsflöden)
+- **Bedömning** → Issue 19 (Bedömningssystem - begränsad omfattning)
+
+> **Not**: Se [Systemoversyn.md](./Systemoversyn.md) för detaljerad analys av nya krav.
 
 ---
 
@@ -753,6 +758,18 @@ Dessa funktioner ligger utanför den initiala scopet men kan övervägas längre
 14. **Issue 14**: PWA och offline (4-6 dagar)
 
 **Mål**: Professionell, tillgänglig och robust produkt
+
+### Fas 4: Deltagarhantering och schemaläggning (7-10 veckor)
+15. **Issue 15**: Schemaläggning (5-7 dagar)
+16. **Issue 16**: Inbjudningar och bokningsflöden (6-8 dagar)
+17. **Issue 17**: Kalenderintegration (5-7 dagar)
+18. **Issue 18**: Deltagarstatistik och närvaro (4-6 dagar)
+19. **Issue 19**: Bedömningssystem (5-7 dagar)
+20. **Issue 20**: Automatiserad kursplanering (8-12 dagar)
+
+**Mål**: Fullständig hantering av deltagare, schemaläggning och uppföljning
+
+> **Not**: Fas 4 är identifierad baserat på [Systemoversyn.md](./Systemoversyn.md) och kräver ytterligare detaljerad planering.
 
 ---
 
@@ -829,6 +846,7 @@ När nya issues skapas ska de följa denna struktur:
 ## Relaterad dokumentation
 
 - [Kravspecifikation](../Kravspecifikation.md) - Fullständig kravdokumentation
+- [Systemoversyn](./Systemoversyn.md) - Systemöversyn med utökade krav (Fas 4)
 - [Implementering: Mallsystem](./Implementering-Mallsystem.md) - Template system detaljer
 - [Implementering: Teamsamarbete](./Implementering-Teamsamarbete.md) - Team collaboration detaljer
 - [WCAG Compliance Report](./WCAG-Compliance-Report.md) - Tillgänglighetsstatus
@@ -849,5 +867,5 @@ För varje nytt issue som skapas ska en referens till detta dokument inkluderas 
 ---
 
 **Dokumentägare**: Utvecklingsteamet  
-**Senast uppdaterad**: 2025-11-21  
+**Senast uppdaterad**: 2025-11-27  
 **Nästa granskning**: Efter Fas 1 completion
