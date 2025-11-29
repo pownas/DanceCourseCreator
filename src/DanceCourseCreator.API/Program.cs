@@ -141,8 +141,7 @@ app.MapControllers();
 
 // Health check endpoint
 app.MapGet("/api/health", () => new { status = "OK", timestamp = DateTime.UtcNow })
-    .WithName("GetHealth")
-    .WithOpenApi();
+    .WithName("GetHealth");
 
 app.Run();
 
