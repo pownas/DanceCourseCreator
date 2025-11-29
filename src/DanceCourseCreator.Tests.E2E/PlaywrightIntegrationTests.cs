@@ -67,7 +67,7 @@ public class PlaywrightIntegrationTests : PageTest
 
         // Assert
         Assert.IsTrue(response.IsSuccessStatusCode, $"Health check failed with status {response.StatusCode}");
-        Assert.Contains(content, "OK", StringComparison.Ordinal, "Health check response should contain 'OK'");
+        Assert.Contains("OK", content, StringComparison.Ordinal, "Health check response should contain 'OK'");
         
         Console.WriteLine($"✓ Health check passed: {content}");
     }
