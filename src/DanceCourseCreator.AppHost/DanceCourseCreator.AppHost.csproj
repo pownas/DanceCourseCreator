@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DanceCourseCreator.API\DanceCourseCreator.API.csproj" />
-    <ProjectReference Include="..\DanceCourseCreator.Client\DanceCourseCreator.Client.csproj" />
     <ProjectReference Include="..\DanceCourseCreator.Web\DanceCourseCreator.Web.csproj" />
   </ItemGroup>
 
