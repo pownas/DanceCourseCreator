@@ -1,11 +1,25 @@
 ﻿@using DanceCourseCreator.Client.Themes
 @using DanceCourseCreator.Client.Components
 @using Microsoft.AspNetCore.Components.WebAssembly.Hosting
+@using Microsoft.AspNetCore.Components.Web
 
 <CascadingAuthenticationState>
-    <MudThemeProvider Theme="DanceTheme.Theme" />
-    <MudDialogProvider />
-    <MudSnackbarProvider />
+    <ErrorBoundary>
+        <ChildContent>
+            <MudThemeProvider Theme="DanceTheme.Theme" />
+            <MudDialogProvider />
+            <MudSnackbarProvider />
+        </ChildContent>
+        <ErrorContent Context="ex">
+            @* Fallback to default theme if custom theme fails *@
+            <MudThemeProvider />
+            <MudDialogProvider />
+            <MudSnackbarProvider />
+            <MudAlert Severity="Severity.Warning" Class="ma-4">
+                Theme loading failed, using default theme. Error: @ex.Message
+            </MudAlert>
+        </ErrorContent>
+    </ErrorBoundary>
     
     <ErrorBoundaryHandler ShowDetails="@_isDevelopment">
         <Router AppAssembly="@typeof(App).Assembly">
