@@ -13,11 +13,13 @@ builder.Services.Configure<LoggerFilterOptions>(options =>
 
 var api = builder.AddProject<Projects.DanceCourseCreator_API>("api")
     .WithHttpHealthCheck("/health")
-    .WithExternalHttpEndpoints();
+    .WithExternalHttpEndpoints()
+    .WithAnnotation(new ResourceNameAnnotation("Dance API swagger"));
 
 builder.AddProject<Projects.DanceCourseCreator_Web>("web")
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints()
+    .WithAnnotation(new ResourceNameAnnotation("Dance Web App"))
     .WaitFor(api)
     .WithReference(api);
 
