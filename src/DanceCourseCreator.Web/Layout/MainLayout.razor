@@ -1,0 +1,121 @@
+﻿@inherits LayoutComponentBase
+@using DanceCourseCreator.Client.Components
+@inject ILogger<MainLayout> Logger
+@inject ISnackbar Snackbar
+
+<MudLayout>
+    <MudAppBar Elevation="2" Dense="false">
+        <MudIconButton Icon="Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" 
+                       aria-label="Visa/dölj navigeringsmeny" />
+        <MudIcon Icon="Icons.Material.Filled.MusicNote" Color="Color.Inherit" Class="mr-2" />
+        <MudText Typo="Typo.h6" Class="app-title">WCS Kursskapare</MudText>
+        <MudSpacer />
+        
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu>
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Text" StartIcon="Icons.Material.Filled.Person" Color="Color.Inherit">
+                            @context.User.Identity?.Name
+                        </MudButton>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem OnClick="Logout">
+                            <div style="display: flex; align-items: center">
+                                <MudIcon Icon="Icons.Material.Filled.Logout" style="margin-right: 8px"/>
+                                Logga ut
+                            </div>
+                        </MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" Href="/login">
+                    Logga in
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu />
+    </MudDrawer>
+    
+    <MudMainContent>
+        <ErrorBoundary @ref="_errorBoundary">
+            <ChildContent>
+                @Body
+            </ChildContent>
+            <ErrorContent Context="exception">
+                <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+                    <MudAlert Severity="Severity.Error" 
+                              Icon="@Icons.Material.Filled.Error"
+                              Class="mb-4">
+                        <MudText Typo="Typo.h6" Class="mb-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Warning" Class="mr-2" />
+                            Ett oväntat fel har uppstått
+                        </MudText>
+                        <MudText Typo="Typo.body1" Class="mb-3">
+                            Vi beklagar det inträffade. Vänligen försök igen eller kontakta support om problemet kvarstår.
+                        </MudText>
+                        <div class="mt-4 d-flex gap-2">
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       OnClick="RecoverFromError"
+                                       StartIcon="@Icons.Material.Filled.Refresh">
+                                Försök igen
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Secondary" 
+                                       Href="/"
+                                       StartIcon="@Icons.Material.Filled.Home">
+                                Gå till startsidan
+                            </MudButton>
+                        </div>
+                    </MudAlert>
+                </MudContainer>
+            </ErrorContent>
+        </ErrorBoundary>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+    private ErrorBoundary? _errorBoundary;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    private async Task Logout()
+    {
+        try
+        {
+            if (AuthStateProvider is CustomAuthStateProvider authStateProvider)
+            {
+                await authStateProvider.MarkUserAsLoggedOut();
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                Logger.LogWarning("AuthStateProvider is not of expected type CustomAuthStateProvider");
+                Navigation.NavigateTo("/login");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error during logout: {Message}", ex.Message);
+            Snackbar.Add("Ett fel uppstod vid utloggning", Severity.Error);
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private void RecoverFromError()
+    {
+        _errorBoundary?.Recover();
+    }
+}

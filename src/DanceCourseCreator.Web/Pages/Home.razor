@@ -1,0 +1,232 @@
+﻿@page "/"
+@* @attribute [Authorize] *@
+@inject IPatternsService PatternsService
+
+<PageTitle>Kursskapare - Dance Course Creator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <!-- Hero section -->
+    <div class="hero-section mb-6">
+        <MudText Typo="Typo.h3" GutterBottom="true" Class="hero-title">
+            <MudIcon Icon="Icons.Material.Filled.MusicNote" Class="mr-2" Color="Color.Primary" />
+            Välkommen till WCS Kursskapare
+        </MudText>
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="hero-subtitle">
+            Planera, strukturera och dela dina West Coast Swing-lektioner och kurser
+        </MudText>
+    </div>
+    
+    <!-- Demo User Info -->
+    <AuthorizeView>
+        <NotAuthorized>
+            <MudAlert Severity="Severity.Info" Class="mb-6" Icon="Icons.Material.Filled.Info">
+                <MudText Typo="Typo.body1" Class="mb-2">
+                    <strong>Prova tjänsten med demoanvändare:</strong>
+                </MudText>
+                <MudText Typo="Typo.body2">
+                    E-post: <strong>demo@dancecourse.com</strong> | Lösenord: <strong>demo123</strong>
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                    Demoanvändaren har enbart läsrättigheter och kan inte redigera innehåll.
+                </MudText>
+                <MudButton Variant="Variant.Text" 
+                           Color="Color.Primary" 
+                           Href="/login"
+                           StartIcon="Icons.Material.Filled.Login"
+                           Class="mt-2">
+                    Logga in
+                </MudButton>
+            </MudAlert>
+        </NotAuthorized>
+    </AuthorizeView>
+    
+    <!-- Library Overview Stats -->
+    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
+        <MudIcon Icon="Icons.Material.Filled.Analytics" Class="mr-2" />
+        Biblioteksöversikt
+    </MudText>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">@_totalPatterns</div>
+            <p class="stat-label">Tillgängliga mönster</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@_beginnerCount</div>
+            <p class="stat-label">Nybörjarnivå</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@_improverCount</div>
+            <p class="stat-label">Förbättringsnivå</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">@_exerciseCount</div>
+            <p class="stat-label">Övningar</p>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
+        <MudIcon Icon="Icons.Material.Filled.FlashOn" Class="mr-2" />
+        Snabbåtgärder
+    </MudText>
+    <div class="quick-action-grid">
+        <MudCard Class="action-card hover-lift">
+            <div class="action-card-content">
+                <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Primary" Class="icon-large" />
+                <MudText Typo="Typo.h6" GutterBottom="true">Bläddra i turbank</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                    Utforska tillgängliga West Coast Swing-mönster och övningar
+                </MudText>
+            </div>
+            <div class="action-card-actions">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           Href="/patterns"
+                           StartIcon="Icons.Material.Filled.LibraryBooks">
+                    Kom igång
+                </MudButton>
+            </div>
+        </MudCard>
+        
+        <MudCard Class="action-card coming-soon-opacity">
+            <div class="action-card-content">
+                <MudIcon Icon="Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Secondary" Class="icon-large" />
+                <MudText Typo="Typo.h6" GutterBottom="true">
+                    Skapa ny lektion
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Class="ml-2">Kommer snart</MudChip>
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                    Bygg en lektionsplan med mönster och övningar
+                </MudText>
+            </div>
+            <div class="action-card-actions">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Secondary" 
+                           Disabled="true">
+                    Kom igång
+                </MudButton>
+            </div>
+        </MudCard>
+        
+        <MudCard Class="action-card coming-soon-opacity">
+            <div class="action-card-content">
+                <MudIcon Icon="Icons.Material.Filled.School" Size="Size.Large" Color="Color.Tertiary" Class="icon-large" />
+                <MudText Typo="Typo.h6" GutterBottom="true">
+                    Planera kurs
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Class="ml-2">Kommer snart</MudChip>
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                    Designa en fleraveckors kursplan
+                </MudText>
+            </div>
+            <div class="action-card-actions">
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Tertiary" 
+                           Disabled="true">
+                    Kom igång
+                </MudButton>
+            </div>
+        </MudCard>
+    </div>
+    
+    <!-- Getting Started / MVP Info -->
+    <div class="getting-started-section">
+        <MudText Typo="Typo.h5" GutterBottom="true" Class="mb-4 section-header">
+            <MudIcon Icon="Icons.Material.Filled.Help" Class="mr-2" />
+            Komma igång
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mb-4">
+            Detta är din MVP (Minimum Viable Product) för West Coast Swing Kursskapare. För närvarande tillgängliga funktioner:
+        </MudText>
+        <div class="feature-list">
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="feature-icon" />
+                <div class="feature-content">
+                    <MudText Typo="Typo.body2"><strong>Turbank:</strong> Bläddra och visa detaljerad information om WCS-mönster och övningar</MudText>
+                </div>
+            </div>
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="feature-icon" />
+                <div class="feature-content">
+                    <MudText Typo="Typo.body2"><strong>Lektionsbyggare:</strong> Kommer snart - Skapa strukturerade lektionsplaner</MudText>
+                </div>
+            </div>
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="feature-icon" />
+                <div class="feature-content">
+                    <MudText Typo="Typo.body2"><strong>Kursplanering:</strong> Kommer snart - Designa fleraveckors kursplaner</MudText>
+                </div>
+            </div>
+            <div class="feature-item">
+                <MudIcon Icon="Icons.Material.Filled.Construction" Color="Color.Warning" Class="feature-icon" />
+                <div class="feature-content">
+                    <MudText Typo="Typo.body2"><strong>Exportfunktioner:</strong> Kommer snart - Exportera till PDF och Markdown</MudText>
+                </div>
+            </div>
+        </div>
+        <MudButton Variant="Variant.Outlined" 
+                   Color="Color.Primary" 
+                   Href="/patterns"
+                   StartIcon="Icons.Material.Filled.LibraryBooks">
+            Utforska turbank
+        </MudButton>
+    </div>
+</MudContainer>
+
+@code {
+    private int _totalPatterns = 0;
+    private int _beginnerCount = 0;
+    private int _improverCount = 0;
+    private int _exerciseCount = 0;
+#pragma warning disable CS0414
+    private bool _hasError = false;
+#pragma warning restore CS0414
+
+    [Inject] private ILogger<Home> Logger { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStatistics();
+    }
+
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            _hasError = false;
+            var patterns = await PatternsService.GetPatternsAsync();
+            if (patterns != null)
+            {
+                _totalPatterns = patterns.Count;
+                _beginnerCount = patterns.Count(p => p.Level?.ToLower() == "beginner");
+                _improverCount = patterns.Count(p => p.Level?.ToLower() == "improver");
+                _exerciseCount = patterns.Count(p => p.Type?.ToLower() == "exercise");
+            }
+            else
+            {
+                // API returned null, use fallback
+                Logger.LogWarning("PatternsService returned null, using fallback values");
+                SetFallbackValues();
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error loading patterns, using fallback values: {Message}", ex.Message);
+            SetFallbackValues();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error loading statistics: {Message}", ex.Message);
+            SetFallbackValues();
+            _hasError = true;
+        }
+    }
+
+    private void SetFallbackValues()
+    {
+        _totalPatterns = 6;
+        _beginnerCount = 4;
+        _improverCount = 1;
+        _exerciseCount = 2;
+    }
+}

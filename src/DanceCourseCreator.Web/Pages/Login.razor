@@ -1,0 +1,102 @@
+@page "/login"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Logga in - WCS Kursskapare</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8">
+        <MudForm @ref="form" @onsubmit:preventDefault="true">
+            <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+                WCS Kursskapare
+            </MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" GutterBottom="true" Class="mb-6">
+                Logga in på ditt konto
+            </MudText>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4">
+                    @errorMessage
+                </MudAlert>
+            }
+
+            <MudTextField @bind-Value="loginRequest.Email"
+                          Label="E-post"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          RequiredError="E-post krävs"
+                          Class="mb-4" />
+
+            <MudTextField @bind-Value="loginRequest.Password"
+                          Label="Lösenord"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Required="true"
+                          RequiredError="Lösenord krävs"
+                          Class="mb-6" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       Disabled="isLoading"
+                       OnClick="HandleLogin">
+                @if (isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ml-2">Loggar in...</MudText>
+                }
+                else
+                {
+                    <MudText>Logga in</MudText>
+                }
+            </MudButton>
+        </MudForm>
+
+        <MudDivider Class="my-6" />
+
+        <MudText Typo="Typo.body2" Align="Align.Center">
+            Har du inget konto?
+            <MudLink Href="/register" Color="Color.Primary">Registrera dig</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private MudForm form = null!;
+    private LoginRequest loginRequest = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var result = await AuthService.LoginAsync(loginRequest);
+            
+            if (result != null)
+            {
+                var authStateProvider = (CustomAuthStateProvider)AuthStateProvider;
+                authStateProvider.MarkUserAsAuthenticated(result.User);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Ogiltig e-post eller lösenord.";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Ett fel uppstod vid inloggning. Försök igen.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

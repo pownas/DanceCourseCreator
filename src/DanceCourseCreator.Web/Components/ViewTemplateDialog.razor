@@ -1,0 +1,209 @@
+@using MudBlazor
+@using System.Text.Json
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-2">@Template?.Name</MudText>
+                    <MudChip T="string" Size="Size.Small" 
+                             Color="@(Template?.Scope == "Lesson" ? Color.Primary : Color.Secondary)"
+                             Class="mb-4">
+                        @(Template?.Scope == "Lesson" ? "LEKTIONSMALL" : "KURSMALL")
+                    </MudChip>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Information</MudText>
+                        <MudGrid>
+                            <MudItem xs="12" md="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Skapad</MudText>
+                                <MudText Typo="Typo.body1">@Template?.CreatedAt.ToString("yyyy-MM-dd HH:mm")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Senast uppdaterad</MudText>
+                                <MudText Typo="Typo.body1">@Template?.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</MudText>
+                            </MudItem>
+                            @if (!string.IsNullOrEmpty(Template?.Team))
+                            {
+                                <MudItem xs="12">
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">Team</MudText>
+                                    <MudText Typo="Typo.body1">@Template.Team</MudText>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Mallinnehåll</MudText>
+                        @if (parsedContent.ValueKind != JsonValueKind.Undefined)
+                        {
+                            @if (Template?.Scope == "Lesson")
+                            {
+                                <MudGrid>
+                                    @if (parsedContent.TryGetProperty("level", out var levelProp))
+                                    {
+                                        <MudItem xs="12" md="6">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">Nivå</MudText>
+                                            <MudText Typo="Typo.body1">@levelProp.GetString()?.ToUpperInvariant()</MudText>
+                                        </MudItem>
+                                    }
+                                    @if (parsedContent.TryGetProperty("duration", out var durationProp))
+                                    {
+                                        <MudItem xs="12" md="6">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">Längd</MudText>
+                                            <MudText Typo="Typo.body1">@durationProp.GetInt32() minuter</MudText>
+                                        </MudItem>
+                                    }
+                                    @if (parsedContent.TryGetProperty("sections", out var sectionsProp) && sectionsProp.ValueKind == JsonValueKind.Array)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">Sektioner</MudText>
+                                            @foreach (var section in sectionsProp.EnumerateArray())
+                                            {
+                                                <MudCard Class="mb-2">
+                                                    <MudCardContent Class="pa-3">
+                                                        <MudGrid>
+                                                            <MudItem xs="8">
+                                                                <MudText Typo="Typo.subtitle2">
+                                                                    @(section.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : "Unnamed section")
+                                                                </MudText>
+                                                            </MudItem>
+                                                            <MudItem xs="4" Class="text-right">
+                                                                @if (section.TryGetProperty("duration", out var secDurationProp))
+                                                                {
+                                                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@secDurationProp.GetInt32() min</MudText>
+                                                                }
+                                                            </MudItem>
+                                                            @if (section.TryGetProperty("notes", out var notesProp) && !string.IsNullOrEmpty(notesProp.GetString()))
+                                                            {
+                                                                <MudItem xs="12">
+                                                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@notesProp.GetString()</MudText>
+                                                                </MudItem>
+                                                            }
+                                                        </MudGrid>
+                                                    </MudCardContent>
+                                                </MudCard>
+                                            }
+                                        </MudItem>
+                                    }
+                                    @if (parsedContent.TryGetProperty("notes", out var notesProp) && !string.IsNullOrEmpty(notesProp.GetString()))
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">Anteckningar</MudText>
+                                            <MudText Typo="Typo.body1">@notesProp.GetString()</MudText>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            }
+                            else if (Template?.Scope == "Course")
+                            {
+                                <MudGrid>
+                                    @if (parsedContent.TryGetProperty("level", out var levelProp))
+                                    {
+                                        <MudItem xs="12" md="6">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">Nivå</MudText>
+                                            <MudText Typo="Typo.body1">@levelProp.GetString()?.ToUpperInvariant()</MudText>
+                                        </MudItem>
+                                    }
+                                    @if (parsedContent.TryGetProperty("durationWeeks", out var durationProp))
+                                    {
+                                        <MudItem xs="12" md="6">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary">Längd</MudText>
+                                            <MudText Typo="Typo.body1">@durationProp.GetInt32() veckor</MudText>
+                                        </MudItem>
+                                    }
+                                    @if (parsedContent.TryGetProperty("goals", out var goalsProp) && goalsProp.ValueKind == JsonValueKind.Array)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">Kursmål</MudText>
+                                            @foreach (var goal in goalsProp.EnumerateArray())
+                                            {
+                                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ma-1">
+                                                    @goal.GetString()
+                                                </MudChip>
+                                            }
+                                        </MudItem>
+                                    }
+                                    @if (parsedContent.TryGetProperty("themesByWeek", out var themesProp) && themesProp.ValueKind == JsonValueKind.Array)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">Teman per vecka</MudText>
+                                            <MudGrid>
+                                                @{
+                                                    var weekIndex = 1;
+                                                }
+                                                @foreach (var theme in themesProp.EnumerateArray())
+                                                {
+                                                    <MudItem xs="12" sm="6" md="4">
+                                                        <MudCard Class="mb-2">
+                                                            <MudCardContent Class="pa-3">
+                                                                <MudText Typo="Typo.subtitle2" Class="mb-1">Vecka @(weekIndex++)</MudText>
+                                                                <MudText Typo="Typo.body2">@theme.GetString()</MudText>
+                                                            </MudCardContent>
+                                                        </MudCard>
+                                                    </MudItem>
+                                                }
+                                            </MudGrid>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Kunde inte läsa mallinnehåll
+                            </MudText>
+                            <MudExpansionPanels Class="mt-3">
+                                <MudExpansionPanel Text="Visa rådata">
+                                    <MudTextField Value="@Template?.Content" 
+                                                  ReadOnly="true"
+                                                  Lines="10"
+                                                  Variant="Variant.Outlined" />
+                                </MudExpansionPanel>
+                            </MudExpansionPanels>
+                        }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Stäng</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [Parameter] public Template? Template { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; } = false;
+
+    private JsonElement parsedContent;
+
+    protected override void OnInitialized()
+    {
+        if (Template != null && !string.IsNullOrEmpty(Template.Content))
+        {
+            try
+            {
+                parsedContent = JsonSerializer.Deserialize<JsonElement>(Template.Content);
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Error parsing template content: {ex.Message}");
+                parsedContent = new JsonElement();
+            }
+        }
+    }
+
+    private void Close()
+    {
+        MudDialog.Close();
+    }
+}

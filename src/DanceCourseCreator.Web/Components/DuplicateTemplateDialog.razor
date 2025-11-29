@@ -1,0 +1,193 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ITemplatesService TemplatesService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-2">Duplicera mall</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                        Skapa en ny @(Template?.Scope == "Lesson" ? "lektion" : "kurs") baserad på mallen "@Template?.Name"
+                    </MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Mallens innehåll</MudText>
+                        <MudGrid>
+                            <MudItem xs="12" md="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Typ</MudText>
+                                <MudText Typo="Typo.body1">@(Template?.Scope == "Lesson" ? "Lektionsmall" : "Kursmall")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" md="6">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Skapad</MudText>
+                                <MudText Typo="Typo.body1">@Template?.CreatedAt.ToString("yyyy-MM-dd")</MudText>
+                            </MudItem>
+                            @if (!string.IsNullOrEmpty(Template?.Team))
+                            {
+                                <MudItem xs="12">
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">Team-mall</MudText>
+                                    <MudText Typo="Typo.body1">@Template.Team</MudText>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Ny @(Template?.Scope == "Lesson" ? "lektion" : "kurs")</MudText>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="duplicateRequest.Name" 
+                                              Label="@(Template?.Scope == "Lesson" ? "Lektionsnamn" : "Kursnamn")" 
+                                              Required="true"
+                                              Error="@(!string.IsNullOrEmpty(nameError))"
+                                              ErrorText="@nameError"
+                                              Placeholder="@(Template?.Scope == "Lesson" ? "T.ex. 'WCS Grundläggande - 2024-03-15'" : "T.ex. 'Nybörjarkurs Våren 2024'")" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Info" Class="mb-4">
+                        <strong>Vad händer när du duplicerar?</strong><br/>
+                        En ny @(Template?.Scope == "Lesson" ? "lektion" : "kurs") skapas med strukturen från mallen. 
+                        Du kan sedan redigera och anpassa innehållet efter dina behov.
+                        @if (Template?.Scope == "Course")
+                        {
+                            <br/><br/>
+                            <text><strong>Observera:</strong> Endast kursstrukturen kopieras. Du behöver lägga till specifika lektioner separat.</text>
+                        }
+                    </MudAlert>
+                </MudItem>
+
+                @if (isDuplicating)
+                {
+                    <MudItem xs="12" Class="text-center">
+                        <MudProgressCircular Indeterminate="true" />
+                        <MudText Typo="Typo.body1" Class="mt-2">Skapar @(Template?.Scope == "Lesson" ? "lektion" : "kurs")...</MudText>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Disabled="@isDuplicating">Avbryt</MudButton>
+        <MudButton Color="Color.Primary" 
+                   OnClick="DuplicateTemplate" 
+                   Disabled="@isDuplicating"
+                   Variant="Variant.Filled"
+                   StartIcon="Icons.Material.Filled.ContentCopy">
+            @if (isDuplicating)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Duplicerar...</MudText>
+            }
+            else
+            {
+                <MudText>Skapa @(Template?.Scope == "Lesson" ? "lektion" : "kurs")</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [Parameter] public Template? Template { get; set; }
+
+    private DuplicateTemplateRequest duplicateRequest = new();
+    private bool isDuplicating = false;
+    private string nameError = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (Template != null)
+        {
+            // Suggest a name based on template name and current date
+            var dateStr = DateTime.Now.ToString("yyyy-MM-dd");
+            if (Template.Scope == "Lesson")
+            {
+                duplicateRequest.Name = $"{Template.Name} - {dateStr}";
+            }
+            else
+            {
+                var season = GetCurrentSeason();
+                var year = DateTime.Now.Year;
+                duplicateRequest.Name = $"{Template.Name} {season} {year}";
+            }
+        }
+    }
+
+    private string GetCurrentSeason()
+    {
+        var month = DateTime.Now.Month;
+        return month switch
+        {
+            >= 3 and <= 5 => "Vår",
+            >= 6 and <= 8 => "Sommar",
+            >= 9 and <= 11 => "Höst",
+            _ => "Vinter"
+        };
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+
+    private async Task DuplicateTemplate()
+    {
+        if (Template == null) return;
+
+        // Validate name
+        nameError = string.Empty;
+        if (string.IsNullOrWhiteSpace(duplicateRequest.Name))
+        {
+            nameError = $"{(Template.Scope == "Lesson" ? "Lektions" : "Kurs")}namn krävs";
+            return;
+        }
+
+        isDuplicating = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await TemplatesService.DuplicateTemplateAsync(Template.Id, duplicateRequest);
+            if (result != null)
+            {
+                Snackbar.Add($"{result.ResourceType} skapad framgångsrikt!", Severity.Success);
+                
+                // Navigate to the created resource
+                if (result.ResourceType == "Lesson")
+                {
+                    Navigation.NavigateTo($"/lessons");
+                }
+                else if (result.ResourceType == "Course")
+                {
+                    Navigation.NavigateTo($"/courses");
+                }
+                
+                MudDialog.Close(DialogResult.Ok(result));
+            }
+            else
+            {
+                Snackbar.Add("Fel vid duplicering av mall", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid duplicering av mall: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isDuplicating = false;
+            StateHasChanged();
+        }
+    }
+}

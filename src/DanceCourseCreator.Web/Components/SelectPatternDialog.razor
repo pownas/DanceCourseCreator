@@ -1,0 +1,235 @@
+@using MudBlazor
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer Style="max-height: 60vh; overflow-y: auto;">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-4">Select Pattern or Exercise</MudText>
+                    
+                    <!-- Search and Filter -->
+                    <MudGrid Class="mb-4">
+                        <MudItem xs="12" md="4">
+                            <MudTextField Value="searchText" 
+                                          Label="Search" 
+                                          AdornmentIcon="Icons.Material.Filled.Search"
+                                          Adornment="Adornment.Start"
+                                          ValueChanged="(string value) => { searchText = value; FilterPatterns(); }" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelect Value="filterType" 
+                                       Label="Type" 
+                                       ValueChanged="(string value) => { filterType = value; FilterPatterns(); }"
+                                       Clearable="true">
+                                <MudSelectItem Value="@("")">All Types</MudSelectItem>
+                                <MudSelectItem Value="@("Pattern")">Pattern</MudSelectItem>
+                                <MudSelectItem Value="@("Exercise")">Exercise</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelect Value="filterLevel" 
+                                       Label="Level" 
+                                       ValueChanged="(string value) => { filterLevel = value; FilterPatterns(); }"
+                                       Clearable="true">
+                                <MudSelectItem Value="@("")">All Levels</MudSelectItem>
+                                <MudSelectItem Value="@("Beginner")">Beginner</MudSelectItem>
+                                <MudSelectItem Value="@("Improver")">Improver</MudSelectItem>
+                                <MudSelectItem Value="@("Intermediate")">Intermediate</MudSelectItem>
+                                <MudSelectItem Value="@("Advanced")">Advanced</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+
+                <MudItem xs="12">
+                    @if (filteredPatterns.Any())
+                    {
+                        <MudList T="string">
+                            @foreach (var pattern in filteredPatterns)
+                            {
+                                var isAlreadyAdded = ExistingItems.Contains(pattern.Id);
+                                
+                                <MudListItem T="string" OnClick="() => SelectPattern(pattern)" 
+                                             Disabled="isAlreadyAdded"
+                                             Class="@(isAlreadyAdded ? "pattern-disabled" : "pattern-selectable")">
+                                    <div class="d-flex justify-space-between align-center full-width">
+                                        <div class="flex-grow-1">
+                                            <MudText Typo="Typo.body1">
+                                                @pattern.Name
+                                                @if (isAlreadyAdded)
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-2">Already Added</MudChip>
+                                                }
+                                            </MudText>
+                                            <div class="d-flex align-center mt-1">
+                                                <MudChip T="string" Size="Size.Small" 
+                                                         Color="GetTypeColor(pattern.Type)" 
+                                                         Class="mr-1">
+                                                    @pattern.Type
+                                                </MudChip>
+                                                <MudChip T="string" Size="Size.Small" 
+                                                         Color="GetLevelColor(pattern.Level)" 
+                                                         Class="mr-1">
+                                                    @pattern.Level
+                                                </MudChip>
+                                                <MudChip T="string" Size="Size.Small" 
+                                                         Color="Color.Default" 
+                                                         Class="mr-1">
+                                                    @pattern.EstimatedMinutes min
+                                                </MudChip>
+                                                @if (pattern.Tags.Any())
+                                                {
+                                                    @foreach (var tag in pattern.Tags.Take(3))
+                                                    {
+                                                        <MudChip T="string" Size="Size.Small" 
+                                                                 Color="Color.Surface" 
+                                                                 Class="mr-1">
+                                                            @tag
+                                                        </MudChip>
+                                                    }
+                                                    @if (pattern.Tags.Count > 3)
+                                                    {
+                                                        <MudText Typo="Typo.caption" Class="ml-1">+@(pattern.Tags.Count - 3) more</MudText>
+                                                    }
+                                                }
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(pattern.Description))
+                                            {
+                                                <MudText Typo="Typo.body2" Class="mt-1 text-truncate">
+                                                    @pattern.Description
+                                                </MudText>
+                                            }
+                                        </div>
+                                        
+                                        @if (!isAlreadyAdded)
+                                        {
+                                            <MudIconButton Icon="Icons.Material.Filled.Add" 
+                                                           Color="Color.Primary"
+                                                           Size="Size.Small" />
+                                        }
+                                    </div>
+                                </MudListItem>
+                                <MudDivider />
+                            }
+                        </MudList>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info">
+                            @if (Patterns.Any())
+                            {
+                                <span>No patterns/exercises match your current filters.</span>
+                            }
+                            else
+                            {
+                                <span>No patterns/exercises available. Create some patterns first.</span>
+                            }
+                        </MudAlert>
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .pattern-selectable:hover {
+        background-color: var(--mud-palette-action-hover);
+        cursor: pointer;
+    }
+    
+    .pattern-disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .full-width {
+        width: 100%;
+    }
+</style>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [Parameter] public List<PatternOrExercise> Patterns { get; set; } = new();
+    [Parameter] public List<string> ExistingItems { get; set; } = new();
+
+    private string searchText = string.Empty;
+    private string filterType = string.Empty;
+    private string filterLevel = string.Empty;
+    private List<PatternOrExercise> filteredPatterns = new();
+
+    protected override void OnInitialized()
+    {
+        FilterPatterns();
+    }
+
+    private void FilterPatterns()
+    {
+        filteredPatterns = Patterns.Where(p =>
+        {
+            // Search filter
+            if (!string.IsNullOrEmpty(searchText) && 
+                !p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) &&
+                !p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase) &&
+                !p.Tags.Any(t => t.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            // Type filter
+            if (!string.IsNullOrEmpty(filterType) && 
+                !p.Type.Equals(filterType, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // Level filter
+            if (!string.IsNullOrEmpty(filterLevel) && 
+                !p.Level.Equals(filterLevel, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
+        }).OrderBy(p => p.Name).ToList();
+        
+        StateHasChanged();
+    }
+
+    private void SelectPattern(PatternOrExercise pattern)
+    {
+        if (!ExistingItems.Contains(pattern.Id))
+        {
+            MudDialog.Close(DialogResult.Ok(pattern.Id));
+        }
+    }
+
+    private void Cancel() => MudDialog.Close();
+
+    private Color GetTypeColor(string type)
+    {
+        return type.ToLower() switch
+        {
+            "pattern" => Color.Primary,
+            "exercise" => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private Color GetLevelColor(string level)
+    {
+        return level.ToLower() switch
+        {
+            "beginner" => Color.Success,
+            "improver" => Color.Info,
+            "intermediate" => Color.Warning,
+            "advanced" => Color.Error,
+            _ => Color.Default
+        };
+    }
+}

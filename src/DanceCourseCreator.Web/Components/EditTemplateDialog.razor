@@ -1,0 +1,340 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ITemplatesService TemplatesService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-4">Redigera mall</MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Grundläggande information</MudText>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="updateRequest.Name" 
+                                              Label="Mallnamn" 
+                                              Required="true"
+                                              Error="@(!string.IsNullOrEmpty(nameError))"
+                                              ErrorText="@nameError" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Typ: @(Template?.Scope == "Lesson" ? "Lektionsmall" : "Kursmall")
+                                </MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3">Mallinnehåll</MudText>
+                        <MudTabs>
+                            <MudTabPanel Text="Enkel redigering">
+                                @if (Template?.Scope == "Lesson")
+                                {
+                                    <MudGrid>
+                                        <MudItem xs="12" md="6">
+                                            <MudSelect @bind-Value="lessonLevel" Label="Nivå">
+                                                <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                                <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                                <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                                <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="12" md="6">
+                                            <MudSelect @bind-Value="lessonDuration" Label="Längd (minuter)" T="int">
+                                                <MudSelectItem Value="60">60 minuter</MudSelectItem>
+                                                <MudSelectItem Value="75">75 minuter</MudSelectItem>
+                                                <MudSelectItem Value="90">90 minuter</MudSelectItem>
+                                                <MudSelectItem Value="120">120 minuter</MudSelectItem>
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudTextField @bind-Value="lessonNotes" 
+                                                          Label="Anteckningar/instruktioner" 
+                                                          Lines="3" />
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+                                else if (Template?.Scope == "Course")
+                                {
+                                    <MudGrid>
+                                        <MudItem xs="12" md="6">
+                                            <MudSelect @bind-Value="courseLevel" Label="Nivå">
+                                                <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                                                <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                                                <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                                                <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="12" md="6">
+                                            <MudSelect @bind-Value="courseDurationWeeks" Label="Kurslängd (veckor)" T="int">
+                                                <MudSelectItem Value="4">4 veckor</MudSelectItem>
+                                                <MudSelectItem Value="6">6 veckor</MudSelectItem>
+                                                <MudSelectItem Value="8">8 veckor</MudSelectItem>
+                                                <MudSelectItem Value="10">10 veckor</MudSelectItem>
+                                                <MudSelectItem Value="12">12 veckor</MudSelectItem>
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.subtitle2" Class="mb-2">Kursmål</MudText>
+                                            <MudGrid>
+                                                @for (int i = 0; i < courseGoals.Count; i++)
+                                                {
+                                                    var index = i; // Capture for closure
+                                                    <MudItem xs="11">
+                                                        <MudTextField @bind-Value="courseGoals[index]" 
+                                                                      Label="@($"Mål {index + 1}")" />
+                                                    </MudItem>
+                                                    <MudItem xs="1">
+                                                        <MudIconButton Icon="Icons.Material.Filled.Remove" 
+                                                                       Color="Color.Error" 
+                                                                       OnClick="@(() => courseGoals.RemoveAt(index))" />
+                                                    </MudItem>
+                                                }
+                                                <MudItem xs="12">
+                                                    <MudButton StartIcon="Icons.Material.Filled.Add" 
+                                                               OnClick="@(() => courseGoals.Add(""))"
+                                                               Variant="Variant.Outlined">
+                                                        Lägg till mål
+                                                    </MudButton>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudItem>
+                                    </MudGrid>
+                                }
+                            </MudTabPanel>
+                            <MudTabPanel Text="Avancerad redigering (JSON)">
+                                <MudTextField @bind-Value="jsonContent" 
+                                              Label="JSON-innehåll" 
+                                              Lines="15"
+                                              Variant="Variant.Outlined"
+                                              Error="@(!string.IsNullOrEmpty(jsonError))"
+                                              ErrorText="@jsonError"
+                                              OnBlur="ValidateJson" />
+                                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                                    Varning: Direkt JSON-redigering kan orsaka fel om formatet inte är korrekt.
+                                </MudText>
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Avbryt</MudButton>
+        <MudButton Color="Color.Primary" 
+                   OnClick="UpdateTemplate" 
+                   Disabled="@isUpdating"
+                   Variant="Variant.Filled">
+            @if (isUpdating)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                <MudText Class="ms-2">Uppdaterar...</MudText>
+            }
+            else
+            {
+                <MudText>Spara ändringar</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [Parameter] public Template? Template { get; set; }
+
+    private UpdateTemplateRequest updateRequest = new();
+    private bool isUpdating = false;
+    private string nameError = string.Empty;
+    private string jsonError = string.Empty;
+    private string jsonContent = string.Empty;
+
+    // Lesson specific fields
+    private string lessonLevel = "beginner";
+    private int lessonDuration = 75;
+    private string lessonNotes = string.Empty;
+
+    // Course specific fields
+    private string courseLevel = "beginner";
+    private int courseDurationWeeks = 6;
+    private List<string> courseGoals = new() { "" };
+
+    protected override void OnInitialized()
+    {
+        if (Template != null)
+        {
+            updateRequest.Name = Template.Name;
+            updateRequest.Team = Template.Team;
+            jsonContent = Template.Content;
+
+            // Parse existing content for simple editing
+            try
+            {
+                var contentElement = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(Template.Content);
+                
+                if (Template.Scope == "Lesson")
+                {
+                    if (contentElement.TryGetProperty("level", out var levelProp))
+                        lessonLevel = levelProp.GetString() ?? "beginner";
+                    
+                    if (contentElement.TryGetProperty("duration", out var durationProp))
+                        lessonDuration = durationProp.GetInt32();
+                    
+                    if (contentElement.TryGetProperty("notes", out var notesProp))
+                        lessonNotes = notesProp.GetString() ?? string.Empty;
+                }
+                else if (Template.Scope == "Course")
+                {
+                    if (contentElement.TryGetProperty("level", out var levelProp))
+                        courseLevel = levelProp.GetString() ?? "beginner";
+                    
+                    if (contentElement.TryGetProperty("durationWeeks", out var durationProp))
+                        courseDurationWeeks = durationProp.GetInt32();
+                    
+                    if (contentElement.TryGetProperty("goals", out var goalsProp) && goalsProp.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        courseGoals = goalsProp.EnumerateArray()
+                            .Select(g => g.GetString() ?? string.Empty)
+                            .ToList();
+                        
+                        if (!courseGoals.Any())
+                            courseGoals.Add("");
+                    }
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                // If parsing fails, user can edit in JSON mode
+            }
+        }
+    }
+
+    private void ValidateJson()
+    {
+        jsonError = string.Empty;
+        if (!string.IsNullOrWhiteSpace(jsonContent))
+        {
+            try
+            {
+                System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(jsonContent);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                jsonError = $"Ogiltigt JSON: {ex.Message}";
+            }
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+
+    private async Task UpdateTemplate()
+    {
+        if (Template == null) return;
+
+        // Validate name
+        nameError = string.Empty;
+        if (string.IsNullOrWhiteSpace(updateRequest.Name))
+        {
+            nameError = "Mallnamn krävs";
+            return;
+        }
+
+        // Validate JSON
+        ValidateJson();
+        if (!string.IsNullOrEmpty(jsonError))
+        {
+            return;
+        }
+
+        isUpdating = true;
+        StateHasChanged();
+
+        try
+        {
+            // Build content from simple fields if JSON wasn't modified directly
+            var originalContent = Template.Content;
+            if (jsonContent == originalContent)
+            {
+                // User didn't modify JSON directly, so build from simple fields
+                if (Template.Scope == "Lesson")
+                {
+                    var lessonContent = new
+                    {
+                        level = lessonLevel,
+                        duration = lessonDuration,
+                        sections = new object[]
+                        {
+                            new { name = "Uppvärmning", duration = 10, patterns = new string[0], notes = "Fokus på connection", teachingPoints = new string[0] },
+                            new { name = "Teknikblock", duration = 20, patterns = new string[0], teachingPoints = new string[0], notes = "" },
+                            new { name = "Mönster", duration = 30, patterns = new string[0], teachingPoints = new string[0], notes = "" },
+                            new { name = "Repetition", duration = 10, patterns = new string[0], notes = "Säkerställ förståelse", teachingPoints = new string[0] },
+                            new { name = "Social", duration = 5, patterns = new string[0], notes = "Fri dans", teachingPoints = new string[0] }
+                        },
+                        goals = new string[] { "Utveckla dansfärdigheter", "Förbättra teknik" },
+                        notes = lessonNotes
+                    };
+                    updateRequest.Content = System.Text.Json.JsonSerializer.Serialize(lessonContent);
+                }
+                else // Course
+                {
+                    var cleanGoals = courseGoals.Where(g => !string.IsNullOrWhiteSpace(g)).ToList();
+                    if (!cleanGoals.Any())
+                    {
+                        cleanGoals.Add("Lära grundläggande WCS");
+                    }
+
+                    var themesByWeek = new List<string>();
+                    for (int i = 0; i < courseDurationWeeks; i++)
+                    {
+                        themesByWeek.Add($"Vecka {i + 1} tema");
+                    }
+
+                    var courseContent = new
+                    {
+                        level = courseLevel,
+                        durationWeeks = courseDurationWeeks,
+                        goals = cleanGoals,
+                        themesByWeek = themesByWeek
+                    };
+                    updateRequest.Content = System.Text.Json.JsonSerializer.Serialize(courseContent);
+                }
+            }
+            else
+            {
+                // User modified JSON directly
+                updateRequest.Content = jsonContent;
+            }
+
+            var updatedTemplate = await TemplatesService.UpdateTemplateAsync(Template.Id, updateRequest);
+            if (updatedTemplate != null)
+            {
+                Snackbar.Add("Mall uppdaterad framgångsrikt!", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(updatedTemplate));
+            }
+            else
+            {
+                Snackbar.Add("Fel vid uppdatering av mall", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid uppdatering av mall: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isUpdating = false;
+            StateHasChanged();
+        }
+    }
+}
