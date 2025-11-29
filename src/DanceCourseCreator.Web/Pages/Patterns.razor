@@ -92,22 +92,20 @@
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudCard Class="mb-4" Style="height: 100%;">
                                         <MudCardContent>
-                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                                <MudText Typo="Typo.h6" Style="flex: 1;">@pattern.Name</MudText>
-                                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                                    <MudChip T="string" Size="Size.Small" Color="GetChipColor(pattern.Level)">
-                                                        @pattern.Level?.ToUpperInvariant()
+                                            <MudText Typo="Typo.h6" Class="mb-2">@pattern.Name</MudText>
+                                            <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px;">
+                                                <MudChip T="string" Size="Size.Small" Color="GetChipColor(pattern.Level)">
+                                                    @pattern.Level?.ToUpperInvariant()
+                                                </MudChip>
+                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="GetTypeColor(pattern.Type)">
+                                                    @(pattern.Type?.ToUpperInvariant() == "PATTERN" ? "MÖNSTER" : "ÖVNING")
+                                                </MudChip>
+                                                @if (!string.IsNullOrEmpty(pattern.DanceStyle))
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" Color="Color.Info">
+                                                        @GetDanceStyleDisplayName(pattern.DanceStyle)
                                                     </MudChip>
-                                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="GetTypeColor(pattern.Type)">
-                                                        @(pattern.Type?.ToUpperInvariant() == "PATTERN" ? "MÖNSTER" : "ÖVNING")
-                                                    </MudChip>
-                                                    @if (!string.IsNullOrEmpty(pattern.DanceStyle))
-                                                    {
-                                                        <MudChip T="string" Size="Size.Small" Color="Color.Info">
-                                                            @GetDanceStyleDisplayName(pattern.DanceStyle)
-                                                        </MudChip>
-                                                    }
-                                                </div>
+                                                }
                                             </div>
                                             <MudText Typo="Typo.body2" Class="mb-3" Style="color: var(--mud-palette-text-secondary);">
                                                 @(string.IsNullOrEmpty(pattern.Description) ? "Ingen beskrivning" : 
