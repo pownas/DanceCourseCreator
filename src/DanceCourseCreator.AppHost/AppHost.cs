@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -10,9 +11,11 @@ builder.Services.Configure<LoggerFilterOptions>(options =>
     options.Rules.Add(new LoggerFilterRule(null, "Microsoft.AspNetCore.DataProtection", LogLevel.Error, null));
 });
 
-var api = builder.AddProject<Projects.DanceCourseCreator_API>("dancecoursecreator-api");
+var api = builder.AddProject<Projects.DanceCourseCreator_API>("dancecoursecreator-api")
+    .WithHttpHealthCheck("/health");
 
 builder.AddProject<Projects.DanceCourseCreator_Client>("dancecoursecreator-blazorclient")
+    .WithHttpHealthCheck("/health")
     .WaitFor(api)
     .WithReference(api);
 
@@ -30,7 +33,6 @@ class StartupMessageService : IHostedService
         _ = Task.Run(async () =>
         {
             await Task.Delay(500, cancellationToken);
-            Console.WriteLine();
             Console.WriteLine("========================================");
             Console.WriteLine("✅ All services started successfully");
             Console.WriteLine("========================================");

@@ -143,6 +143,14 @@ app.MapControllers();
 app.MapGet("/api/health", () => new { status = "OK", timestamp = DateTime.UtcNow })
     .WithName("GetHealth");
 
+// Log application started with timestamp
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+lifetime.ApplicationStarted.Register(() =>
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Application started at {StartTime}", DateTime.UtcNow);
+});
+
 app.Run();
 
 // Make Program accessible for integration tests
