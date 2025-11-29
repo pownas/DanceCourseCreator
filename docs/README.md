@@ -48,6 +48,20 @@ Innehåller:
 
 **Använd detta** som dagligt referensdokument under utveckling.
 
+### [🎨 Nytt Gränssnitt - Issues](./Issues-Nytt-Gransnitt.md)
+**SUB-ISSUES** för implementation av det nya gränssnittet.
+
+Innehåller:
+- 41 detaljerade sub-issues för UI-implementation
+- 6 faser: Layout, Turbank, Lektioner, Kurser, Polish, Test
+- Beroendekarta och prioriteringar
+- Acceptanskriterier per issue
+- Labels och milestones
+
+**Relaterad dokumentation**:
+- [Kravspecifikation-Nytt-Gransnitt.md](./Kravspecifikation-Nytt-Gransnitt.md)
+- [Implementeringsplan-Nytt-Gransnitt.md](./Implementeringsplan-Nytt-Gransnitt.md)
+
 ---
 
 ## 📚 Implementeringsguider för specifika funktioner
