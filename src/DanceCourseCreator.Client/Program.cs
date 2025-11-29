@@ -14,8 +14,11 @@ builder.AddServiceDefaults();
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Configure API HttpClient
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5274") });
+// Configure API HttpClient - use service discovery when available, fallback to localhost
+var apiBaseUrl = builder.Configuration["services:dancecoursecreator-api:https:0"] 
+    ?? builder.Configuration["services:dancecoursecreator-api:http:0"]
+    ?? "http://localhost:5139";
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
