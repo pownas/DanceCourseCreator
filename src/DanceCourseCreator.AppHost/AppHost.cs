@@ -1,7 +1,14 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var builder = DistributedApplication.CreateBuilder(args);
+
+// Suppress DataProtection warnings
+builder.Services.Configure<LoggerFilterOptions>(options =>
+{
+    options.Rules.Add(new LoggerFilterRule(null, "Microsoft.AspNetCore.DataProtection", LogLevel.Error, null));
+});
 
 var api = builder.AddProject<Projects.DanceCourseCreator_API>("dancecoursecreator-api");
 
