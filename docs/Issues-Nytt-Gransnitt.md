@@ -11,7 +11,7 @@
 Detta dokument definierar de sub-issues som ska skapas för att implementera det nya gränssnittet enligt kravspecifikationen. Arbetet är uppdelat i 6 faser med tydliga delmoment, beroenden och acceptanskriterier.
 
 **Total estimerad tid**: 12-16 veckor  
-**Antal sub-issues**: 19 huvudissues + testning
+**Antal sub-issues**: 41 issues (UI-001 till UI-041)
 
 ---
 
@@ -175,7 +175,7 @@ Etablera CSS-variabler, breakpoint-system och globala stilar för responsiv desi
 
 #### ✅ Acceptanskriterier
 - [ ] Alla breakpoints fungerar enligt MudBlazor-spec
-- [ ] CSS-variabler konsekvent användna
+- [ ] CSS-variabler konsekvent använda
 - [ ] Inga FOUC (Flash of Unstyled Content)
 - [ ] Performant CSS utan onödiga överspecificeringar
 
