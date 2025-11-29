@@ -1,9 +1,10 @@
 @using DanceCourseCreator.Web.Themes
+@rendermode InteractiveServer
 
 <CascadingAuthenticationState>
     <ErrorBoundary>
         <ChildContent>
-            <MudThemeProvider Theme="DanceTheme.Theme" />
+            <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="@DanceTheme.Theme" />
             <MudPopoverProvider />
             <MudDialogProvider />
             <MudSnackbarProvider />
@@ -42,6 +43,7 @@
 
 @code {
     private bool _isDevelopment = false;
+    private bool _isDarkMode = false;
 
     [Inject]
     private IHostEnvironment? HostEnvironment { get; set; }

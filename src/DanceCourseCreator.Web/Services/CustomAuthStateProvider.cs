@@ -16,15 +16,15 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await _authService.GetTokenAsync();
-        
-        if (string.IsNullOrEmpty(token))
-        {
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-        }
-
         try
         {
+            var token = await _authService.GetTokenAsync();
+            
+            if (string.IsNullOrEmpty(token))
+            {
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+
             var user = await _authService.GetProfileAsync();
             
             if (user == null)
@@ -45,6 +45,11 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             var principal = new ClaimsPrincipal(identity);
 
             return new AuthenticationState(principal);
+        }
+        catch (InvalidOperationException)
+        {
+            // JavaScript interop not available during prerendering
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
         catch
         {

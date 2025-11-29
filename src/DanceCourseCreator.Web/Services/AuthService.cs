@@ -21,6 +21,7 @@ public class AuthService : IAuthService
     private readonly HttpClient _httpClient;
     private readonly IJSRuntime _jsRuntime;
     private const string TOKEN_KEY = "authToken";
+    private string? _cachedToken;
 
     public AuthService(HttpClient httpClient, IJSRuntime jsRuntime)
     {
@@ -110,17 +111,48 @@ public class AuthService : IAuthService
 
     public async Task<string?> GetTokenAsync()
     {
-        return await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", TOKEN_KEY);
+        try
+        {
+            // During prerendering, return cached token if available
+            if (_cachedToken != null)
+                return _cachedToken;
+                
+            var token = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", TOKEN_KEY);
+            if (!string.IsNullOrEmpty(token))
+                _cachedToken = token;
+            return token;
+        }
+        catch (InvalidOperationException)
+        {
+            // JavaScript interop not available during prerendering
+            return _cachedToken;
+        }
     }
 
     public async Task SetTokenAsync(string token)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", TOKEN_KEY, token);
+        _cachedToken = token;
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", TOKEN_KEY, token);
+        }
+        catch (InvalidOperationException)
+        {
+            // JavaScript interop not available during prerendering, token is cached
+        }
     }
 
     public async Task RemoveTokenAsync()
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", TOKEN_KEY);
+        _cachedToken = null;
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", TOKEN_KEY);
+        }
+        catch (InvalidOperationException)
+        {
+            // JavaScript interop not available during prerendering, cache is cleared
+        }
     }
 
     private void SetAuthorizationHeader(string token)
