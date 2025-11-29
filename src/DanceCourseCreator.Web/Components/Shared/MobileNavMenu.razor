@@ -1,0 +1,76 @@
+@* MobileNavMenu.razor - Navigation menu för mobil drawer *@
+
+<MudNavMenu Class="mobile-nav-menu">
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/" 
+                        Icon="@Icons.Material.Filled.Dashboard" 
+                        Match="NavLinkMatch.All"
+                        OnClick="@HandleNavigate">
+                Översikt
+            </MudNavLink>
+            
+            <MudNavLink Href="/patterns" 
+                        Icon="@Icons.Material.Filled.LibraryBooks"
+                        OnClick="@HandleNavigate">
+                Mönster
+            </MudNavLink>
+            
+            <MudNavLink Href="/lessons" 
+                        Icon="@Icons.Material.Filled.School"
+                        OnClick="@HandleNavigate">
+                Lektioner
+            </MudNavLink>
+            
+            <MudNavLink Href="/courses" 
+                        Icon="@Icons.Material.Filled.Timeline"
+                        OnClick="@HandleNavigate">
+                Kurser
+            </MudNavLink>
+            
+            <MudDivider Class="my-4" />
+            
+            <MudNavLink Href="/templates" 
+                        Icon="@Icons.Material.Filled.FileCopy"
+                        OnClick="@HandleNavigate">
+                Mallar
+            </MudNavLink>
+            
+            <MudNavLink Href="/shared" 
+                        Icon="@Icons.Material.Filled.Share"
+                        OnClick="@HandleNavigate">
+                Delat innehåll
+            </MudNavLink>
+            
+            <MudDivider Class="my-4" />
+            
+            <MudNavLink Href="/settings" 
+                        Icon="@Icons.Material.Filled.Settings"
+                        OnClick="@HandleNavigate">
+                Inställningar
+            </MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+            <MudNavLink Href="/login" 
+                        Icon="@Icons.Material.Filled.Login"
+                        OnClick="@HandleNavigate">
+                Logga in
+            </MudNavLink>
+            <MudNavLink Href="/register" 
+                        Icon="@Icons.Material.Filled.PersonAdd"
+                        OnClick="@HandleNavigate">
+                Registrera
+            </MudNavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudNavMenu>
+
+@code {
+    [Parameter]
+    public EventCallback OnNavigate { get; set; }
+
+    private async Task HandleNavigate()
+    {
+        await OnNavigate.InvokeAsync();
+    }
+}

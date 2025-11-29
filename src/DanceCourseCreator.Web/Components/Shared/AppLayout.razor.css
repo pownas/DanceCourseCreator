@@ -1,0 +1,163 @@
+/* AppLayout.razor.css - Responsive layout styling */
+
+/* CSS Variables for layout measurements */
+:root {
+    /* Layout dimensions */
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
+    --bottom-nav-height: 56px;
+    --toolbar-height: 64px;
+    --toolbar-height-mobile: 56px;
+    
+    /* Spacing */
+    --layout-spacing-xs: 4px;
+    --layout-spacing-sm: 8px;
+    --layout-spacing-md: 16px;
+    --layout-spacing-lg: 24px;
+    --layout-spacing-xl: 32px;
+    
+    /* Touch targets - WCAG 2.1 minimum */
+    --touch-target-min: 44px;
+    
+    /* Transitions */
+    --layout-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main layout container */
+.app-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* App header styling */
+.app-header {
+    z-index: 1200;
+}
+
+.app-logo {
+    flex-shrink: 0;
+}
+
+.app-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* User menu button */
+.user-menu-button {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+}
+
+.menu-item-content {
+    display: flex;
+    align-items: center;
+}
+
+/* Main content area */
+.main-content {
+    flex: 1;
+    transition: margin-left var(--layout-transition), padding-bottom var(--layout-transition);
+}
+
+/* Desktop/tablet with sidebar open */
+.main-content.sidebar-open {
+    margin-left: var(--sidebar-width);
+}
+
+/* Desktop/tablet with sidebar collapsed */
+.main-content.sidebar-collapsed {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Mobile content with bottom navigation */
+.main-content.mobile-content {
+    margin-left: 0;
+    padding-bottom: var(--bottom-nav-height);
+}
+
+/* Mobile drawer styling */
+::deep .mobile-drawer {
+    width: 280px;
+}
+
+/* Responsive breakpoints */
+
+/* Extra small devices (phones, up to 599px) */
+@media (max-width: 599.98px) {
+    :root {
+        --toolbar-height: var(--toolbar-height-mobile);
+    }
+    
+    .app-title {
+        font-size: 1rem;
+    }
+}
+
+/* Small devices (large phones, tablets in portrait, 600-959px) */
+@media (min-width: 600px) and (max-width: 959.98px) {
+    .main-content {
+        padding-left: var(--layout-spacing-md);
+        padding-right: var(--layout-spacing-md);
+    }
+}
+
+/* Medium devices (tablets, small laptops, 960-1279px) */
+@media (min-width: 960px) and (max-width: 1279.98px) {
+    .main-content {
+        padding-left: var(--layout-spacing-lg);
+        padding-right: var(--layout-spacing-lg);
+    }
+}
+
+/* Large devices (desktops, 1280-1919px) */
+@media (min-width: 1280px) and (max-width: 1919.98px) {
+    .main-content {
+        padding-left: var(--layout-spacing-xl);
+        padding-right: var(--layout-spacing-xl);
+    }
+}
+
+/* Extra large devices (large desktops, 1920px and up) */
+@media (min-width: 1920px) {
+    .main-content {
+        max-width: 1600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .main-content.sidebar-open {
+        margin-left: var(--sidebar-width);
+    }
+}
+
+/* Print styles */
+@media print {
+    .app-header,
+    ::deep .mobile-drawer,
+    ::deep .desktop-sidebar,
+    ::deep .mobile-bottom-nav {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding-bottom: 0 !important;
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .main-content {
+        transition: none;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    ::deep .mobile-drawer {
+        background-color: #1e1e1e;
+    }
+}

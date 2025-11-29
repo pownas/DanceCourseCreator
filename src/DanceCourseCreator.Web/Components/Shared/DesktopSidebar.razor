@@ -1,0 +1,144 @@
+@* DesktopSidebar.razor - Kollapserbar sidebar för desktop och surfplatta *@
+
+<MudDrawer @bind-Open="Open"
+           Variant="DrawerVariant.Mini"
+           OpenMiniOnHover="true"
+           ClipMode="DrawerClipMode.Always"
+           Elevation="2"
+           Class="@GetSidebarClass()">
+    <MudNavMenu Dense="@(!Open)" Bordered="@Open" Class="sidebar-nav">
+        <AuthorizeView>
+            <Authorized>
+                <MudNavLink Href="/" 
+                            Icon="@Icons.Material.Filled.Dashboard" 
+                            Match="NavLinkMatch.All"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Översikt</span>
+                    }
+                </MudNavLink>
+                
+                <MudNavGroup Title="Turbank" 
+                             Icon="@Icons.Material.Filled.LibraryBooks"
+                             Expanded="@(_patternMenuExpanded && Open)"
+                             ExpandedChanged="@(value => _patternMenuExpanded = value)"
+                             HideExpandIcon="@(!Open)">
+                    <MudNavLink Href="/patterns" 
+                                Icon="@Icons.Material.Filled.ViewList"
+                                Match="NavLinkMatch.All"
+                                Class="nav-item">
+                        @if (Open)
+                        {
+                            <span>Alla mönster</span>
+                        }
+                    </MudNavLink>
+                    <MudNavLink Href="/patterns/favorites" 
+                                Icon="@Icons.Material.Filled.Star"
+                                Class="nav-item">
+                        @if (Open)
+                        {
+                            <span>Mina favoriter</span>
+                        }
+                    </MudNavLink>
+                    <MudNavLink Href="/patterns/new" 
+                                Icon="@Icons.Material.Filled.Add"
+                                Class="nav-item">
+                        @if (Open)
+                        {
+                            <span>Ny tur</span>
+                        }
+                    </MudNavLink>
+                </MudNavGroup>
+                
+                <MudNavLink Href="/lessons" 
+                            Icon="@Icons.Material.Filled.School"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Lektioner</span>
+                    }
+                </MudNavLink>
+                
+                <MudNavLink Href="/courses" 
+                            Icon="@Icons.Material.Filled.Timeline"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Kurser</span>
+                    }
+                </MudNavLink>
+                
+                <MudDivider Class="my-4" />
+                
+                <MudNavLink Href="/templates" 
+                            Icon="@Icons.Material.Filled.FileCopy"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Mallar</span>
+                    }
+                </MudNavLink>
+                
+                <MudNavLink Href="/shared" 
+                            Icon="@Icons.Material.Filled.Share"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Delat innehåll</span>
+                    }
+                </MudNavLink>
+                
+                <MudSpacer />
+                
+                <MudNavLink Href="/settings" 
+                            Icon="@Icons.Material.Filled.Settings"
+                            Class="nav-item settings-nav">
+                    @if (Open)
+                    {
+                        <span>Inställningar</span>
+                    }
+                </MudNavLink>
+            </Authorized>
+            <NotAuthorized>
+                <MudNavLink Href="/login" 
+                            Icon="@Icons.Material.Filled.Login"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Logga in</span>
+                    }
+                </MudNavLink>
+                <MudNavLink Href="/register" 
+                            Icon="@Icons.Material.Filled.PersonAdd"
+                            Class="nav-item">
+                    @if (Open)
+                    {
+                        <span>Registrera</span>
+                    }
+                </MudNavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudNavMenu>
+</MudDrawer>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; } = true;
+    
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private bool _patternMenuExpanded = false;
+
+    private string GetSidebarClass()
+    {
+        return Open ? "desktop-sidebar expanded" : "desktop-sidebar collapsed";
+    }
+
+    private async Task ToggleOpen()
+    {
+        Open = !Open;
+        await OpenChanged.InvokeAsync(Open);
+    }
+}
