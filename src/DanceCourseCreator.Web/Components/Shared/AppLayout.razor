@@ -1,0 +1,243 @@
+@inherits LayoutComponentBase
+@using DanceCourseCreator.Web.Services
+@inject ILogger<AppLayout> Logger
+@inject ISnackbar Snackbar
+@inject IBreakpointService BreakpointService
+@implements IAsyncDisposable
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout Class="app-layout">
+    @* Header - visas på alla skärmstorlekar *@
+    <MudAppBar Elevation="2" Dense="@_isMobile" Class="app-header">
+        @if (_isMobile)
+        {
+            @* Mobil header - kompakt *@
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" 
+                           Color="Color.Inherit" 
+                           Edge="Edge.Start" 
+                           OnClick="@ToggleDrawer"
+                           aria-label="Visa/dölj navigeringsmeny" />
+        }
+        else
+        {
+            @* Desktop/surfplatta - visa hamburger om sidebar är kollapsad *@
+            <MudIconButton Icon="@(_sidebarOpen ? Icons.Material.Filled.MenuOpen : Icons.Material.Filled.Menu)" 
+                           Color="Color.Inherit" 
+                           Edge="Edge.Start" 
+                           OnClick="@ToggleSidebar"
+                           aria-label="@(_sidebarOpen ? "Kollapsa sidopanel" : "Expandera sidopanel")" />
+        }
+        
+        <MudIcon Icon="@Icons.Material.Filled.MusicNote" Color="Color.Inherit" Class="mr-2 app-logo" />
+        <MudText Typo="@(_isMobile ? Typo.subtitle1 : Typo.h6)" Class="app-title">
+            @(_isMobile ? "WCS" : "WCS Kursskapare")
+        </MudText>
+        
+        <MudSpacer />
+        
+        @* Användarmenyn *@
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu>
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Text" 
+                                   StartIcon="@Icons.Material.Filled.Person" 
+                                   Color="Color.Inherit"
+                                   Class="user-menu-button">
+                            @if (!_isMobile)
+                            {
+                                @context.User.Identity?.Name
+                            }
+                        </MudButton>
+                    </ActivatorContent>
+                    <ChildContent>
+                        <MudMenuItem OnClick="Logout">
+                            <div class="menu-item-content">
+                                <MudIcon Icon="@Icons.Material.Filled.Logout" Class="mr-2"/>
+                                Logga ut
+                            </div>
+                        </MudMenuItem>
+                    </ChildContent>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" Href="/login">
+                    @(_isMobile ? "" : "Logga in")
+                    @if (_isMobile)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Login" />
+                    }
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    @* Desktop Sidebar - visas på Md och uppåt *@
+    @if (!_isMobile)
+    {
+        <DesktopSidebar @bind-Open="_sidebarOpen" />
+    }
+    else
+    {
+        @* Mobil Drawer - endast på mobil *@
+        <MudDrawer @bind-Open="_drawerOpen" 
+                   ClipMode="DrawerClipMode.Always" 
+                   Elevation="2"
+                   Variant="DrawerVariant.Temporary"
+                   Class="mobile-drawer">
+            <MobileNavMenu OnNavigate="@CloseDrawer" />
+        </MudDrawer>
+    }
+
+    @* Huvudinnehåll *@
+    <MudMainContent Class="@GetMainContentClass()">
+        <ErrorBoundary @ref="_errorBoundary">
+            <ChildContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+                    @Body
+                </MudContainer>
+            </ChildContent>
+            <ErrorContent Context="exception">
+                <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+                    <MudAlert Severity="Severity.Error" 
+                              Icon="@Icons.Material.Filled.Error"
+                              Class="mb-4">
+                        <MudText Typo="Typo.h6" Class="mb-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Warning" Class="mr-2" />
+                            Ett oväntat fel har uppstått
+                        </MudText>
+                        <MudText Typo="Typo.body1" Class="mb-3">
+                            Vi beklagar det inträffade. Vänligen försök igen eller kontakta support om problemet kvarstår.
+                        </MudText>
+                        <div class="mt-4 d-flex gap-2">
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       OnClick="RecoverFromError"
+                                       StartIcon="@Icons.Material.Filled.Refresh">
+                                Försök igen
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Secondary" 
+                                       Href="/"
+                                       StartIcon="@Icons.Material.Filled.Home">
+                                Gå till startsidan
+                            </MudButton>
+                        </div>
+                    </MudAlert>
+                </MudContainer>
+            </ErrorContent>
+        </ErrorBoundary>
+    </MudMainContent>
+
+    @* Mobil Bottom Navigation - visas endast på mobil *@
+    @if (_isMobile)
+    {
+        <MobileBottomNav />
+    }
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = false;
+    private bool _sidebarOpen = true;
+    private bool _isMobile = false;
+    private ErrorBoundary? _errorBoundary;
+    private Guid _subscriptionId;
+
+    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _subscriptionId = await BreakpointService.Subscribe(OnBreakpointChanged);
+        _isMobile = await BreakpointService.IsMobile();
+        _sidebarOpen = !_isMobile;
+    }
+
+    private Task OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        var wasMobile = _isMobile;
+        _isMobile = breakpoint <= Breakpoint.Sm;
+        
+        // Om vi byter från mobil till desktop, öppna sidebar
+        if (wasMobile && !_isMobile)
+        {
+            _sidebarOpen = true;
+            _drawerOpen = false;
+        }
+        
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void ToggleSidebar()
+    {
+        _sidebarOpen = !_sidebarOpen;
+    }
+
+    private void CloseDrawer()
+    {
+        _drawerOpen = false;
+    }
+
+    private string GetMainContentClass()
+    {
+        var classes = new List<string> { "main-content" };
+        
+        if (_isMobile)
+        {
+            classes.Add("mobile-content");
+        }
+        else if (_sidebarOpen)
+        {
+            classes.Add("sidebar-open");
+        }
+        else
+        {
+            classes.Add("sidebar-collapsed");
+        }
+        
+        return string.Join(" ", classes);
+    }
+
+    private async Task Logout()
+    {
+        try
+        {
+            if (AuthStateProvider is CustomAuthStateProvider authStateProvider)
+            {
+                await authStateProvider.MarkUserAsLoggedOut();
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                Logger.LogWarning("AuthStateProvider is not of expected type CustomAuthStateProvider");
+                Navigation.NavigateTo("/login");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error during logout: {Message}", ex.Message);
+            Snackbar.Add("Ett fel uppstod vid utloggning", Severity.Error);
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private void RecoverFromError()
+    {
+        _errorBoundary?.Recover();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await BreakpointService.Unsubscribe(_subscriptionId);
+    }
+}

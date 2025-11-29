@@ -1,0 +1,110 @@
+@* MobileBottomNav.razor - Bottom navigation för mobila enheter *@
+@inject NavigationManager Navigation
+
+<div class="mobile-bottom-nav" role="navigation" aria-label="Huvudnavigation">
+    <MudPaper Elevation="4" Class="bottom-nav-paper">
+        <div class="bottom-nav-container">
+            <MudIconButton Icon="@Icons.Material.Filled.Dashboard"
+                           Color="@GetNavColor("/")"
+                           Size="Size.Medium"
+                           Href="/"
+                           Class="nav-button"
+                           aria-label="Översikt"
+                           aria-current="@(IsCurrentPage("/") ? "page" : null)" />
+            
+            <MudIconButton Icon="@Icons.Material.Filled.LibraryBooks"
+                           Color="@GetNavColor("/patterns")"
+                           Size="Size.Medium"
+                           Href="/patterns"
+                           Class="nav-button"
+                           aria-label="Turbank"
+                           aria-current="@(IsCurrentPage("/patterns") ? "page" : null)" />
+            
+            <MudIconButton Icon="@Icons.Material.Filled.School"
+                           Color="@GetNavColor("/lessons")"
+                           Size="Size.Medium"
+                           Href="/lessons"
+                           Class="nav-button"
+                           aria-label="Lektioner"
+                           aria-current="@(IsCurrentPage("/lessons") ? "page" : null)" />
+            
+            <MudIconButton Icon="@Icons.Material.Filled.Timeline"
+                           Color="@GetNavColor("/courses")"
+                           Size="Size.Medium"
+                           Href="/courses"
+                           Class="nav-button"
+                           aria-label="Kurser"
+                           aria-current="@(IsCurrentPage("/courses") ? "page" : null)" />
+            
+            <MudMenu Icon="@Icons.Material.Filled.Add"
+                     Color="Color.Primary"
+                     Variant="Variant.Filled"
+                     Size="Size.Medium"
+                     Class="fab-menu"
+                     aria-label="Snabbmeny för att skapa nytt">
+                <MudMenuItem Href="/patterns/new" Icon="@Icons.Material.Filled.LibraryAdd">
+                    Ny tur
+                </MudMenuItem>
+                <MudMenuItem Href="/lessons/new" Icon="@Icons.Material.Filled.NoteAdd">
+                    Ny lektion
+                </MudMenuItem>
+                <MudMenuItem Href="/courses/new" Icon="@Icons.Material.Filled.PlaylistAdd">
+                    Ny kurs
+                </MudMenuItem>
+            </MudMenu>
+        </div>
+        
+        @* Label för aktiv sida (visas under ikoner) *@
+        <div class="nav-labels">
+            <span class="@GetLabelClass("/")">Hem</span>
+            <span class="@GetLabelClass("/patterns")">Turbank</span>
+            <span class="@GetLabelClass("/lessons")">Lektioner</span>
+            <span class="@GetLabelClass("/courses")">Kurser</span>
+            <span class="nav-label">Ny</span>
+        </div>
+    </MudPaper>
+</div>
+
+@code {
+    private string _currentUri = string.Empty;
+    
+    protected override void OnInitialized()
+    {
+        _currentUri = Navigation.Uri;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+    
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _currentUri = e.Location;
+        StateHasChanged();
+    }
+    
+    private bool IsCurrentPage(string path)
+    {
+        var uri = new Uri(_currentUri);
+        var localPath = uri.LocalPath;
+        
+        if (path == "/")
+        {
+            return localPath == "/" || localPath == "";
+        }
+        
+        return localPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+    }
+    
+    private Color GetNavColor(string path)
+    {
+        return IsCurrentPage(path) ? Color.Primary : Color.Default;
+    }
+    
+    private string GetLabelClass(string path)
+    {
+        return IsCurrentPage(path) ? "nav-label active" : "nav-label";
+    }
+    
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}
