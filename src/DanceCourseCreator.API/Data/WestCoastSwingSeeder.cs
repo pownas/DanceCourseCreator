@@ -12,6 +12,17 @@ public static class WestCoastSwingSeeder
     /// </summary>
     public static async Task SeedAsync(DanceCourseDbContext context)
     {
+        // Check if data already exists - skip seeding if so
+        var hasData = await context.Patterns.AnyAsync() || 
+                      await context.Lessons.AnyAsync() || 
+                      await context.Courses.AnyAsync();
+        
+        if (hasData)
+        {
+            // Data already seeded, skip
+            return;
+        }
+        
         // Ensure we have an instructor user for creating the data
         var instructorId = await EnsureInstructorUserAsync(context);
         

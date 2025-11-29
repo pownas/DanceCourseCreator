@@ -177,7 +177,7 @@ The tests require:
 - .NET 10.0 SDK
 - Playwright browsers (auto-installable)
 - API running on http://localhost:5139
-- Client running on http://localhost:5034
+- Web running on http://localhost:5034
 
 See E2E test README for detailed setup instructions.
 

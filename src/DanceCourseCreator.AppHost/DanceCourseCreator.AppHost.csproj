@@ -1,6 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.0" />
+<Project Sdk="Aspire.AppHost.Sdk/13.0.1">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DanceCourseCreator.API\DanceCourseCreator.API.csproj" />
-    <ProjectReference Include="..\DanceCourseCreator.Client\DanceCourseCreator.Client.csproj" />
+    <ProjectReference Include="..\DanceCourseCreator.Web\DanceCourseCreator.Web.csproj" />
   </ItemGroup>
 
 </Project>

@@ -122,7 +122,7 @@ Detta dokument utgör en systematisk översyn av DanceCourseCreator-applikatione
 
 | Område | Styrka | Beskrivning |
 |--------|--------|-------------|
-| **Arkitektur** | Modern .NET 10 stack | Framtidssäker teknik med Blazor WebAssembly |
+| **Arkitektur** | Modern .NET 10 stack | Framtidssäker teknik med Blazor Server |
 | **Skalbarhet** | Aspire-baserad hosting | Färdig för mikrotjänster och skalning |
 | **UI/UX** | MudBlazor Material Design | Professionellt och responsivt gränssnitt |
 | **API** | RESTful med Swagger | Väldokumenterat och testbart |
@@ -536,13 +536,13 @@ DanceCourseCreator är en välstrukturerad applikation med solid teknisk grund. 
 ┌────────────────────────────────────────────────────────────────┐
 │                        FRONTEND                                 │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │           Blazor WebAssembly (.NET 10)                  │  │
+│   │           Blazor Server (.NET 10)                       │  │
 │   │   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐      │  │
 │   │   │ Pages   │ │Components│ │ Services│ │ Models  │      │  │
 │   │   └─────────┘ └─────────┘ └─────────┘ └─────────┘      │  │
 │   └─────────────────────────────────────────────────────────┘  │
 │                              │                                  │
-│                              │ HTTP/REST                        │
+│                              │ SignalR + HTTP/REST             │
 │                              v                                  │
 │   ┌─────────────────────────────────────────────────────────┐  │
 │   │              ASP.NET Web API (.NET 10)                  │  │

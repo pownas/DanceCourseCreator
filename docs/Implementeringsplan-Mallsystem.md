@@ -71,8 +71,8 @@ Denna implementeringsplan strukturerar utvecklingsarbetet för kursmallssystemet
 **Estimerad tid:** 2 veckor
 
 **Deluppgifter:**
-- [ ] **1.3.1** Skapa template service i Client
-  - TypeScript-interfaces för Template-modellen
+- [ ] **1.3.1** Skapa template service i Web
+  - C#-modeller för Template-modellen
   - HTTP-klient för API-anrop
   - Error handling och loading states
 

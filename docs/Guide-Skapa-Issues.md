@@ -44,7 +44,7 @@ Använd denna mall när du skapar varje issue i GitHub:
 - [Lista relevanta NuGet-paket eller tekniker]
 
 **Arkitektur:**
-- [Vilka lager påverkas: API, Client, Models, Services]
+- [Vilka lager påverkas: API, Web, Models, Services]
 
 ## 📚 Relaterad dokumentation
 - [Implementeringsplan](docs/Implementeringsplan.md) - Detaljerad plan för detta issue
@@ -335,7 +335,7 @@ Inga blockerande beroenden. Detta issue kan startas direkt.
 
 **Arkitektur:**
 - API Layer: New controller + service
-- Client Layer: New pages/components + service
+- Web Layer: New pages/components + service
 - Database: Modellen finns redan
 
 ## 📚 Relaterad dokumentation

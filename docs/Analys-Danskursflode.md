@@ -32,7 +32,7 @@ DanceCourseCreator är implementerad som en modern .NET 10-applikation med:
 
 **Teknisk stack**:
 - Backend: .NET 10 Web API med Entity Framework Core
-- Frontend: Blazor WebAssembly med MudBlazor
+- Frontend: Blazor Server med MudBlazor
 - Databas: SQLite (skalbar till PostgreSQL/SQL Server)
 - Autentisering: JWT med rollbaserad åtkomstkontroll
 
