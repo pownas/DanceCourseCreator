@@ -541,11 +541,10 @@
 
         if (!string.IsNullOrWhiteSpace(_searchTerm))
         {
-            var searchLower = _searchTerm.ToLowerInvariant();
             filtered = filtered.Where(p =>
                 p.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                p.Tags.Any(t => t.Contains(searchLower, StringComparison.OrdinalIgnoreCase)));
+                p.Tags.Any(t => t.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (!string.IsNullOrWhiteSpace(_filterLevel))
@@ -595,7 +594,14 @@
         if (index >= 0 && index < _lessonRequest.Sections.Count)
         {
             _lessonRequest.Sections.RemoveAt(index);
-            _currentSectionIndex = Math.Max(0, _currentSectionIndex - 1);
+            // Only decrease current section index if we removed a section at or before it
+            if (index <= _currentSectionIndex)
+            {
+                _currentSectionIndex = Math.Max(0, _currentSectionIndex - 1);
+            }
+            // Ensure index is still valid
+            _currentSectionIndex = Math.Min(_currentSectionIndex, _lessonRequest.Sections.Count - 1);
+            _currentSectionIndex = Math.Max(0, _currentSectionIndex);
             RecalculateTime();
             ValidateLesson();
         }
@@ -634,7 +640,13 @@
 
     private async Task HandleCancel()
     {
-        var hasChanges = _lessonRequest.Sections.Any(s => s.Items.Any());
+        // Check for any meaningful changes that would be lost
+        var hasChanges = _lessonRequest.Sections.Any(s => s.Items.Any()) ||
+                        _lessonRequest.Sections.Any(s => !string.IsNullOrWhiteSpace(s.Notes)) ||
+                        !string.IsNullOrWhiteSpace(_lessonRequest.Notes) ||
+                        _lessonRequest.Date.HasValue ||
+                        _lessonRequest.Sections.Count > 1;
+        
         if (hasChanges)
         {
             var confirmed = await DialogService.ShowMessageBox(

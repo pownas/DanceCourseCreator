@@ -1,5 +1,12 @@
 /* LessonBuilder.razor.css - Styling for the LessonBuilder page component */
 
+/* CSS Custom Properties for consistent spacing */
+:root {
+    --lesson-builder-action-bar-height: 64px;
+    --lesson-builder-header-height: 160px;
+    --lesson-builder-content-padding: 32px;
+}
+
 /* Container layout */
 .lesson-builder-container {
     display: flex;
@@ -128,6 +135,7 @@
 .mobile-layout .lesson-builder-content {
     flex: 1;
     overflow: hidden;
+    padding-bottom: 80px; /* Space for fixed action bar */
 }
 
 .mobile-layout .lesson-builder-tabs {
@@ -146,6 +154,7 @@
     bottom: var(--bottom-nav-height, 56px);
     left: 0;
     right: 0;
+    z-index: 100;
 }
 
 .mobile-layout .lesson-builder-header {
@@ -155,7 +164,8 @@
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .lesson-builder-container {
-        padding-bottom: 120px; /* Space for bottom action bar */
+        /* Space for fixed bottom action bar + bottom nav */
+        padding-bottom: calc(var(--lesson-builder-action-bar-height, 64px) + var(--bottom-nav-height, 56px));
     }
     
     .pattern-list {
@@ -170,7 +180,8 @@
 @media (min-width: 960px) {
     .pattern-bank-panel,
     .lesson-structure-panel {
-        max-height: calc(100vh - 280px);
+        /* Header height + action bar + container padding */
+        max-height: calc(100vh - var(--lesson-builder-header-height, 160px) - var(--lesson-builder-action-bar-height, 64px) - var(--lesson-builder-content-padding, 32px) - var(--mud-appbar-height, 64px));
         overflow-y: auto;
     }
 }
