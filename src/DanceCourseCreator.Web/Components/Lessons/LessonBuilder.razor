@@ -1,0 +1,830 @@
+@page "/lessons/builder"
+@page "/lessons/{LessonId}/edit"
+@using MudBlazor
+@inject ILessonsService LessonsService
+@inject IPatternsService PatternsService
+@inject ITimeValidationService TimeValidationService
+@inject IBreakpointService BreakpointService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
+@inject ILogger<LessonBuilder> Logger
+@implements IAsyncDisposable
+
+<PageTitle>@GetPageTitle()</PageTitle>
+
+<div class="lesson-builder-container @GetLayoutClass()">
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center align-center" style="height: 400px;">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else
+    {
+        @* Header with basic info *@
+        <MudPaper Class="lesson-builder-header pa-4 mb-4" Elevation="2">
+            <MudGrid>
+                <MudItem xs="12" md="6" lg="3">
+                    <MudTextField @bind-Value="_lessonRequest.Notes"
+                                  Label="Lektionsnamn"
+                                  Placeholder="T.ex. Vecka 3 - Side Passes"
+                                  Variant="Variant.Outlined"
+                                  FullWidth="true"
+                                  Immediate="true"
+                                  HelperText="Valfritt namn för att identifiera lektionen" />
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3" lg="2">
+                    <MudDatePicker @bind-Date="_lessonRequest.Date"
+                                   Label="Datum"
+                                   Variant="Variant.Outlined"
+                                   Editable="true"
+                                   Clearable="true"
+                                   Placeholder="Välj datum" />
+                </MudItem>
+                <MudItem xs="6" sm="3" md="2">
+                    <MudSelect @bind-Value="_lessonRequest.Duration"
+                               Label="Längd"
+                               Variant="Variant.Outlined"
+                               AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="60">60 min</MudSelectItem>
+                        <MudSelectItem Value="75">75 min</MudSelectItem>
+                        <MudSelectItem Value="90">90 min</MudSelectItem>
+                        <MudSelectItem Value="120">120 min</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6" sm="3" md="2">
+                    <MudSelect @bind-Value="_selectedLevel"
+                               Label="Nivå"
+                               Variant="Variant.Outlined"
+                               AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="12" lg="3">
+                    <div class="d-flex align-center h-100">
+                        <MudChip T="string" Color="@GetTimeStatusColor()" Size="Size.Medium" Class="time-chip">
+                            <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" Class="mr-1" />
+                            @_totalEstimatedTime / @_lessonRequest.Duration min
+                        </MudChip>
+                        <MudText Typo="Typo.caption" Class="ml-2">@GetTimeStatusText()</MudText>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        @* Main content - Split panel *@
+        <div class="lesson-builder-content">
+            @if (_isMobile)
+            {
+                @* Mobile: Vertical layout with tabs *@
+                <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" Class="lesson-builder-tabs">
+                    <MudTabPanel Text="Turbank" Icon="@Icons.Material.Filled.LibraryBooks">
+                        <div class="pa-4">
+                            @RenderPatternBank()
+                        </div>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Lektion" Icon="@Icons.Material.Filled.Assignment" BadgeData="@_lessonRequest.Sections.Count" BadgeColor="Color.Primary">
+                        <div class="pa-4">
+                            @RenderLessonStructure()
+                        </div>
+                    </MudTabPanel>
+                </MudTabs>
+            }
+            else
+            {
+                @* Desktop/Tablet: Horizontal split layout *@
+                <MudGrid Spacing="4">
+                    <MudItem xs="12" md="5" lg="4">
+                        <MudPaper Class="pa-4 pattern-bank-panel" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Class="mr-2" />
+                                Turbank
+                            </MudText>
+                            @RenderPatternBank()
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12" md="7" lg="8">
+                        <MudPaper Class="pa-4 lesson-structure-panel" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-2" />
+                                Lektionsstruktur
+                            </MudText>
+                            @RenderLessonStructure()
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            }
+        </div>
+
+        @* Bottom action bar - always visible *@
+        <MudPaper Class="lesson-builder-actions pa-3" Elevation="4">
+            <div class="d-flex justify-space-between align-center flex-wrap gap-2">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.Close"
+                           OnClick="HandleCancel">
+                    Avbryt
+                </MudButton>
+                <div class="d-flex gap-2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="HandleSaveDraft"
+                               Disabled="_isSaving">
+                        @if (_isSavingDraft)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        Spara utkast
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Check"
+                               OnClick="HandleSave"
+                               Disabled="_isSaving || !CanSave()">
+                        @if (_isSaving && !_isSavingDraft)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        @(IsEditMode ? "Uppdatera" : "Spara")
+                    </MudButton>
+                </div>
+            </div>
+        </MudPaper>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? LessonId { get; set; }
+
+    private CreateLessonRequest _lessonRequest = new();
+    private List<PatternOrExercise>? _patterns;
+    private TimeValidationResult? _validationResult;
+    private bool _isLoading = true;
+    private bool _isSaving = false;
+    private bool _isSavingDraft = false;
+    private bool _isMobile = false;
+    private int _totalEstimatedTime = 0;
+    private string _selectedLevel = "beginner";
+    private string _searchTerm = string.Empty;
+    private string? _filterLevel = null;
+    private string? _filterType = null;
+    private Guid _breakpointSubscriptionId;
+
+    private bool IsEditMode => !string.IsNullOrEmpty(LessonId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breakpointSubscriptionId = await BreakpointService.Subscribe(OnBreakpointChanged);
+        _isMobile = await BreakpointService.IsMobile();
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        try
+        {
+            // Load patterns
+            _patterns = await PatternsService.GetPatternsAsync();
+            _patterns ??= new List<PatternOrExercise>();
+
+            // If editing, load existing lesson
+            if (IsEditMode)
+            {
+                var lesson = await LessonsService.GetLessonAsync(LessonId!);
+                if (lesson != null)
+                {
+                    _lessonRequest = new CreateLessonRequest
+                    {
+                        CourseId = lesson.CourseId,
+                        Date = lesson.Date,
+                        Duration = lesson.Duration,
+                        Sections = lesson.Sections?.Select(s => new LessonSection
+                        {
+                            Id = s.Id,
+                            Type = s.Type,
+                            Items = new List<string>(s.Items),
+                            Notes = s.Notes,
+                            AllocatedMinutes = s.AllocatedMinutes
+                        }).ToList() ?? new List<LessonSection>(),
+                        Notes = lesson.Notes ?? string.Empty
+                    };
+                }
+                else
+                {
+                    Logger.LogWarning("Lesson with ID {LessonId} not found", LessonId);
+                    Snackbar.Add("Lektionen hittades inte", Severity.Warning);
+                    Navigation.NavigateTo("/lessons");
+                    return;
+                }
+            }
+            else
+            {
+                // Initialize with default section for new lessons
+                _lessonRequest.Sections.Add(new LessonSection
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Type = "Warmup",
+                    AllocatedMinutes = 10
+                });
+            }
+
+            RecalculateTime();
+            ValidateLesson();
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error loading data: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading data: {Message}", ex.Message);
+            Snackbar.Add($"Fel vid laddning: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private Task OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        _isMobile = breakpoint <= Breakpoint.Sm;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private string GetPageTitle()
+    {
+        return IsEditMode ? "Redigera lektion" : "Skapa ny lektion";
+    }
+
+    private string GetLayoutClass()
+    {
+        return _isMobile ? "mobile-layout" : "desktop-layout";
+    }
+
+    private RenderFragment RenderPatternBank() => __builder =>
+    {
+        <div class="pattern-bank-content">
+            @* Search and filters *@
+            <MudGrid Class="mb-3">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_searchTerm"
+                                  Label="Sök turer/övningar"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Immediate="true"
+                                  DebounceInterval="300"
+                                  Clearable="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect @bind-Value="_filterLevel"
+                               Label="Nivå"
+                               Variant="Variant.Outlined"
+                               Clearable="true"
+                               Dense="true">
+                        <MudSelectItem Value="@((string?)null)">Alla nivåer</MudSelectItem>
+                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect @bind-Value="_filterType"
+                               Label="Typ"
+                               Variant="Variant.Outlined"
+                               Clearable="true"
+                               Dense="true">
+                        <MudSelectItem Value="@((string?)null)">Alla typer</MudSelectItem>
+                        <MudSelectItem Value="@("pattern")">Turer</MudSelectItem>
+                        <MudSelectItem Value="@("exercise")">Övningar</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            @* Pattern list *@
+            <div class="pattern-list" style="max-height: 500px; overflow-y: auto;">
+                @if (GetFilteredPatterns().Any())
+                {
+                    foreach (var pattern in GetFilteredPatterns())
+                    {
+                        <MudCard Class="pattern-card mb-2" @onclick="@(() => AddPatternToCurrentSection(pattern.Id))">
+                            <MudCardContent Class="pa-2">
+                                <div class="d-flex justify-space-between align-center">
+                                    <div>
+                                        <MudText Typo="Typo.subtitle2">@pattern.Name</MudText>
+                                        <div class="d-flex gap-1 mt-1">
+                                            <MudChip T="string" Size="Size.Small" Color="@GetLevelColor(pattern.Level)">
+                                                @GetLevelDisplayName(pattern.Level)
+                                            </MudChip>
+                                            <MudChip T="string" Size="Size.Small" Color="@GetTypeColor(pattern.Type)">
+                                                @GetTypeDisplayName(pattern.Type)
+                                            </MudChip>
+                                            <MudText Typo="Typo.caption" Class="ml-1">@pattern.EstimatedMinutes min</MudText>
+                                        </div>
+                                    </div>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   OnClick="@(() => AddPatternToCurrentSection(pattern.Id))"
+                                                   aria-label="@($"Lägg till {pattern.Name}")" />
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        Inga turer/övningar matchade sökningen.
+                    </MudAlert>
+                }
+            </div>
+        </div>
+    };
+
+    private RenderFragment RenderLessonStructure() => __builder =>
+    {
+        <div class="lesson-structure-content">
+            @* Time summary *@
+            <MudAlert Severity="@GetTimeSeverity()" Class="mb-3" Variant="Variant.Outlined" Dense="true">
+                <div class="d-flex justify-space-between align-center">
+                    <MudText Typo="Typo.body2">
+                        Total tid: <strong>@_totalEstimatedTime</strong> av @_lessonRequest.Duration min
+                    </MudText>
+                    <MudProgressLinear Value="@GetTimePercentage()"
+                                       Color="@GetTimeProgressColor()"
+                                       Size="Size.Small"
+                                       Style="width: 100px;" />
+                </div>
+            </MudAlert>
+
+            @* Sections *@
+            @if (_lessonRequest.Sections.Any())
+            {
+                for (int i = 0; i < _lessonRequest.Sections.Count; i++)
+                {
+                    var section = _lessonRequest.Sections[i];
+                    var sectionIndex = i;
+
+                    <MudPaper Class="section-card pa-3 mb-3" Elevation="1">
+                        @* Section header *@
+                        <div class="d-flex justify-space-between align-center mb-2">
+                            <div class="d-flex align-center gap-2">
+                                <MudIcon Icon="@GetSectionIcon(section.Type)" Color="Color.Primary" />
+                                <MudSelect @bind-Value="section.Type"
+                                           Label="Sektion"
+                                           Variant="Variant.Text"
+                                           Dense="true"
+                                           Style="min-width: 150px;">
+                                    <MudSelectItem Value="@("Warmup")">Uppvärmning</MudSelectItem>
+                                    <MudSelectItem Value="@("Technique")">Teknik</MudSelectItem>
+                                    <MudSelectItem Value="@("Patterns")">Turer</MudSelectItem>
+                                    <MudSelectItem Value="@("Combination")">Kombination</MudSelectItem>
+                                    <MudSelectItem Value="@("Repetition")">Repetition</MudSelectItem>
+                                    <MudSelectItem Value="@("Social")">Socialdans</MudSelectItem>
+                                </MudSelect>
+                                <MudChip T="string" Size="Size.Small" Color="@GetSectionTimeColor(section)">
+                                    @TimeValidationService.CalculateSectionEstimatedTime(section, _patterns) min
+                                </MudChip>
+                            </div>
+                            <div class="d-flex">
+                                @if (sectionIndex > 0)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowUp"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => MoveSectionUp(sectionIndex))"
+                                                   aria-label="Flytta upp" />
+                                }
+                                @if (sectionIndex < _lessonRequest.Sections.Count - 1)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowDown"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => MoveSectionDown(sectionIndex))"
+                                                   aria-label="Flytta ner" />
+                                }
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="@(() => RemoveSection(sectionIndex))"
+                                               aria-label="Ta bort sektion" />
+                            </div>
+                        </div>
+
+                        @* Section items (patterns) *@
+                        <div class="section-items">
+                            @if (section.Items.Any())
+                            {
+                                foreach (var itemId in section.Items)
+                                {
+                                    var pattern = _patterns?.FirstOrDefault(p => p.Id == itemId);
+                                    var itemIndex = section.Items.IndexOf(itemId);
+
+                                    <div class="section-item d-flex justify-space-between align-center pa-2 mb-1">
+                                        <div>
+                                            @if (pattern != null)
+                                            {
+                                                <MudText Typo="Typo.body2">@pattern.Name</MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    @pattern.EstimatedMinutes min
+                                                </MudText>
+                                            }
+                                            else
+                                            {
+                                                <MudText Typo="Typo.body2" Class="text-muted">@itemId</MudText>
+                                            }
+                                        </div>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                       Size="Size.Small"
+                                                       Color="Color.Default"
+                                                       OnClick="@(() => RemoveItemFromSection(sectionIndex, itemIndex))"
+                                                       aria-label="Ta bort" />
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="text-center pa-2">
+                                    Inga moment tillagda. Välj från turbanken.
+                                </MudText>
+                            }
+                        </div>
+
+                        @* Section notes *@
+                        <MudTextField @bind-Value="section.Notes"
+                                      Label="Anteckningar"
+                                      Variant="Variant.Outlined"
+                                      Lines="2"
+                                      Class="mt-2"
+                                      FullWidth="true" />
+                    </MudPaper>
+                }
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Class="mb-3">
+                    Inga sektioner ännu. Klicka på "Lägg till sektion" för att börja.
+                </MudAlert>
+            }
+
+            @* Add section button *@
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="AddSection"
+                       FullWidth="true"
+                       Class="add-section-btn"
+                       Disabled="@(_lessonRequest.Sections.Count >= 8)">
+                Lägg till sektion
+                @if (_lessonRequest.Sections.Count >= 8)
+                {
+                    <MudText Typo="Typo.caption" Class="ml-2">(max 8)</MudText>
+                }
+            </MudButton>
+
+            @* Validation warnings *@
+            @if (_validationResult != null && _validationResult.Messages.Any())
+            {
+                <MudDivider Class="my-3" />
+                @foreach (var warning in _validationResult.Warnings.Take(3))
+                {
+                    <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-2">
+                        @warning.Message
+                    </MudAlert>
+                }
+                @foreach (var error in _validationResult.Errors.Take(3))
+                {
+                    <MudAlert Severity="Severity.Error" Dense="true" Class="mb-2">
+                        @error.Message
+                    </MudAlert>
+                }
+            }
+        </div>
+    };
+
+    // Track which section was last selected for adding patterns
+    private int _currentSectionIndex = 0;
+
+    private void AddPatternToCurrentSection(string patternId)
+    {
+        if (_lessonRequest.Sections.Count == 0)
+        {
+            AddSection();
+        }
+
+        // Use the last section or the current one
+        var targetIndex = Math.Min(_currentSectionIndex, _lessonRequest.Sections.Count - 1);
+        if (targetIndex >= 0)
+        {
+            _lessonRequest.Sections[targetIndex].Items.Add(patternId);
+            RecalculateTime();
+            ValidateLesson();
+            Snackbar.Add("Moment tillagt!", Severity.Success, config => config.VisibleStateDuration = 1000);
+        }
+    }
+
+    private List<PatternOrExercise> GetFilteredPatterns()
+    {
+        if (_patterns == null) return new List<PatternOrExercise>();
+
+        var filtered = _patterns.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            var searchLower = _searchTerm.ToLowerInvariant();
+            filtered = filtered.Where(p =>
+                p.Name.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Tags.Any(t => t.Contains(searchLower, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_filterLevel))
+        {
+            filtered = filtered.Where(p => p.Level.Equals(_filterLevel, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_filterType))
+        {
+            filtered = filtered.Where(p => p.Type.Equals(_filterType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return filtered.Take(30).ToList();
+    }
+
+    private void RecalculateTime()
+    {
+        _totalEstimatedTime = TimeValidationService.CalculateEstimatedTime(_lessonRequest.Sections, _patterns);
+    }
+
+    private void ValidateLesson()
+    {
+        _validationResult = TimeValidationService.ValidateLesson(_lessonRequest, _patterns);
+    }
+
+    private void AddSection()
+    {
+        if (_lessonRequest.Sections.Count >= 8)
+        {
+            Snackbar.Add("Max 8 sektioner är tillåtna", Severity.Warning);
+            return;
+        }
+
+        _lessonRequest.Sections.Add(new LessonSection
+        {
+            Id = Guid.NewGuid().ToString(),
+            Type = "Patterns",
+            AllocatedMinutes = 15
+        });
+        _currentSectionIndex = _lessonRequest.Sections.Count - 1;
+        RecalculateTime();
+        ValidateLesson();
+    }
+
+    private void RemoveSection(int index)
+    {
+        if (index >= 0 && index < _lessonRequest.Sections.Count)
+        {
+            _lessonRequest.Sections.RemoveAt(index);
+            _currentSectionIndex = Math.Max(0, _currentSectionIndex - 1);
+            RecalculateTime();
+            ValidateLesson();
+        }
+    }
+
+    private void MoveSectionUp(int index)
+    {
+        if (index > 0 && index < _lessonRequest.Sections.Count)
+        {
+            var section = _lessonRequest.Sections[index];
+            _lessonRequest.Sections.RemoveAt(index);
+            _lessonRequest.Sections.Insert(index - 1, section);
+        }
+    }
+
+    private void MoveSectionDown(int index)
+    {
+        if (index >= 0 && index < _lessonRequest.Sections.Count - 1)
+        {
+            var section = _lessonRequest.Sections[index];
+            _lessonRequest.Sections.RemoveAt(index);
+            _lessonRequest.Sections.Insert(index + 1, section);
+        }
+    }
+
+    private void RemoveItemFromSection(int sectionIndex, int itemIndex)
+    {
+        if (sectionIndex >= 0 && sectionIndex < _lessonRequest.Sections.Count &&
+            itemIndex >= 0 && itemIndex < _lessonRequest.Sections[sectionIndex].Items.Count)
+        {
+            _lessonRequest.Sections[sectionIndex].Items.RemoveAt(itemIndex);
+            RecalculateTime();
+            ValidateLesson();
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        var hasChanges = _lessonRequest.Sections.Any(s => s.Items.Any());
+        if (hasChanges)
+        {
+            var confirmed = await DialogService.ShowMessageBox(
+                "Avbryt",
+                "Är du säker på att du vill avbryta? Osparade ändringar kommer att förloras.",
+                yesText: "Ja, avbryt",
+                cancelText: "Nej, fortsätt redigera");
+
+            if (confirmed != true) return;
+        }
+
+        Navigation.NavigateTo("/lessons");
+    }
+
+    private async Task HandleSaveDraft()
+    {
+        _isSaving = true;
+        _isSavingDraft = true;
+        try
+        {
+            // For now, we save as a regular lesson but could add draft functionality later
+            await SaveLesson();
+            Snackbar.Add("Utkast sparat!", Severity.Info);
+        }
+        finally
+        {
+            _isSaving = false;
+            _isSavingDraft = false;
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        if (!CanSave())
+        {
+            Snackbar.Add("Lektionen kan inte sparas. Kontrollera valideringsfel.", Severity.Warning);
+            return;
+        }
+
+        _isSaving = true;
+        try
+        {
+            await SaveLesson();
+            Snackbar.Add(IsEditMode ? "Lektion uppdaterad!" : "Lektion skapad!", Severity.Success);
+            Navigation.NavigateTo("/lessons");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task SaveLesson()
+    {
+        if (IsEditMode)
+        {
+            await LessonsService.UpdateLessonAsync(LessonId!, _lessonRequest);
+        }
+        else
+        {
+            await LessonsService.CreateLessonAsync(_lessonRequest);
+        }
+    }
+
+    private bool CanSave()
+    {
+        return _lessonRequest.Sections.Count >= 3 &&
+               _lessonRequest.Sections.Count <= 8 &&
+               (_validationResult == null || !_validationResult.HasErrors);
+    }
+
+    // Helper methods for UI
+
+    private Severity GetTimeSeverity()
+    {
+        var percentage = GetTimePercentage();
+        if (percentage > 110) return Severity.Error;
+        if (percentage > 100) return Severity.Warning;
+        if (percentage < 80) return Severity.Info;
+        return Severity.Success;
+    }
+
+    private Color GetTimeStatusColor()
+    {
+        var percentage = GetTimePercentage();
+        if (percentage > 110) return Color.Error;
+        if (percentage > 100) return Color.Warning;
+        if (percentage < 80) return Color.Info;
+        return Color.Success;
+    }
+
+    private string GetTimeStatusText()
+    {
+        var percentage = GetTimePercentage();
+        if (percentage > 110) return "För lång!";
+        if (percentage > 100) return "Lite för lång";
+        if (percentage < 80) return "Mer tid finns";
+        return "Perfekt!";
+    }
+
+    private Color GetTimeProgressColor()
+    {
+        var percentage = GetTimePercentage();
+        if (percentage > 110) return Color.Error;
+        if (percentage > 100) return Color.Warning;
+        if (percentage < 80) return Color.Info;
+        return Color.Success;
+    }
+
+    private double GetTimePercentage()
+    {
+        if (_lessonRequest.Duration == 0) return 0;
+        return (double)_totalEstimatedTime / _lessonRequest.Duration * 100;
+    }
+
+    private Color GetSectionTimeColor(LessonSection section)
+    {
+        if (_patterns == null) return Color.Default;
+        var estimated = TimeValidationService.CalculateSectionEstimatedTime(section, _patterns);
+        var allocated = section.AllocatedMinutes;
+
+        if (allocated == 0) return Color.Default;
+        var percentage = (double)estimated / allocated * 100;
+
+        if (percentage > 120) return Color.Error;
+        if (percentage > 100) return Color.Warning;
+        if (percentage < 80) return Color.Info;
+        return Color.Success;
+    }
+
+    private string GetSectionIcon(string sectionType)
+    {
+        return sectionType switch
+        {
+            "Warmup" => Icons.Material.Filled.FitnessCenter,
+            "Technique" => Icons.Material.Filled.Settings,
+            "Patterns" => Icons.Material.Filled.Psychology,
+            "Combination" => Icons.Material.Filled.Shuffle,
+            "Repetition" => Icons.Material.Filled.Replay,
+            "Social" => Icons.Material.Filled.Groups,
+            _ => Icons.Material.Filled.Circle
+        };
+    }
+
+    private Color GetLevelColor(string level)
+    {
+        return level.ToLowerInvariant() switch
+        {
+            "beginner" => Color.Success,
+            "improver" => Color.Info,
+            "intermediate" => Color.Warning,
+            "advanced" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private string GetLevelDisplayName(string level)
+    {
+        return level.ToLowerInvariant() switch
+        {
+            "beginner" => "Nybörjare",
+            "improver" => "Förbättrare",
+            "intermediate" => "Medel",
+            "advanced" => "Avancerad",
+            _ => level
+        };
+    }
+
+    private Color GetTypeColor(string type)
+    {
+        return type.ToLowerInvariant() switch
+        {
+            "pattern" => Color.Primary,
+            "exercise" => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private string GetTypeDisplayName(string type)
+    {
+        return type.ToLowerInvariant() switch
+        {
+            "pattern" => "Tur",
+            "exercise" => "Övning",
+            _ => type
+        };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await BreakpointService.Unsubscribe(_breakpointSubscriptionId);
+    }
+}
