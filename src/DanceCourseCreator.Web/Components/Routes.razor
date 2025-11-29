@@ -4,12 +4,14 @@
     <ErrorBoundary>
         <ChildContent>
             <MudThemeProvider Theme="DanceTheme.Theme" />
+            <MudPopoverProvider />
             <MudDialogProvider />
             <MudSnackbarProvider />
         </ChildContent>
         <ErrorContent Context="ex">
             @* Fallback to default theme if custom theme fails *@
             <MudThemeProvider />
+            <MudPopoverProvider />
             <MudDialogProvider />
             <MudSnackbarProvider />
             <MudAlert Severity="Severity.Warning" Class="ma-4">
