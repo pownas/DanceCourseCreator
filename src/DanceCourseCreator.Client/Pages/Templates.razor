@@ -156,7 +156,9 @@
     private List<Template>? templates;
     private TemplateListResponse? templateResponse;
     private bool isLoading = false;
+#pragma warning disable CS0414
     private bool hasError = false;
+#pragma warning restore CS0414
     private string? filterScope;
     private string searchText = string.Empty;
     private int currentPage = 1;

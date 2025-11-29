@@ -163,7 +163,9 @@
 @code {
     private List<PatternOrExercise>? patterns;
     private bool isLoading = false;
+#pragma warning disable CS0414
     private bool hasError = false;
+#pragma warning restore CS0414
     private string? errorMessage;
     private string? filterType;
     private string? filterLevel;

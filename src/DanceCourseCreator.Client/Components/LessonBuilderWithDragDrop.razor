@@ -238,20 +238,20 @@
                                                                 <MudIconButton Icon="Icons.Material.Filled.KeyboardArrowUp" 
                                                                               Size="Size.Small"
                                                                               OnClick="() => MoveSectionUp(sectionIndex)"
-                                                                              Title="Flytta upp" />
+                                                                              title="Flytta upp" />
                                                             }
                                                             @if (sectionIndex < lessonRequest.Sections.Count - 1)
                                                             {
                                                                 <MudIconButton Icon="Icons.Material.Filled.KeyboardArrowDown" 
                                                                               Size="Size.Small"
                                                                               OnClick="() => MoveSectionDown(sectionIndex)"
-                                                                              Title="Flytta ner" />
+                                                                              title="Flytta ner" />
                                                             }
                                                             <MudIconButton Icon="Icons.Material.Filled.Delete" 
                                                                           Size="Size.Small"
                                                                           Color="Color.Error"
                                                                           OnClick="() => RemoveSection(sectionIndex)"
-                                                                          Title="Ta bort sektion" />
+                                                                          title="Ta bort sektion" />
                                                         </div>
                                                     }
                                                 </div>
@@ -333,7 +333,7 @@
                                                                   Size="Size.Small"
                                                                   Color="Color.Error"
                                                                   OnClick="@(() => RemoveItemFromSection(context.SectionIndex, context.ItemIndex))"
-                                                                  Title="Ta bort" />
+                                                                  title="Ta bort" />
                                                 }
                                             </div>
                                         </MudPaper>

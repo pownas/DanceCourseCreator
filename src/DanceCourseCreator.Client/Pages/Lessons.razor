@@ -130,7 +130,9 @@
 @code {
     private List<Lesson>? lessons;
     private bool isLoading = false;
+#pragma warning disable CS0414
     private bool hasError = false;
+#pragma warning restore CS0414
 
     [Inject] private ILogger<Lessons> Logger { get; set; } = null!;
 

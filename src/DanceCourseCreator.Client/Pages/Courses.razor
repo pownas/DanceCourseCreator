@@ -209,7 +209,9 @@
 @code {
     private List<Course>? courses;
     private bool isLoading = false;
+#pragma warning disable CS0414
     private bool hasError = false;
+#pragma warning restore CS0414
     private string? filterLevel;
     private string? filterDanceStyle;
     private string? searchText;

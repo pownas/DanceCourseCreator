@@ -178,7 +178,9 @@
     private int _beginnerCount = 0;
     private int _improverCount = 0;
     private int _exerciseCount = 0;
+#pragma warning disable CS0414
     private bool _hasError = false;
+#pragma warning restore CS0414
 
     [Inject] private ILogger<Home> Logger { get; set; } = null!;
 

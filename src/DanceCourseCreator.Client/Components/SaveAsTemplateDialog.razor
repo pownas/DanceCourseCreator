@@ -30,7 +30,7 @@
                                               Placeholder="@(ResourceType == "Lesson" ? "T.ex. 'Standard 75-min Nybörjarlektion'" : "T.ex. 'Standard 6-veckors Nybörjarkurs'")" />
                             </MudItem>
                             <MudItem xs="12">
-                                <MudSwitch T="bool" @bind-Checked="isTeamTemplate" Color="Color.Primary">
+                                <MudSwitch T="bool" @bind-Value="isTeamTemplate" Color="Color.Primary">
                                     Dela med team
                                 </MudSwitch>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">
