@@ -11,11 +11,13 @@ builder.Services.Configure<LoggerFilterOptions>(options =>
     options.Rules.Add(new LoggerFilterRule(null, "Microsoft.AspNetCore.DataProtection", LogLevel.Error, null));
 });
 
-var api = builder.AddProject<Projects.DanceCourseCreator_API>("dancecoursecreator-api")
-    .WithHttpHealthCheck("/health");
-
-builder.AddProject<Projects.DanceCourseCreator_Web>("dancecoursecreator-web")
+var api = builder.AddProject<Projects.DanceCourseCreator_API>("api")
     .WithHttpHealthCheck("/health")
+    .WithExternalHttpEndpoints();
+
+builder.AddProject<Projects.DanceCourseCreator_Web>("web")
+    .WithHttpHealthCheck("/health")
+    .WithExternalHttpEndpoints()
     .WaitFor(api)
     .WithReference(api);
 

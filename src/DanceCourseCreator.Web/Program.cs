@@ -16,8 +16,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 // Configure API HttpClient
-var apiBaseUrl = builder.Configuration["services:dancecoursecreator-api:https:0"] 
-    ?? builder.Configuration["services:dancecoursecreator-api:http:0"]
+var apiBaseUrl = builder.Configuration["services:api:https:0"] 
+    ?? builder.Configuration["services:api:http:0"]
     ?? "http://localhost:5139";
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
