@@ -1,5 +1,6 @@
 @* MobileBottomNav.razor - Bottom navigation för mobila enheter *@
 @inject NavigationManager Navigation
+@implements IDisposable
 
 <div class="mobile-bottom-nav" role="navigation" aria-label="Huvudnavigation">
     <MudPaper Elevation="4" Class="bottom-nav-paper">
@@ -17,7 +18,7 @@
                            Size="Size.Medium"
                            Href="/patterns"
                            Class="nav-button"
-                           aria-label="Turbank"
+                           aria-label="Mönster"
                            aria-current="@(IsCurrentPage("/patterns") ? "page" : null)" />
             
             <MudIconButton Icon="@Icons.Material.Filled.School"
@@ -57,7 +58,7 @@
         @* Label för aktiv sida (visas under ikoner) *@
         <div class="nav-labels">
             <span class="@GetLabelClass("/")">Hem</span>
-            <span class="@GetLabelClass("/patterns")">Turbank</span>
+            <span class="@GetLabelClass("/patterns")">Mönster</span>
             <span class="@GetLabelClass("/lessons")">Lektioner</span>
             <span class="@GetLabelClass("/courses")">Kurser</span>
             <span class="nav-label">Ny</span>
