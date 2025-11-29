@@ -5,6 +5,50 @@ All notable changes to the DanceCourseCreator project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-11-29
+
+### Changed
+- **Updated all NuGet packages to latest versions**
+
+#### DanceCourseCreator.ServiceDefaults
+| Package | Old Version | New Version |
+|---------|-------------|-------------|
+| Microsoft.Extensions.Http.Resilience | 9.4.0 | 10.0.0 |
+| Microsoft.Extensions.ServiceDiscovery | 9.3.1 | 10.0.0 |
+| OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.9.0 | 1.14.0 |
+| OpenTelemetry.Extensions.Hosting | 1.9.0 | 1.14.0 |
+| OpenTelemetry.Instrumentation.AspNetCore | 1.9.0 | 1.14.0 |
+| OpenTelemetry.Instrumentation.Http | 1.9.0 | 1.14.0 |
+| OpenTelemetry.Instrumentation.Runtime | 1.9.0 | 1.14.0 |
+
+#### DanceCourseCreator.Tests.E2E
+| Package | Old Version | New Version |
+|---------|-------------|-------------|
+| Microsoft.NET.Test.Sdk | 17.6.0 | 18.0.1 |
+| MSTest.TestAdapter | 3.0.4 | 4.0.2 |
+| MSTest.TestFramework | 3.0.4 | 4.0.2 |
+| coverlet.collector | 6.0.0 | 6.0.4 |
+| Microsoft.Playwright.MSTest | 1.40.0 | 1.56.0 |
+
+#### DanceCourseCreator.Web.Tests
+| Package | Old Version | New Version |
+|---------|-------------|-------------|
+| bunit | 2.0.33-preview | 2.1.1 |
+| Microsoft.NET.Test.Sdk | 17.14.1 | 18.0.1 |
+| xunit.runner.visualstudio | 3.1.4 | 3.1.5 |
+
+#### DanceCourseCreator.Web
+| Package | Old Version | New Version |
+|---------|-------------|-------------|
+| MudBlazor | 8.11.0 | 8.15.0 |
+
+### Fixed
+- Resolved security vulnerability in transitive dependency `Microsoft.Extensions.Caching.Memory` (GHSA-qj66-m88j-hmgj) by updating bunit from preview to stable version
+
+### Notes
+- MSTest 4.x introduces new analyzer warnings (MSTEST0001, MSTEST0037) recommending explicit parallelization settings and improved assertion methods. These are recommendations, not breaking changes.
+- No breaking changes detected in any of the package updates
+
 ## [0.2.0] - 2025-11-29
 
 ### Added
