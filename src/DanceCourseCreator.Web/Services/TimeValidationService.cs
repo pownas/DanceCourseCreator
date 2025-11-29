@@ -1,6 +1,6 @@
-using DanceCourseCreator.Client.Models;
+using DanceCourseCreator.Web.Models;
 
-namespace DanceCourseCreator.Client.Services;
+namespace DanceCourseCreator.Web.Services;
 
 /// <summary>
 /// Service for validating lesson time allocations and requirements

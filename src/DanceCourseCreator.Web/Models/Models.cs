@@ -1,4 +1,4 @@
-namespace DanceCourseCreator.Client.Models;
+namespace DanceCourseCreator.Web.Models;
 
 public class User
 {

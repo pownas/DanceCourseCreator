@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
-using DanceCourseCreator.Client.Models;
+using DanceCourseCreator.Web.Models;
 
-namespace DanceCourseCreator.Client.Services;
+namespace DanceCourseCreator.Web.Services;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {

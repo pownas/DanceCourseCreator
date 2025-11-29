@@ -1,54 +1,28 @@
-﻿@using DanceCourseCreator.Client.Themes
-@using DanceCourseCreator.Client.Components
-@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
+﻿@using DanceCourseCreator.Web.Themes
+@using DanceCourseCreator.Web.Components
 @using Microsoft.AspNetCore.Components.Web
 
-<CascadingAuthenticationState>
-    <ErrorBoundary>
-        <ChildContent>
-            <MudThemeProvider Theme="DanceTheme.Theme" />
-            <MudDialogProvider />
-            <MudSnackbarProvider />
-        </ChildContent>
-        <ErrorContent Context="ex">
-            @* Fallback to default theme if custom theme fails *@
-            <MudThemeProvider />
-            <MudDialogProvider />
-            <MudSnackbarProvider />
-            <MudAlert Severity="Severity.Warning" Class="ma-4">
-                Theme loading failed, using default theme. Error: @ex.Message
-            </MudAlert>
-        </ErrorContent>
-    </ErrorBoundary>
-    
-    <ErrorBoundaryHandler ShowDetails="@_isDevelopment">
-        <Router AppAssembly="@typeof(App).Assembly">
-            <Found Context="routeData">
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                    <NotAuthorized>
-                        <RedirectToLogin />
-                    </NotAuthorized>
-                </AuthorizeRouteView>
-                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-            </Found>
-            <NotFound>
-                <PageTitle>Not found</PageTitle>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p role="alert">Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
-    </ErrorBoundaryHandler>
-</CascadingAuthenticationState>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link href="DanceCourseCreator.Web.styles.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+</body>
+
+</html>
 
 @code {
-    private bool _isDevelopment = false;
-
-    [Inject]
-    private IWebAssemblyHostEnvironment? HostEnvironment { get; set; }
-
-    protected override void OnInitialized()
-    {
-        _isDevelopment = HostEnvironment?.IsDevelopment() ?? false;
-    }
+    
 }

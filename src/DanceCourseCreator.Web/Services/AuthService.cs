@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.JSInterop;
-using DanceCourseCreator.Client.Models;
+using DanceCourseCreator.Web.Models;
 
-namespace DanceCourseCreator.Client.Services;
+namespace DanceCourseCreator.Web.Services;
 
 public interface IAuthService
 {

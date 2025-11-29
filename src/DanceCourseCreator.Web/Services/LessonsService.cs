@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
-using DanceCourseCreator.Client.Models;
+using DanceCourseCreator.Web.Models;
 
-namespace DanceCourseCreator.Client.Services;
+namespace DanceCourseCreator.Web.Services;
 
 public interface ILessonsService
 {

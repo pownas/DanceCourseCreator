@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-namespace DanceCourseCreator.Client.Services;
+namespace DanceCourseCreator.Web.Services;
 
 /// <summary>
 /// Sample service to demonstrate observability features are working
@@ -16,7 +16,7 @@ public class ObservabilityTestService : IObservabilityTestService
 {
     private readonly ILogger<ObservabilityTestService> _logger;
     private readonly HttpClient _httpClient;
-    private static readonly ActivitySource ActivitySource = new("DanceCourseCreator.Client");
+    private static readonly ActivitySource ActivitySource = new("DanceCourseCreator.Web");
 
     public ObservabilityTestService(ILogger<ObservabilityTestService> logger, HttpClient httpClient)
     {

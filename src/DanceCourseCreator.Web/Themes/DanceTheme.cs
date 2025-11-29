@@ -1,6 +1,6 @@
 using MudBlazor;
 
-namespace DanceCourseCreator.Client.Themes;
+namespace DanceCourseCreator.Web.Themes;
 
 public static class DanceTheme
 {
