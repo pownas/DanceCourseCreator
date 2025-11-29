@@ -1,0 +1,48 @@
+@* LevelBadge.razor - Component for displaying dance level with color-coded indicator *@
+
+<MudChip T="string" 
+         Color="@GetLevelColor()" 
+         Size="@Size" 
+         Variant="Variant.Filled"
+         Class="level-badge"
+         aria-label="@($"Nivå: {Level}")">
+    @GetDisplayLevel()
+</MudChip>
+
+@code {
+    /// <summary>
+    /// The level to display (e.g., "Beginner", "Improver", "Intermediate", "Advanced")
+    /// </summary>
+    [Parameter]
+    public string Level { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Size of the badge (default: Small)
+    /// </summary>
+    [Parameter]
+    public Size Size { get; set; } = Size.Small;
+
+    private Color GetLevelColor()
+    {
+        return Level?.ToLowerInvariant() switch
+        {
+            "beginner" => Color.Success,      // Green
+            "improver" => Color.Info,         // Blue
+            "intermediate" => Color.Warning,  // Orange
+            "advanced" => Color.Error,        // Red
+            _ => Color.Default
+        };
+    }
+
+    private string GetDisplayLevel()
+    {
+        return Level?.ToLowerInvariant() switch
+        {
+            "beginner" => "Nybörjare",
+            "improver" => "Fortsättning",
+            "intermediate" => "Medel",
+            "advanced" => "Avancerad",
+            _ => Level ?? "Okänd"
+        };
+    }
+}

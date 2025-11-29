@@ -1,0 +1,185 @@
+/* PatternCard.razor.css - Styles for PatternCard component */
+
+/* Base card styling */
+.pattern-card {
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+    cursor: default;
+    min-height: 120px;
+    container-type: inline-size;
+}
+
+/* Selectable card styling */
+.pattern-card-selectable {
+    cursor: pointer;
+}
+
+.pattern-card-selectable:hover {
+    transform: translateY(-2px);
+}
+
+.pattern-card-selectable:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+/* Hover state */
+.pattern-card-hovered {
+    box-shadow: 0px 3px 5px -1px rgba(0,0,0,0.2),
+                0px 6px 10px 0px rgba(0,0,0,0.14),
+                0px 1px 18px 0px rgba(0,0,0,0.12);
+}
+
+/* Header styling */
+.pattern-card-header {
+    padding: 12px 16px 8px 16px;
+}
+
+.pattern-card-header-compact {
+    padding: 8px 12px 4px 12px;
+}
+
+.pattern-card-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pattern-name {
+    font-weight: 600;
+    color: var(--mud-palette-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Content styling */
+.pattern-card-content {
+    padding: 0 16px 12px 16px;
+}
+
+.pattern-card-content-compact {
+    padding: 0 12px 8px 12px;
+}
+
+/* Meta information row */
+.pattern-meta {
+    margin-bottom: 8px;
+}
+
+.pattern-info {
+    flex-wrap: wrap;
+}
+
+/* Tags container */
+.pattern-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+/* Description text */
+.pattern-description {
+    color: var(--mud-palette-text-secondary);
+    line-height: 1.4;
+}
+
+/* Card actions */
+.pattern-card-actions {
+    padding: 0 8px 8px 8px;
+    justify-content: flex-end;
+}
+
+/* Compact mode specific styles */
+.pattern-card-compact {
+    min-height: auto;
+}
+
+.pattern-card-compact .pattern-card-header-content {
+    gap: 4px;
+}
+
+.pattern-card-compact .pattern-tags {
+    margin-top: 4px;
+}
+
+/* Level badge positioning */
+::deep .level-badge {
+    flex-shrink: 0;
+}
+
+/* Tag chip styling */
+::deep .tag-chip {
+    font-size: 0.75rem;
+    height: 24px;
+}
+
+/* Responsive styles using container queries */
+@container (max-width: 280px) {
+    .pattern-card-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .pattern-info {
+        flex-wrap: wrap;
+    }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 599px) {
+    .pattern-card {
+        border-radius: 8px;
+    }
+    
+    .pattern-card-header {
+        padding: 10px 12px 6px 12px;
+    }
+    
+    .pattern-card-content {
+        padding: 0 12px 10px 12px;
+    }
+    
+    .pattern-name {
+        font-size: 1rem;
+    }
+}
+
+/* Touch device optimization */
+@media (hover: none) {
+    .pattern-card-selectable:hover {
+        transform: none;
+    }
+    
+    .pattern-card-selectable:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .pattern-card {
+        border: 2px solid var(--mud-palette-text-primary);
+    }
+    
+    .pattern-card-selectable:focus-visible {
+        outline-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .pattern-card {
+        transition: none;
+    }
+    
+    .pattern-card-selectable:hover {
+        transform: none;
+    }
+}

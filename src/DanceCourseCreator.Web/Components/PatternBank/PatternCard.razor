@@ -1,0 +1,249 @@
+@* PatternCard.razor - Individual card for displaying patterns/exercises with compact and expanded variants *@
+@using DanceCourseCreator.Web.Components.Common
+
+<MudCard Elevation="@_currentElevation"
+         Class="@GetCardClass()"
+         @onmouseenter="@HandleMouseEnter"
+         @onmouseleave="@HandleMouseLeave"
+         @onclick="@HandleCardClick"
+         tabindex="@(Selectable ? 0 : -1)"
+         role="@(Selectable ? "button" : "article")"
+         aria-label="@GetAriaLabel()">
+    <MudCardHeader Class="@GetHeaderClass()">
+        <CardHeaderContent>
+            <div class="pattern-card-header-content">
+                <MudText Typo="@(Compact ? Typo.subtitle1 : Typo.h6)" Class="pattern-name">
+                    @Pattern.Name
+                </MudText>
+                <LevelBadge Level="@Pattern.Level" Size="@(Compact ? Size.Small : Size.Medium)" />
+            </div>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            @if (Selectable)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Add"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="@HandleSelectWithStopPropagation"
+                               aria-label="@($"Lägg till {Pattern.Name}")" />
+            }
+        </CardHeaderActions>
+    </MudCardHeader>
+
+    <MudCardContent Class="@GetContentClass()">
+        <div class="pattern-meta">
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="pattern-info">
+                <MudIcon Icon="@GetTypeIcon()" Size="Size.Small" Color="Color.Default" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @GetTypeDisplayName()
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">·</MudText>
+                <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" Color="Color.Default" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @Pattern.EstimatedMinutes min
+                </MudText>
+            </MudStack>
+        </div>
+
+        @if (Pattern.Tags?.Any() == true)
+        {
+            <div class="pattern-tags">
+                @foreach (var tag in Pattern.Tags.Take(MaxVisibleTags))
+                {
+                    <TagChip Tag="@tag" />
+                }
+                @if (Pattern.Tags.Count > MaxVisibleTags)
+                {
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Default">
+                        +@(Pattern.Tags.Count - MaxVisibleTags)
+                    </MudChip>
+                }
+            </div>
+        }
+
+        @if (!Compact && ShowDetails && !string.IsNullOrEmpty(Pattern.Description))
+        {
+            <MudText Typo="Typo.body2" Class="pattern-description mt-2">
+                @TruncateDescription(Pattern.Description)
+            </MudText>
+        }
+    </MudCardContent>
+
+    @if (!Compact)
+    {
+        <MudCardActions Class="pattern-card-actions">
+            <MudButton Size="Size.Small"
+                       Color="Color.Primary"
+                       Variant="Variant.Text"
+                       StartIcon="@Icons.Material.Filled.Visibility"
+                       OnClick="@HandleViewWithStopPropagation"
+                       aria-label="@($"Visa detaljer för {Pattern.Name}")">
+                Visa detaljer
+            </MudButton>
+        </MudCardActions>
+    }
+</MudCard>
+
+@code {
+    /// <summary>
+    /// The pattern or exercise to display
+    /// </summary>
+    [Parameter, EditorRequired]
+    public PatternOrExercise Pattern { get; set; } = null!;
+
+    /// <summary>
+    /// Whether to show additional details (description)
+    /// </summary>
+    [Parameter]
+    public bool ShowDetails { get; set; } = false;
+
+    /// <summary>
+    /// Whether the card is selectable (clickable for adding to a selection)
+    /// </summary>
+    [Parameter]
+    public bool Selectable { get; set; } = true;
+
+    /// <summary>
+    /// Whether to use compact mode (optimized for mobile)
+    /// </summary>
+    [Parameter]
+    public bool Compact { get; set; } = false;
+
+    /// <summary>
+    /// Event callback when the card is selected (add button clicked or card clicked if Selectable)
+    /// </summary>
+    [Parameter]
+    public EventCallback<PatternOrExercise> OnSelect { get; set; }
+
+    /// <summary>
+    /// Event callback when "View details" is clicked
+    /// </summary>
+    [Parameter]
+    public EventCallback<PatternOrExercise> OnView { get; set; }
+
+    /// <summary>
+    /// Maximum number of visible tags before showing "+X" indicator
+    /// </summary>
+    [Parameter]
+    public int MaxVisibleTags { get; set; } = 3;
+
+    private int _currentElevation = 2;
+    private bool _isHovered = false;
+    private bool _actionInProgress = false;
+
+    private const int ElevationDefault = 2;
+    private const int ElevationHover = 6;
+    private const int MaxDescriptionLength = 120;
+
+    private void HandleMouseEnter()
+    {
+        _isHovered = true;
+        _currentElevation = ElevationHover;
+    }
+
+    private void HandleMouseLeave()
+    {
+        _isHovered = false;
+        _currentElevation = ElevationDefault;
+    }
+
+    private async Task HandleCardClick()
+    {
+        // Don't trigger card click if an action button was clicked
+        if (_actionInProgress)
+        {
+            _actionInProgress = false;
+            return;
+        }
+        
+        if (Selectable && OnSelect.HasDelegate)
+        {
+            await OnSelect.InvokeAsync(Pattern);
+        }
+    }
+
+    private async Task HandleSelectWithStopPropagation()
+    {
+        _actionInProgress = true;
+        if (OnSelect.HasDelegate)
+        {
+            await OnSelect.InvokeAsync(Pattern);
+        }
+    }
+
+    private async Task HandleViewWithStopPropagation()
+    {
+        _actionInProgress = true;
+        if (OnView.HasDelegate)
+        {
+            await OnView.InvokeAsync(Pattern);
+        }
+    }
+
+    private string GetCardClass()
+    {
+        var classes = new List<string> { "pattern-card" };
+        
+        if (Compact)
+            classes.Add("pattern-card-compact");
+        
+        if (Selectable)
+            classes.Add("pattern-card-selectable");
+        
+        if (_isHovered)
+            classes.Add("pattern-card-hovered");
+        
+        return string.Join(" ", classes);
+    }
+
+    private string GetHeaderClass()
+    {
+        return Compact ? "pattern-card-header-compact" : "pattern-card-header";
+    }
+
+    private string GetContentClass()
+    {
+        return Compact ? "pattern-card-content-compact" : "pattern-card-content";
+    }
+
+    private string GetAriaLabel()
+    {
+        var typeText = GetTypeDisplayName();
+        return $"{Pattern.Name}, {typeText}, nivå {Pattern.Level}, {Pattern.EstimatedMinutes} minuter";
+    }
+
+    private string GetTypeIcon()
+    {
+        return Pattern.Type?.ToLowerInvariant() switch
+        {
+            "pattern" => Icons.Material.Filled.SwapHoriz,
+            "exercise" => Icons.Material.Filled.FitnessCenter,
+            "drill" => Icons.Material.Filled.Loop,
+            "technique" => Icons.Material.Filled.School,
+            _ => Icons.Material.Filled.Category
+        };
+    }
+
+    private string GetTypeDisplayName()
+    {
+        return Pattern.Type?.ToLowerInvariant() switch
+        {
+            "pattern" => "Tur",
+            "exercise" => "Övning",
+            "drill" => "Drill",
+            "technique" => "Teknik",
+            _ => Pattern.Type ?? "Okänd"
+        };
+    }
+
+    private string TruncateDescription(string description)
+    {
+        if (string.IsNullOrEmpty(description))
+            return string.Empty;
+        
+        if (description.Length <= MaxDescriptionLength)
+            return description;
+        
+        return description[..MaxDescriptionLength].TrimEnd() + "...";
+    }
+}

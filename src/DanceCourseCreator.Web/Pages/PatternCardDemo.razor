@@ -1,0 +1,196 @@
+@page "/pattern-card-demo"
+@using DanceCourseCreator.Web.Components.PatternBank
+
+<PageTitle>PatternCard Demo</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-4">PatternCard Komponent Demo</MudText>
+    
+    <MudText Typo="Typo.body1" Class="mb-4">
+        Denna sida demonstrerar PatternCard-komponenten med olika varianter och interaktioner.
+    </MudText>
+
+    <!-- Toggle for compact mode -->
+    <MudPaper Class="pa-4 mb-4">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4">
+            <MudSwitch @bind-Value="_useCompactMode" Label="Kompakt läge (för mobil)" Color="Color.Primary" />
+            <MudSwitch @bind-Value="_showDetails" Label="Visa beskrivning" Color="Color.Secondary" />
+            <MudSwitch @bind-Value="_isSelectable" Label="Valbar" Color="Color.Tertiary" />
+        </MudStack>
+    </MudPaper>
+
+    <!-- Selected patterns display -->
+    @if (_selectedPatterns.Any())
+    {
+        <MudAlert Severity="Severity.Success" Class="mb-4" Variant="Variant.Outlined">
+            <MudText Typo="Typo.body2">
+                <strong>Valda mönster:</strong> @string.Join(", ", _selectedPatterns.Select(p => p.Name))
+            </MudText>
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error" OnClick="ClearSelection" Class="ml-2">
+                Rensa val
+            </MudButton>
+        </MudAlert>
+    }
+
+    <!-- Pattern cards grid -->
+    <MudGrid>
+        @foreach (var pattern in _demoPatterns)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <PatternCard Pattern="@pattern"
+                             Compact="@_useCompactMode"
+                             ShowDetails="@_showDetails"
+                             Selectable="@_isSelectable"
+                             OnSelect="@HandlePatternSelect"
+                             OnView="@HandlePatternView" />
+            </MudItem>
+        }
+    </MudGrid>
+
+    <!-- View dialog -->
+    @if (_viewedPattern != null)
+    {
+        <MudDialog @bind-Visible="_showViewDialog">
+            <DialogContent>
+                <MudText Typo="Typo.h6" Class="mb-2">@_viewedPattern.Name</MudText>
+                <MudDivider Class="mb-4" />
+                <MudStack Spacing="2">
+                    <MudText><strong>Typ:</strong> @_viewedPattern.Type</MudText>
+                    <MudText><strong>Nivå:</strong> @_viewedPattern.Level</MudText>
+                    <MudText><strong>Estimerad tid:</strong> @_viewedPattern.EstimatedMinutes min</MudText>
+                    @if (_viewedPattern.BpmRange is { Min: > 0, Max: > 0 })
+                    {
+                        <MudText><strong>BPM:</strong> @_viewedPattern.BpmRange.Min - @_viewedPattern.BpmRange.Max</MudText>
+                    }
+                    @if (!string.IsNullOrEmpty(_viewedPattern.Description))
+                    {
+                        <MudText><strong>Beskrivning:</strong> @_viewedPattern.Description</MudText>
+                    }
+                    @if (_viewedPattern.Tags?.Any() == true)
+                    {
+                        <div>
+                            <MudText><strong>Taggar:</strong></MudText>
+                            <MudChipSet T="string" Class="mt-1">
+                                @foreach (var tag in _viewedPattern.Tags)
+                                {
+                                    <MudChip T="string" Size="Size.Small">@tag</MudChip>
+                                }
+                            </MudChipSet>
+                        </div>
+                    }
+                </MudStack>
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="CloseViewDialog" Variant="Variant.Filled" Color="Color.Primary">Stäng</MudButton>
+            </DialogActions>
+        </MudDialog>
+    }
+</MudContainer>
+
+@code {
+    private bool _useCompactMode = false;
+    private bool _showDetails = true;
+    private bool _isSelectable = true;
+    private bool _showViewDialog = false;
+    private PatternOrExercise? _viewedPattern;
+    private List<PatternOrExercise> _selectedPatterns = new();
+
+    // Demo patterns for testing
+    private readonly List<PatternOrExercise> _demoPatterns = new()
+    {
+        new PatternOrExercise
+        {
+            Id = "1",
+            Name = "Sugar Push",
+            Type = "Pattern",
+            Level = "Beginner",
+            Description = "Grundläggande tur i West Coast Swing med push-away-rörelse. En av de första turerna som lärs ut i WCS.",
+            EstimatedMinutes = 10,
+            BpmRange = new BpmRange { Min = 88, Max = 104 },
+            Tags = new List<string> { "fundamentals", "connection", "slot" }
+        },
+        new PatternOrExercise
+        {
+            Id = "2",
+            Name = "Left Side Pass",
+            Type = "Pattern",
+            Level = "Beginner",
+            Description = "Följaren passerar på ledares vänstra sida genom sloten.",
+            EstimatedMinutes = 10,
+            BpmRange = new BpmRange { Min = 88, Max = 104 },
+            Tags = new List<string> { "fundamentals", "pass", "slot" }
+        },
+        new PatternOrExercise
+        {
+            Id = "3",
+            Name = "Whip",
+            Type = "Pattern",
+            Level = "Improver",
+            Description = "Klassisk WCS-tur med rotation och stretch. Kräver god anchor och connection.",
+            EstimatedMinutes = 15,
+            BpmRange = new BpmRange { Min = 92, Max = 108 },
+            Tags = new List<string> { "classic", "rotation", "stretch", "connection", "anchor" }
+        },
+        new PatternOrExercise
+        {
+            Id = "4",
+            Name = "Tuck Turn",
+            Type = "Pattern",
+            Level = "Intermediate",
+            Description = "Avancerad variation på Sugar Push med insiderotation för följaren.",
+            EstimatedMinutes = 12,
+            BpmRange = new BpmRange { Min = 88, Max = 100 },
+            Tags = new List<string> { "rotation", "styling", "variation" }
+        },
+        new PatternOrExercise
+        {
+            Id = "5",
+            Name = "Anchor Drill",
+            Type = "Exercise",
+            Level = "Beginner",
+            Description = "Teknikövning för att träna korrekt anchor step med stretch och connection.",
+            EstimatedMinutes = 5,
+            Tags = new List<string> { "technique", "anchor", "drill" }
+        },
+        new PatternOrExercise
+        {
+            Id = "6",
+            Name = "Connection Flow",
+            Type = "Exercise",
+            Level = "Advanced",
+            Description = "Avancerad teknikövning för att öva mjuka övergångar och kontinuerlig connection under hela turen.",
+            EstimatedMinutes = 8,
+            BpmRange = new BpmRange { Min = 90, Max = 110 },
+            Tags = new List<string> { "technique", "connection", "flow", "musicality", "advanced" }
+        }
+    };
+
+    private void HandlePatternSelect(PatternOrExercise pattern)
+    {
+        if (_selectedPatterns.Any(p => p.Id == pattern.Id))
+        {
+            _selectedPatterns.RemoveAll(p => p.Id == pattern.Id);
+        }
+        else
+        {
+            _selectedPatterns.Add(pattern);
+        }
+    }
+
+    private void HandlePatternView(PatternOrExercise pattern)
+    {
+        _viewedPattern = pattern;
+        _showViewDialog = true;
+    }
+
+    private void CloseViewDialog()
+    {
+        _showViewDialog = false;
+        _viewedPattern = null;
+    }
+
+    private void ClearSelection()
+    {
+        _selectedPatterns.Clear();
+    }
+}
