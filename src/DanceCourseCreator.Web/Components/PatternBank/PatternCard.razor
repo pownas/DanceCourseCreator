@@ -15,7 +15,15 @@
                 <MudText Typo="@(Compact ? Typo.subtitle1 : Typo.h6)" Class="pattern-name">
                     @Pattern.Name
                 </MudText>
-                <LevelBadge Level="@Pattern.Level" Size="@(Compact ? Size.Small : Size.Medium)" />
+                <div class="pattern-card-badges">
+                    <LevelBadge Level="@Pattern.Level" Size="@(Compact ? Size.Small : Size.Medium)" />
+                    @if (!string.IsNullOrEmpty(Pattern.DanceStyle))
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined" Class="dance-style-chip">
+                            @GetDanceStyleDisplayName()
+                        </MudChip>
+                    }
+                </div>
             </div>
         </CardHeaderContent>
         <CardHeaderActions>
@@ -233,6 +241,22 @@
             "drill" => "Drill",
             "technique" => "Teknik",
             _ => Pattern.Type ?? "Okänd"
+        };
+    }
+
+    private string GetDanceStyleDisplayName()
+    {
+        return Pattern.DanceStyle switch
+        {
+            "WestCoastSwing" => "WCS",
+            "Bugg" => "Bugg",
+            "Fox" => "Fox",
+            "Foxtrot" => "Foxtrot",
+            "Lindy" => "Lindy Hop",
+            "Balboa" => "Balboa",
+            "Blues" => "Blues",
+            "Other" => "Annan",
+            _ => Pattern.DanceStyle
         };
     }
 

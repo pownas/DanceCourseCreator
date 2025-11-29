@@ -10,12 +10,24 @@
         Denna sida demonstrerar PatternCard-komponenten med olika varianter och interaktioner.
     </MudText>
 
-    <!-- Toggle for compact mode -->
+    <!-- Toggle for compact mode and filters -->
     <MudPaper Class="pa-4 mb-4">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4" Class="mb-3">
             <MudSwitch @bind-Value="_useCompactMode" Label="Kompakt läge (för mobil)" Color="Color.Primary" />
             <MudSwitch @bind-Value="_showDetails" Label="Visa beskrivning" Color="Color.Secondary" />
             <MudSwitch @bind-Value="_isSelectable" Label="Valbar" Color="Color.Tertiary" />
+        </MudStack>
+        
+        <!-- Dance style filter -->
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudText Typo="Typo.body2" Class="mr-2"><strong>Filtrera efter dansstil:</strong></MudText>
+            <MudChipSet T="string" SelectionMode="SelectionMode.SingleSelection" @bind-SelectedValue="_selectedDanceStyle" Color="Color.Info">
+                <MudChip T="string" Value="@string.Empty" Default="true">Alla</MudChip>
+                <MudChip T="string" Value="@("WestCoastSwing")">WCS</MudChip>
+                <MudChip T="string" Value="@("Bugg")">Bugg</MudChip>
+                <MudChip T="string" Value="@("Lindy")">Lindy Hop</MudChip>
+                <MudChip T="string" Value="@("Blues")">Blues</MudChip>
+            </MudChipSet>
         </MudStack>
     </MudPaper>
 
@@ -34,7 +46,7 @@
 
     <!-- Pattern cards grid -->
     <MudGrid>
-        @foreach (var pattern in _demoPatterns)
+        @foreach (var pattern in GetFilteredPatterns())
         {
             <MudItem xs="12" sm="6" md="4" lg="3">
                 <PatternCard Pattern="@pattern"
@@ -46,6 +58,13 @@
             </MudItem>
         }
     </MudGrid>
+    
+    @if (!GetFilteredPatterns().Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">
+            Inga mönster matchar det valda filtret.
+        </MudAlert>
+    }
 
     <!-- View dialog -->
     @if (_viewedPattern != null)
@@ -94,6 +113,16 @@
     private bool _showViewDialog = false;
     private PatternOrExercise? _viewedPattern;
     private List<PatternOrExercise> _selectedPatterns = new();
+    private string _selectedDanceStyle = string.Empty;
+
+    private List<PatternOrExercise> GetFilteredPatterns()
+    {
+        if (string.IsNullOrEmpty(_selectedDanceStyle))
+        {
+            return _demoPatterns;
+        }
+        return _demoPatterns.Where(p => p.DanceStyle == _selectedDanceStyle).ToList();
+    }
 
     // Demo patterns for testing
     private readonly List<PatternOrExercise> _demoPatterns = new()
@@ -104,6 +133,7 @@
             Name = "Sugar Push",
             Type = "Pattern",
             Level = "Beginner",
+            DanceStyle = "WestCoastSwing",
             Description = "Grundläggande tur i West Coast Swing med push-away-rörelse. En av de första turerna som lärs ut i WCS.",
             EstimatedMinutes = 10,
             BpmRange = new BpmRange { Min = 88, Max = 104 },
@@ -115,6 +145,7 @@
             Name = "Left Side Pass",
             Type = "Pattern",
             Level = "Beginner",
+            DanceStyle = "WestCoastSwing",
             Description = "Följaren passerar på ledares vänstra sida genom sloten.",
             EstimatedMinutes = 10,
             BpmRange = new BpmRange { Min = 88, Max = 104 },
@@ -126,6 +157,7 @@
             Name = "Whip",
             Type = "Pattern",
             Level = "Improver",
+            DanceStyle = "WestCoastSwing",
             Description = "Klassisk WCS-tur med rotation och stretch. Kräver god anchor och connection.",
             EstimatedMinutes = 15,
             BpmRange = new BpmRange { Min = 92, Max = 108 },
@@ -137,6 +169,7 @@
             Name = "Tuck Turn",
             Type = "Pattern",
             Level = "Intermediate",
+            DanceStyle = "WestCoastSwing",
             Description = "Avancerad variation på Sugar Push med insiderotation för följaren.",
             EstimatedMinutes = 12,
             BpmRange = new BpmRange { Min = 88, Max = 100 },
@@ -145,23 +178,49 @@
         new PatternOrExercise
         {
             Id = "5",
+            Name = "Grundsteg",
+            Type = "Pattern",
+            Level = "Beginner",
+            DanceStyle = "Bugg",
+            Description = "Det grundläggande steget i bugg med sexstegsmönster.",
+            EstimatedMinutes = 8,
+            BpmRange = new BpmRange { Min = 130, Max = 160 },
+            Tags = new List<string> { "fundamentals", "basic" }
+        },
+        new PatternOrExercise
+        {
+            Id = "6",
+            Name = "Swing Out",
+            Type = "Pattern",
+            Level = "Improver",
+            DanceStyle = "Lindy",
+            Description = "Klassisk Lindy Hop-tur med öppen och stängd position.",
+            EstimatedMinutes = 15,
+            BpmRange = new BpmRange { Min = 120, Max = 180 },
+            Tags = new List<string> { "classic", "swing", "rotation" }
+        },
+        new PatternOrExercise
+        {
+            Id = "7",
             Name = "Anchor Drill",
             Type = "Exercise",
             Level = "Beginner",
+            DanceStyle = "WestCoastSwing",
             Description = "Teknikövning för att träna korrekt anchor step med stretch och connection.",
             EstimatedMinutes = 5,
             Tags = new List<string> { "technique", "anchor", "drill" }
         },
         new PatternOrExercise
         {
-            Id = "6",
-            Name = "Connection Flow",
+            Id = "8",
+            Name = "Blues Walk",
             Type = "Exercise",
-            Level = "Advanced",
-            Description = "Avancerad teknikövning för att öva mjuka övergångar och kontinuerlig connection under hela turen.",
-            EstimatedMinutes = 8,
-            BpmRange = new BpmRange { Min = 90, Max = 110 },
-            Tags = new List<string> { "technique", "connection", "flow", "musicality", "advanced" }
+            Level = "Beginner",
+            DanceStyle = "Blues",
+            Description = "Grundläggande gång och connection i blues dans.",
+            EstimatedMinutes = 10,
+            BpmRange = new BpmRange { Min = 60, Max = 90 },
+            Tags = new List<string> { "technique", "walk", "connection" }
         }
     };
 
