@@ -1,6 +1,6 @@
 # Dance Course Creator - .NET 10
 
-En applikation för att skapa danskurser och hantera kursverksamheten för West Coast Swing, nu implementerad med .NET 10 Blazor WebAssembly frontend och Web API backend.
+En applikation för att skapa danskurser och hantera kursverksamheten för West Coast Swing, nu implementerad med .NET 10 Blazor Server frontend och Web API backend.
 
 ## 🎯 Status - FULLY FUNCTIONAL APPLICATION!
 
@@ -103,7 +103,7 @@ The easiest way to get started is using GitHub Codespaces with our automated ins
 2. **Build the solution**
    ```bash
    dotnet build src/DanceCourseCreator.API
-   dotnet build src/DanceCourseCreator.Client
+   dotnet build src/DanceCourseCreator.Web
    ```
 
 3. **Start the API backend (Terminal 1)**
@@ -113,12 +113,12 @@ The easiest way to get started is using GitHub Codespaces with our automated ins
    ```
    API will be available at: https://localhost:7177
 
-4. **Start the Blazor client (Terminal 2)**
+4. **Start the Blazor web app (Terminal 2)**
    ```bash
-   cd src/DanceCourseCreator.Client
+   cd src/DanceCourseCreator.Web
    dotnet run
    ```
-   Client application will be available at: https://localhost:5001
+   Web application will be available at: https://localhost:5001
 
 5. **Access the application**
    - Open your browser to: https://localhost:5001
@@ -142,7 +142,7 @@ This script manages the complete application lifecycle and provides monitoring t
 ## 🏗️ Technical Architecture
 
 ### .NET 10 Technology Stack
-- **Frontend**: Blazor WebAssembly 10.0 with MudBlazor Material Design components
+- **Frontend**: Blazor Server 10.0 with MudBlazor Material Design components
 - **Backend**: .NET 10 Web API with Entity Framework Core
 - **Database**: SQLite with Entity Framework Core (easily upgradeable to PostgreSQL/SQL Server)
 - **Authentication**: JWT with BCrypt password hashing
@@ -159,16 +159,15 @@ DanceCourseCreator/
 │   │   ├── Services/                    # Business Services
 │   │   ├── DTOs/                        # Data Transfer Objects
 │   │   └── Program.cs                   # API Startup
-│   └── DanceCourseCreator.Client/       # Blazor WebAssembly Frontend
-│       ├── Pages/                       # Razor Pages/Components
-│       ├── Components/                  # Reusable UI Components
-│       ├── Services/                    # HTTP Client Services
-│       ├── Models/                      # Client-side Models
-│       ├── Layout/                      # Application Layout
-│       └── Program.cs                   # Client Startup
-├── legacy/                              # Original TypeScript/React code (preserved)
-│   ├── server/                          # Node.js/Express backend
-│   └── client/                          # React frontend
+│   ├── DanceCourseCreator.Web/          # Blazor Server Frontend
+│   │   ├── Pages/                       # Razor Pages/Components
+│   │   ├── Components/                  # Reusable UI Components
+│   │   ├── Services/                    # HTTP Client Services
+│   │   ├── Models/                      # Client-side Models
+│   │   ├── Layout/                      # Application Layout
+│   │   └── Program.cs                   # Web Startup
+│   ├── DanceCourseCreator.AppHost/      # Aspire Orchestration
+│   └── DanceCourseCreator.ServiceDefaults/ # Shared Service Configuration
 ├── docs/                                # Documentation
 ├── Kravspecifikation.md                 # Requirements specification (Swedish)
 └── DanceCourseCreator.slnx             # .NET Solution file
@@ -217,7 +216,7 @@ Each pattern and exercise includes:
 ## 🎓 User Experience
 
 ### Getting Started Journey
-1. **Launch Application** - Access the Blazor WebAssembly interface
+1. **Launch Application** - Access the Blazor Server interface
 2. **User Registration** - Create account with secure authentication
 3. **Explore Dashboard** - Overview of library statistics and quick actions
 4. **Browse Turbank** - View all available patterns and exercises
@@ -244,11 +243,11 @@ dotnet build                  # Build API project
 dotnet test                   # Run API tests (if available)
 ```
 
-**Client Development:**
+**Web Development:**
 ```bash
-cd src/DanceCourseCreator.Client
-dotnet run                    # Start Blazor WebAssembly with hot reload
-dotnet build                  # Build client project
+cd src/DanceCourseCreator.Web
+dotnet run                    # Start Blazor Server with hot reload
+dotnet build                  # Build web project
 ```
 
 **Solution Level:**
@@ -323,7 +322,7 @@ This application successfully demonstrates:
 2. **Turbank** - Full CRUD operations with rich metadata and search
 3. **Lesson Management** - Create, organize, and manage individual lesson plans
 4. **Course Management** - Design and track multi-week course series
-5. **Modern UI/UX** - Responsive Blazor WebAssembly interface with Material Design
+5. **Modern UI/UX** - Responsive Blazor Server interface with Material Design
 6. **RESTful API** - Comprehensive backend with Entity Framework Core
 7. **Database Integration** - SQLite with automatic setup and sample data
 8. **API Documentation** - Interactive Swagger interface for testing and integration

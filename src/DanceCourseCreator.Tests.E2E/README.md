@@ -4,10 +4,10 @@ This project contains comprehensive Playwright end-to-end tests for the Dance Co
 
 ## Prerequisites
 
-- .NET 8.0 SDK
-- Both API and Client applications running:
+- .NET 10.0 SDK
+- Both API and Web applications running:
   - API: `http://localhost:5139`
-  - Client: `http://localhost:5034`
+  - Web: `http://localhost:5034`
 
 ## Setup
 
@@ -20,12 +20,12 @@ This project contains comprehensive Playwright end-to-end tests for the Dance Co
    dotnet build
    
    # Install Playwright browsers
-   pwsh bin/Debug/net8.0/playwright.ps1 install chromium
+   pwsh bin/Debug/net10.0/playwright.ps1 install chromium
    ```
    
    Alternative installation:
    ```bash
-   node bin/Debug/net8.0/.playwright/package/cli.js install chromium
+   node bin/Debug/net10.0/.playwright/package/cli.js install chromium
    ```
 
 2. **Start the applications**:
@@ -44,9 +44,9 @@ This project contains comprehensive Playwright end-to-end tests for the Dance Co
    dotnet run --urls "http://localhost:5139"
    ```
    
-   Terminal 2 - Client:
+   Terminal 2 - Web:
    ```bash
-   cd src/DanceCourseCreator.Client
+   cd src/DanceCourseCreator.Web
    dotnet run --urls "http://localhost:5034"
    ```
 
@@ -228,13 +228,13 @@ Tests automatically capture screenshots organized by category in the `screenshot
 If Playwright browser installation fails, try:
 ```bash
 # Alternative installation method
-pwsh bin/Debug/net8.0/playwright.ps1 install chromium --force
+pwsh bin/Debug/net10.0/playwright.ps1 install chromium --force
 ```
 
 ### Application Not Running
-Ensure both API and Client are running on the correct ports:
+Ensure both API and Web are running on the correct ports:
 - Check API: `curl http://localhost:5139/api/health`
-- Check Client: `curl http://localhost:5034`
+- Check Web: `curl http://localhost:5034`
 
 ### Test Failures
 1. Verify applications are running and accessible
