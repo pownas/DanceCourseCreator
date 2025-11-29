@@ -90,16 +90,16 @@ else
     echo ""
 fi
 
-# Check if Client is running
-CLIENT_URL="http://localhost:5034"
-echo "Checking if Client is running at http://localhost:5034..."
-if curl -s --max-time 2 "$CLIENT_URL" > /dev/null 2>&1; then
-    echo "✅ Client is running"
+# Check if Web is running
+WEB_URL="http://localhost:5034"
+echo "Checking if Web is running at http://localhost:5034..."
+if curl -s --max-time 2 "$WEB_URL" > /dev/null 2>&1; then
+    echo "✅ Web is running"
 else
-    echo "⚠️  Client is not running"
+    echo "⚠️  Web is not running"
     echo ""
-    echo "Please start the Client in another terminal:"
-    echo "  cd src/DanceCourseCreator.Client"
+    echo "Please start the Web in another terminal:"
+    echo "  cd src/DanceCourseCreator.Web"
     echo "  dotnet run --urls \"http://localhost:5034\""
     echo ""
 fi

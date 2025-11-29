@@ -130,7 +130,7 @@ Dessa implementeringsguider är avsedda för:
 
 Båda implementeringarna baseras på:
 - **.NET 10** för backend-API
-- **Blazor WebAssembly** för frontend
+- **Blazor Server** för frontend
 - **Entity Framework Core** för dataåtkomst
 - **SQLite** för datalagring
 - **JWT** för autentisering och behörigheter

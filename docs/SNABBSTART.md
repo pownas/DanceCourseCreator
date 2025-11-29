@@ -41,12 +41,12 @@ Detta dokument guidar dig till rätt nästa steg beroende på vem du är och vad
 
 2. **Setup utvecklingsmiljö** (30 min)
    - Följ instruktioner i README.md "Getting Started"
-   - Verifiera att API och Client kör lokalt
+   - Verifiera att API och Web kör lokalt
    - Kör befintliga tester: `dotnet test`
 
 3. **Förstå arkitekturen** (30 min)
    - Utforska `src/DanceCourseCreator.API/` - Backend struktur
-   - Utforska `src/DanceCourseCreator.Client/` - Frontend struktur
+   - Utforska `src/DanceCourseCreator.Web/` - Frontend struktur (Blazor Server)
    - Granska befintliga modeller i `Models/`
 
 4. **Välj ett issue att börja med**

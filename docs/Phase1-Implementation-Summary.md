@@ -76,7 +76,7 @@ Successfully implemented Phase 1 requirements for course planning with progressi
 **Service Registration: Program.cs**
 - Registered ProgressionService as scoped service
 
-### Frontend (Client)
+### Frontend (Web)
 
 **New Models: Models.cs**
 - CourseCoverageMetrics
@@ -133,16 +133,16 @@ Successfully implemented Phase 1 requirements for course planning with progressi
 
 ### New Files (4)
 1. `src/DanceCourseCreator.API/Services/ProgressionService.cs` (370 lines)
-2. `src/DanceCourseCreator.Client/Components/CourseProgressionDialog.razor` (280 lines)
+2. `src/DanceCourseCreator.Web/Components/CourseProgressionDialog.razor` (280 lines)
 3. `src/DanceCourseCreator.Tests.E2E/CourseProgressionTests.cs` (220 lines)
 4. `docs/Fas1-Progression-Taeckning.md` (detailed documentation)
 
 ### Modified Files (5)
 1. `src/DanceCourseCreator.API/Controllers/CoursesController.cs` (+30 lines)
 2. `src/DanceCourseCreator.API/Program.cs` (+1 line)
-3. `src/DanceCourseCreator.Client/Models/Models.cs` (+50 lines)
-4. `src/DanceCourseCreator.Client/Services/CoursesService.cs` (+35 lines)
-5. `src/DanceCourseCreator.Client/Pages/Courses.razor` (+25 lines)
+3. `src/DanceCourseCreator.Web/Models/Models.cs` (+50 lines)
+4. `src/DanceCourseCreator.Web/Services/CoursesService.cs` (+35 lines)
+5. `src/DanceCourseCreator.Web/Pages/Courses.razor` (+25 lines)
 
 **Total:** 9 files, ~1,000 lines of new code
 

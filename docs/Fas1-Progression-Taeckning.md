@@ -155,7 +155,7 @@ En omfattande dialogkomponent som visar:
 - Exponerar två nya endpoints för coverage och progression
 - Hanterar fel och returnerar lämpliga HTTP-statuskoder
 
-### Frontend (Client)
+### Frontend (Web)
 
 **Models.cs tillägg**
 - `CourseCoverageMetrics`

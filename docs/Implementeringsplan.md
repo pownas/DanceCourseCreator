@@ -11,7 +11,7 @@ Detta dokument innehåller en strukturerad plan för vidareutveckling av DanceCo
 ### Nulägesbedömning
 
 **Vad som är implementerat** (✅):
-- Grundläggande .NET 10 Blazor WebAssembly applikation
+- Grundläggande .NET 10 Blazor Server applikation
 - Autentisering och JWT-baserad säkerhet
 - Pattern & Exercise Library med CRUD-operationer
 - Sök och filtrering av patterns/övningar

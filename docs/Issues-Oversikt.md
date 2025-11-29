@@ -286,7 +286,7 @@ dotnet test
 
 # Starta app för manuell testning
 cd src/DanceCourseCreator.API && dotnet run &
-cd src/DanceCourseCreator.Client && dotnet run
+cd src/DanceCourseCreator.Web && dotnet run
 ```
 
 ---
