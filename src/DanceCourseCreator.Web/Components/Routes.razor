@@ -1,0 +1,51 @@
+@using DanceCourseCreator.Web.Themes
+
+<CascadingAuthenticationState>
+    <ErrorBoundary>
+        <ChildContent>
+            <MudThemeProvider Theme="DanceTheme.Theme" />
+            <MudDialogProvider />
+            <MudSnackbarProvider />
+        </ChildContent>
+        <ErrorContent Context="ex">
+            @* Fallback to default theme if custom theme fails *@
+            <MudThemeProvider />
+            <MudDialogProvider />
+            <MudSnackbarProvider />
+            <MudAlert Severity="Severity.Warning" Class="ma-4">
+                Theme loading failed, using default theme. Error: @ex.Message
+            </MudAlert>
+        </ErrorContent>
+    </ErrorBoundary>
+    
+    <ErrorBoundaryHandler ShowDetails="@_isDevelopment">
+        <Router AppAssembly="@typeof(Routes).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        <RedirectToLogin />
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p role="alert">Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </ErrorBoundaryHandler>
+</CascadingAuthenticationState>
+
+@code {
+    private bool _isDevelopment = false;
+
+    [Inject]
+    private IHostEnvironment? HostEnvironment { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _isDevelopment = HostEnvironment?.IsDevelopment() ?? false;
+    }
+}
