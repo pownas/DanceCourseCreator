@@ -17,7 +17,7 @@
 # 7. Restart services
 # 8. Verify update success
 #
-# Created: January 7, 2025
+# Created: November 30, 2025
 # For: Raspberry Pi OS (Debian-based)
 # ============================================================================
 
@@ -73,8 +73,8 @@ check_installation() {
         exit 1
     fi
     
-    if [ ! -f "$INSTALL_DIR/DanceCourseCreator.sln" ]; then
-        log_error "Ogiltig installation i $INSTALL_DIR"
+    if [ ! -f "$INSTALL_DIR/DanceCourseCreator.slnx" ] && [ ! -f "$INSTALL_DIR/DanceCourseCreator.sln" ]; then
+        log_error "Ogiltig installation i $INSTALL_DIR (hittar inte .sln eller .slnx)"
         exit 1
     fi
     
@@ -359,10 +359,8 @@ User=$user
 Group=$user
 WorkingDirectory=$INSTALL_DIR/publish/AppHost
 Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=DanceCourseCreator_ENVIRONMENT=RaspberryPi
-Environment=DanceCourseCreator_STORAGE_PROVIDER=Sqlite
-Environment=DanceCourseCreator_RASPBERRY_PI=true
-Environment=DOTNET_DASHBOARD_URLS=http://0.0.0.0:17127
+Environment=DANCECOURSE_RASPBERRY_PI=true
+Environment=DOTNET_DASHBOARD_URLS=http://0.0.0.0:15000
 Environment=DOTNET_ROOT=$HOME/.dotnet
 ExecStart=$INSTALL_DIR/publish/AppHost/DanceCourseCreator.AppHost
 Restart=always
@@ -436,16 +434,16 @@ verify_update() {
         
         # Check if ports are listening
         sleep 2
-        if ss -lnt | grep -q ":17127 "; then
-            log_success "Aspire Dashboard lyssnar på port 17127"
+        if ss -lnt | grep -q ":15000 "; then
+            log_success "Aspire Dashboard lyssnar på port 15000"
         else
-            log_warning "Aspire Dashboard lyssnar inte på port 17127"
+            log_warning "Aspire Dashboard lyssnar inte på port 15000"
         fi
         
-        if ss -lnt | grep -q ":5274 "; then
-            log_success "Web App lyssnar på port 5274"
+        if ss -lnt | grep -q ":5001 "; then
+            log_success "Web App lyssnar på port 5001"
         else
-            log_warning "Web App lyssnar inte på port 5274"
+            log_warning "Web App lyssnar inte på port 5001"
         fi
     else
         log_info "Tjänst körs inte (normalt om systemd-tjänst inte är installerad)"
@@ -470,12 +468,14 @@ show_post_update_info() {
     echo -e ""
     echo -e "${BLUE}Åtkomst till applikationen:${NC}"
     echo -e "  ${YELLOW}Lokalt:${NC}"
-    echo -e "    http://localhost:17127 (Aspire Dashboard)"
-    echo -e "    http://localhost:5274 (Web App)"
+    echo -e "    http://localhost:15000 (Aspire Dashboard)"
+    echo -e "    http://localhost:5001 (Web App)"
+    echo -e "    http://localhost:7177 (API)"
     echo -e ""
     echo -e "  ${YELLOW}Från andra enheter:${NC}"
-    echo -e "    http://$pi_ip:17127 (Aspire Dashboard)"
-    echo -e "    http://$pi_ip:5274 (Web App)"
+    echo -e "    http://$pi_ip:15000 (Aspire Dashboard)"
+    echo -e "    http://$pi_ip:5001 (Web App)"
+    echo -e "    http://$pi_ip:7177 (API)"
     echo -e ""
     
     if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then

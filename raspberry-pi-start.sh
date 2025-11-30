@@ -46,7 +46,7 @@ cleanup_processes() {
     fi
     
     # Check for processes using DanceCourseCreator ports and kill them
-    local ports=(17127 5274 5277)
+    local ports=(15000 5001 7177)
     
     for port in "${ports[@]}"; do
         if command -v lsof &> /dev/null; then

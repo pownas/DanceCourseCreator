@@ -1287,10 +1287,10 @@ verify_installation() {
     fi
     
     # Check project
-    if [ -f "$INSTALL_DIR/DanceCourseCreator.sln" ]; then
+    if [ -f "$INSTALL_DIR/DanceCourseCreator.slnx" ] || [ -f "$INSTALL_DIR/DanceCourseCreator.sln" ]; then
         log_success "DanceCourseCreator-projekt: Installerat i $INSTALL_DIR"
     else
-        log_error "DanceCourseCreator-projekt inte funnet"
+        log_error "DanceCourseCreator-projekt inte funnet (söker efter .sln eller .slnx)"
         return 1
     fi
     
@@ -1312,13 +1312,13 @@ validate_network_config() {
     
     # Check appsettings.Production.json files exist and have correct Urls
     local web_config="$INSTALL_DIR/src/DanceCourseCreator.Web/appsettings.Production.json"
-    local api_config="$INSTALL_DIR/src/DanceCourseCreator.Api/appsettings.Production.json"
+    local api_config="$INSTALL_DIR/src/DanceCourseCreator.API/appsettings.Production.json"
     local apphost_config="$INSTALL_DIR/src/DanceCourseCreator.AppHost/appsettings.Production.json"
     
     # Validate Web config
     if [ -f "$web_config" ]; then
-        if grep -q '"Urls".*"http://0.0.0.0:5274"' "$web_config"; then
-            log_success "Web konfiguration: Korrekt (lyssnar på 0.0.0.0:5274)"
+        if grep -q '"Urls".*"http://0.0.0.0:5001"' "$web_config"; then
+            log_success "Web konfiguration: Korrekt (lyssnar på 0.0.0.0:5001)"
         else
             log_warning "Web konfiguration: Kontrollera Urls-inställning"
             validation_passed=false
@@ -1330,8 +1330,8 @@ validate_network_config() {
     
     # Validate API config
     if [ -f "$api_config" ]; then
-        if grep -q '"Urls".*"http://0.0.0.0:5277"' "$api_config"; then
-            log_success "API konfiguration: Korrekt (lyssnar på 0.0.0.0:5277)"
+        if grep -q '"Urls".*"http://0.0.0.0:7177"' "$api_config"; then
+            log_success "API konfiguration: Korrekt (lyssnar på 0.0.0.0:7177)"
         else
             log_warning "API konfiguration: Kontrollera Urls-inställning"
             validation_passed=false
@@ -1343,8 +1343,8 @@ validate_network_config() {
     
     # Validate AppHost config
     if [ -f "$apphost_config" ]; then
-        if grep -q '"Url".*"http://0.0.0.0:17127"' "$apphost_config"; then
-            log_success "AppHost konfiguration: Korrekt (lyssnar på 0.0.0.0:17127)"
+        if grep -q '"Url".*"http://0.0.0.0:15000"' "$apphost_config"; then
+            log_success "AppHost konfiguration: Korrekt (lyssnar på 0.0.0.0:15000)"
         else
             log_warning "AppHost konfiguration: Kontrollera Kestrel-inställning"
             validation_passed=false
@@ -1361,9 +1361,9 @@ validate_network_config() {
         echo ""
         echo -e "${BLUE}Åtkomst från andra enheter på nätverket:${NC}"
         echo -e "  ${YELLOW}Direktåtkomst:${NC}"
-        echo -e "    http://$pi_ip:17127  (Aspire Dashboard)"
-        echo -e "    http://$pi_ip:5274   (Web App)"
-        echo -e "    http://$pi_ip:5277   (API)"
+        echo -e "    http://$pi_ip:15000  (Aspire Dashboard)"
+        echo -e "    http://$pi_ip:5001   (Web App)"
+        echo -e "    http://$pi_ip:7177   (API)"
         
         if command -v nginx &> /dev/null && systemctl is-active --quiet nginx 2>/dev/null; then
             echo -e ""
@@ -1385,7 +1385,7 @@ validate_network_config() {
         log_info "Kontrollerar brandväggsinställningar..."
         local firewall_ok=true
         
-        for port in 17127 5274 5277; do
+        for port in 15000 5001 7177; do
             if sudo ufw status | grep -q "$port"; then
                 log_success "Port $port är öppen i brandväggen"
             else
@@ -1397,9 +1397,9 @@ validate_network_config() {
         if [ "$firewall_ok" = false ]; then
             echo ""
             echo -e "${YELLOW}Öppna portar med:${NC}"
-            echo "  sudo ufw allow 17127/tcp comment 'DanceCourseCreator Aspire'"
-            echo "  sudo ufw allow 5274/tcp comment 'DanceCourseCreator Web'"
-            echo "  sudo ufw allow 5277/tcp comment 'DanceCourseCreator API'"
+            echo "  sudo ufw allow 15000/tcp comment 'DanceCourseCreator Aspire'"
+            echo "  sudo ufw allow 5001/tcp comment 'DanceCourseCreator Web'"
+            echo "  sudo ufw allow 7177/tcp comment 'DanceCourseCreator API'"
             echo "  sudo ufw reload"
             validation_passed=false
         fi
