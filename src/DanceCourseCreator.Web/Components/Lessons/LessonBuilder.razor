@@ -1,6 +1,7 @@
 @page "/lessons/builder"
 @page "/lessons/{LessonId}/edit"
 @using MudBlazor
+@using System.Text.Json
 @inject ILessonsService LessonsService
 @inject IPatternsService PatternsService
 @inject ITimeValidationService TimeValidationService
@@ -9,6 +10,7 @@
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ILogger<LessonBuilder> Logger
+@inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
 <PageTitle>@GetPageTitle()</PageTitle>
@@ -32,10 +34,13 @@
                                   Variant="Variant.Outlined"
                                   FullWidth="true"
                                   Immediate="true"
+                                  DebounceInterval="500"
+                                  OnDebounceIntervalElapsed="@(() => TriggerAutoSave())"
                                   HelperText="Valfritt namn för att identifiera lektionen" />
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3" lg="2">
                     <MudDatePicker @bind-Date="_lessonRequest.Date"
+                                   @bind-Date:after="TriggerAutoSave"
                                    Label="Datum"
                                    Variant="Variant.Outlined"
                                    Editable="true"
@@ -44,6 +49,7 @@
                 </MudItem>
                 <MudItem xs="6" sm="3" md="2">
                     <MudSelect @bind-Value="_lessonRequest.Duration"
+                               @bind-Value:after="OnDurationChanged"
                                Label="Längd"
                                Variant="Variant.Outlined"
                                AnchorOrigin="Origin.BottomCenter">
@@ -55,6 +61,7 @@
                 </MudItem>
                 <MudItem xs="6" sm="3" md="2">
                     <MudSelect @bind-Value="_selectedLevel"
+                               @bind-Value:after="TriggerAutoSave"
                                Label="Nivå"
                                Variant="Variant.Outlined"
                                AnchorOrigin="Origin.BottomCenter">
@@ -65,12 +72,21 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" md="12" lg="3">
-                    <div class="d-flex align-center h-100">
+                    <div class="d-flex align-center h-100 flex-wrap gap-2">
                         <MudChip T="string" Color="@GetTimeStatusColor()" Size="Size.Medium" Class="time-chip">
                             <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" Class="mr-1" />
                             @_totalEstimatedTime / @_lessonRequest.Duration min
                         </MudChip>
                         <MudText Typo="Typo.caption" Class="ml-2">@GetTimeStatusText()</MudText>
+                        @if (_lastAutoSaveTime.HasValue)
+                        {
+                            <MudTooltip Text="Automatiskt sparat lokalt">
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
+                                    <MudIcon Icon="@Icons.Material.Filled.CloudDone" Size="Size.Small" Class="mr-1" />
+                                    @_lastAutoSaveTime.Value.ToString("HH:mm")
+                                </MudChip>
+                            </MudTooltip>
+                        }
                     </div>
                 </MudItem>
             </MudGrid>
@@ -175,6 +191,12 @@
     private string? _filterLevel = null;
     private string? _filterType = null;
     private Guid _breakpointSubscriptionId;
+    
+    // Auto-save related fields
+    private const string LOCAL_STORAGE_KEY = "lessonBuilder_draft";
+    private DateTime? _lastAutoSaveTime = null;
+    private System.Timers.Timer? _autoSaveTimer;
+    private bool _hasUnsavedChanges = false;
 
     private bool IsEditMode => !string.IsNullOrEmpty(LessonId);
 
@@ -182,6 +204,12 @@
     {
         _breakpointSubscriptionId = await BreakpointService.Subscribe(OnBreakpointChanged);
         _isMobile = await BreakpointService.IsMobile();
+        
+        // Initialize auto-save timer (debounce: save 2 seconds after last change)
+        _autoSaveTimer = new System.Timers.Timer(2000);
+        _autoSaveTimer.Elapsed += async (sender, e) => await AutoSaveToLocalStorage();
+        _autoSaveTimer.AutoReset = false;
+        
         await LoadData();
     }
 
@@ -226,13 +254,19 @@
             }
             else
             {
-                // Initialize with default section for new lessons
-                _lessonRequest.Sections.Add(new LessonSection
+                // Try to load from localStorage first (for new lessons only)
+                var loadedFromStorage = await TryLoadFromLocalStorage();
+                
+                if (!loadedFromStorage)
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    Type = "Warmup",
-                    AllocatedMinutes = 10
-                });
+                    // Initialize with default section for new lessons
+                    _lessonRequest.Sections.Add(new LessonSection
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Type = "Warmup",
+                        AllocatedMinutes = 10
+                    });
+                }
             }
 
             RecalculateTime();
@@ -383,6 +417,7 @@
                             <div class="d-flex align-center gap-2">
                                 <MudIcon Icon="@GetSectionIcon(section.Type)" Color="Color.Primary" />
                                 <MudSelect @bind-Value="section.Type"
+                                           @bind-Value:after="TriggerAutoSave"
                                            Label="Sektion"
                                            Variant="Variant.Text"
                                            Dense="true"
@@ -466,7 +501,10 @@
                                       Variant="Variant.Outlined"
                                       Lines="2"
                                       Class="mt-2"
-                                      FullWidth="true" />
+                                      FullWidth="true"
+                                      Immediate="true"
+                                      DebounceInterval="500"
+                                      OnDebounceIntervalElapsed="@(() => TriggerAutoSave())" />
                     </MudPaper>
                 }
             }
@@ -529,6 +567,7 @@
             _lessonRequest.Sections[targetIndex].Items.Add(patternId);
             RecalculateTime();
             ValidateLesson();
+            TriggerAutoSave();
             Snackbar.Add("Moment tillagt!", Severity.Success, config => config.VisibleStateDuration = 1000);
         }
     }
@@ -570,6 +609,13 @@
         _validationResult = TimeValidationService.ValidateLesson(_lessonRequest, _patterns);
     }
 
+    private void OnDurationChanged()
+    {
+        RecalculateTime();
+        ValidateLesson();
+        TriggerAutoSave();
+    }
+
     private void AddSection()
     {
         if (_lessonRequest.Sections.Count >= 8)
@@ -587,6 +633,7 @@
         _currentSectionIndex = _lessonRequest.Sections.Count - 1;
         RecalculateTime();
         ValidateLesson();
+        TriggerAutoSave();
     }
 
     private void RemoveSection(int index)
@@ -604,6 +651,7 @@
             _currentSectionIndex = Math.Max(0, _currentSectionIndex);
             RecalculateTime();
             ValidateLesson();
+            TriggerAutoSave();
         }
     }
 
@@ -614,6 +662,7 @@
             var section = _lessonRequest.Sections[index];
             _lessonRequest.Sections.RemoveAt(index);
             _lessonRequest.Sections.Insert(index - 1, section);
+            TriggerAutoSave();
         }
     }
 
@@ -624,6 +673,7 @@
             var section = _lessonRequest.Sections[index];
             _lessonRequest.Sections.RemoveAt(index);
             _lessonRequest.Sections.Insert(index + 1, section);
+            TriggerAutoSave();
         }
     }
 
@@ -635,6 +685,7 @@
             _lessonRequest.Sections[sectionIndex].Items.RemoveAt(itemIndex);
             RecalculateTime();
             ValidateLesson();
+            TriggerAutoSave();
         }
     }
 
@@ -656,6 +707,9 @@
                 cancelText: "Nej, fortsätt redigera");
 
             if (confirmed != true) return;
+            
+            // Clear localStorage when user confirms cancellation
+            await ClearLocalStorage();
         }
 
         Navigation.NavigateTo("/lessons");
@@ -669,6 +723,7 @@
         {
             // For now, we save as a regular lesson but could add draft functionality later
             await SaveLesson();
+            await ClearLocalStorage();
             Snackbar.Add("Utkast sparat!", Severity.Info);
         }
         finally
@@ -690,6 +745,7 @@
         try
         {
             await SaveLesson();
+            await ClearLocalStorage();
             Snackbar.Add(IsEditMode ? "Lektion uppdaterad!" : "Lektion skapad!", Severity.Success);
             Navigation.NavigateTo("/lessons");
         }
@@ -835,8 +891,142 @@
         };
     }
 
+    // Auto-save methods
+    
+    private void TriggerAutoSave()
+    {
+        _hasUnsavedChanges = true;
+        // Reset and start the timer (debounce)
+        _autoSaveTimer?.Stop();
+        _autoSaveTimer?.Start();
+    }
+
+    private async Task AutoSaveToLocalStorage()
+    {
+        // Only auto-save for new lessons, not when editing existing ones
+        // (editing an existing lesson should not overwrite localStorage drafts)
+        if (!_hasUnsavedChanges || IsEditMode) return;
+        
+        try
+        {
+            var draftData = new LessonBuilderDraft
+            {
+                LessonRequest = _lessonRequest,
+                SelectedLevel = _selectedLevel,
+                SavedAt = DateTime.Now
+            };
+            
+            var json = JsonSerializer.Serialize(draftData);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", LOCAL_STORAGE_KEY, json);
+            
+            var previousSaveTime = _lastAutoSaveTime;
+            _lastAutoSaveTime = DateTime.Now;
+            _hasUnsavedChanges = false;
+            
+            // Only update UI if save time indicator needs to be refreshed (first save or time changed)
+            if (!previousSaveTime.HasValue || previousSaveTime.Value.Minute != _lastAutoSaveTime.Value.Minute)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+            Logger.LogDebug("Auto-saved lesson draft to localStorage at {Time}", _lastAutoSaveTime);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to auto-save to localStorage: {Message}", ex.Message);
+        }
+    }
+
+    private async Task<bool> TryLoadFromLocalStorage()
+    {
+        try
+        {
+            var json = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", LOCAL_STORAGE_KEY);
+            
+            if (string.IsNullOrEmpty(json)) return false;
+            
+            LessonBuilderDraft? draftData;
+            try
+            {
+                draftData = JsonSerializer.Deserialize<LessonBuilderDraft>(json);
+            }
+            catch (JsonException jsonEx)
+            {
+                // Malformed JSON data in localStorage - clear it and start fresh
+                Logger.LogWarning(jsonEx, "Invalid JSON in localStorage draft, clearing: {Message}", jsonEx.Message);
+                await ClearLocalStorage();
+                return false;
+            }
+            
+            if (draftData?.LessonRequest == null) return false;
+            
+            // Ask user if they want to restore the draft
+            var confirmed = await DialogService.ShowMessageBox(
+                "Återställ utkast",
+                $"Ett sparat utkast hittades från {draftData.SavedAt:g}. Vill du återställa det?",
+                yesText: "Ja, återställ",
+                cancelText: "Nej, börja om");
+            
+            if (confirmed == true)
+            {
+                _lessonRequest = draftData.LessonRequest;
+                _selectedLevel = draftData.SelectedLevel ?? "beginner";
+                _lastAutoSaveTime = draftData.SavedAt;
+                
+                Snackbar.Add("Utkast återställt!", Severity.Info);
+                Logger.LogInformation("Restored lesson draft from localStorage");
+                return true;
+            }
+            else
+            {
+                // User chose to start fresh, clear the old draft
+                await ClearLocalStorage();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load draft from localStorage: {Message}", ex.Message);
+        }
+        
+        return false;
+    }
+
+    private async Task ClearLocalStorage()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.removeItem", LOCAL_STORAGE_KEY);
+            _lastAutoSaveTime = null;
+            Logger.LogDebug("Cleared lesson draft from localStorage");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to clear localStorage: {Message}", ex.Message);
+        }
+    }
+
+    // Draft data model for localStorage
+    private class LessonBuilderDraft
+    {
+        public CreateLessonRequest? LessonRequest { get; set; }
+        public string? SelectedLevel { get; set; }
+        public DateTime SavedAt { get; set; }
+    }
+
     public async ValueTask DisposeAsync()
     {
+        // Stop and dispose the auto-save timer
+        if (_autoSaveTimer != null)
+        {
+            _autoSaveTimer.Stop();
+            _autoSaveTimer.Dispose();
+        }
+        
+        // Save any pending changes before disposing
+        if (_hasUnsavedChanges && !IsEditMode)
+        {
+            await AutoSaveToLocalStorage();
+        }
+        
         await BreakpointService.Unsubscribe(_breakpointSubscriptionId);
     }
 }
