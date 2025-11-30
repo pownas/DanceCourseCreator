@@ -377,7 +377,6 @@
                 {
                     var weekIndex = week - 1;
                     var weekLessons = GetLessonsForWeek(week);
-                    var weekTheme = weekIndex < _course.ThemesByWeek.Count ? _course.ThemesByWeek[weekIndex] : "";
                     
                     <MudTimelineItem Color="@GetWeekColor(weekLessons.Count)" Size="Size.Medium">
                         <ItemOpposite>
@@ -385,15 +384,18 @@
                         </ItemOpposite>
                         <ItemContent>
                             <MudPaper Class="pa-3 week-card" Elevation="1">
-                                @* Week theme - editable *@
-                                <MudTextField @bind-Value="_course.ThemesByWeek[weekIndex]"
-                                              @bind-Value:after="OnCourseInfoChanged"
-                                              Label="Tema"
-                                              Variant="Variant.Text"
-                                              Placeholder="Ange veckans tema..."
-                                              Margin="Margin.Dense"
-                                              FullWidth="true"
-                                              Class="mb-2" />
+                                @* Week theme - editable (only if index is valid) *@
+                                @if (weekIndex < _course.ThemesByWeek.Count)
+                                {
+                                    <MudTextField @bind-Value="_course.ThemesByWeek[weekIndex]"
+                                                  @bind-Value:after="OnCourseInfoChanged"
+                                                  Label="Tema"
+                                                  Variant="Variant.Text"
+                                                  Placeholder="Ange veckans tema..."
+                                                  Margin="Margin.Dense"
+                                                  FullWidth="true"
+                                                  Class="mb-2" />
+                                }
 
                                 @* Lessons for this week *@
                                 <div class="d-flex justify-space-between align-center mb-2">
@@ -542,7 +544,7 @@
         var courseLessons = _allLessons.Where(l => 
             _course.LessonIds.Contains(l.Id) && 
             l.Date.HasValue
-        ).OrderBy(l => l.Date).ToList();
+        ).OrderBy(l => l.Date!.Value).ToList();
         
         // Simple distribution logic (same as CourseTimelineBuilder)
         var lessonsPerWeek = (double)courseLessons.Count / _course.DurationWeeks;
@@ -560,6 +562,8 @@
 
     private async Task AddLessonToWeek(int weekNumber)
     {
+        // Note: Future enhancement - pass course ID and week number to pre-populate lesson
+        // LessonBuilderWithDragDrop currently doesn't support these parameters
         var parameters = new DialogParameters();
         var options = new DialogOptions 
         { 
@@ -686,14 +690,18 @@
         _isSaving = true;
         try
         {
+            Logger.LogInformation("Saving course {CourseId}: {CourseName}", _course.Id, _course.Name);
             var result = await CoursesService.UpdateCourseAsync(_course.Id, _course);
             if (result != null)
             {
+                _course = result; // Update with server response
                 _hasUnsavedChanges = false;
+                Logger.LogInformation("Course {CourseId} saved successfully", _course.Id);
                 Snackbar.Add("Kursen sparades!", Severity.Success);
             }
             else
             {
+                Logger.LogWarning("Failed to save course {CourseId}: API returned null", _course.Id);
                 Snackbar.Add("Kunde inte spara kursen", Severity.Error);
             }
         }
