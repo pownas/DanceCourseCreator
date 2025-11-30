@@ -291,8 +291,8 @@ publish_application() {
         /p:PublishSingleFile=false
     
     # Publish API
-    log_info "Publicerar DanceCourseCreator.Api..."
-    dotnet publish src/DanceCourseCreator.Api/DanceCourseCreator.Api.csproj \
+    log_info "Publicerar DanceCourseCreator.API..."
+    dotnet publish src/DanceCourseCreator.API/DanceCourseCreator.API.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
@@ -311,8 +311,8 @@ publish_application() {
         cp "src/DanceCourseCreator.Web/appsettings.Production.json" "$publish_dir/Web/"
     fi
     
-    if [ -f "src/DanceCourseCreator.Api/appsettings.Production.json" ]; then
-        cp "src/DanceCourseCreator.Api/appsettings.Production.json" "$publish_dir/Api/"
+    if [ -f "src/DanceCourseCreator.API/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.API/appsettings.Production.json" "$publish_dir/Api/"
     fi
     
     log_success "Applikation publicerad framgångsrikt"
