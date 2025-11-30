@@ -361,6 +361,8 @@ WorkingDirectory=$INSTALL_DIR/publish/AppHost
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DANCECOURSE_RASPBERRY_PI=true
 Environment=DOTNET_DASHBOARD_URLS=http://0.0.0.0:15000
+Environment=DOTNET_URLS=http://0.0.0.0:15000
+Environment=ASPNETCORE_HTTP_PORTS=
 Environment=DOTNET_ROOT=$HOME/.dotnet
 ExecStart=$INSTALL_DIR/publish/AppHost/DanceCourseCreator.AppHost
 Restart=always

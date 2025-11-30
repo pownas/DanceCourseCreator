@@ -1066,6 +1066,8 @@ WorkingDirectory=$working_dir
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DANCECOURSE_RASPBERRY_PI=true
 Environment=DOTNET_DASHBOARD_URLS=http://0.0.0.0:$DEFAULT_PORT
+Environment=DOTNET_URLS=http://0.0.0.0:$DEFAULT_PORT
+Environment=ASPNETCORE_HTTP_PORTS=
 Environment=DOTNET_ROOT=$HOME/.dotnet
 ExecStart=$exec_command
 Restart=always
