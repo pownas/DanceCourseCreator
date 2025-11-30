@@ -4,6 +4,7 @@
 @inject ITemplatesService TemplatesService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <PageTitle>Kurser - Kursskapare</PageTitle>
 
@@ -155,12 +156,18 @@
                                         <MudCardActions>
                                             <MudButton Size="Size.Small" 
                                                        Color="Color.Primary" 
+                                                       StartIcon="Icons.Material.Filled.Timeline"
+                                                       OnClick="@(() => OpenCoursePlanner(course))">
+                                                Planera
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" 
+                                                       Color="Color.Secondary" 
                                                        StartIcon="Icons.Material.Filled.Edit"
                                                        OnClick="@(() => EditCourse(course))">
                                                 Redigera
                                             </MudButton>
                                             <MudButton Size="Size.Small" 
-                                                       Color="Color.Secondary" 
+                                                       Color="Color.Default" 
                                                        StartIcon="Icons.Material.Filled.Visibility"
                                                        OnClick="@(() => ViewCourse(course))">
                                                 Visa
@@ -294,6 +301,11 @@
             $"Kurstidslinje: {course.Name}", 
             parameters, 
             options);
+    }
+
+    private void OpenCoursePlanner(Course course)
+    {
+        Navigation.NavigateTo($"/courses/{course.Id}/planner");
     }
 
     private async Task ViewProgression(Course course)
