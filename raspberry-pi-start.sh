@@ -95,8 +95,11 @@ export DANCECOURSE_RASPBERRY_PI=true
 export ASPNETCORE_ENVIRONMENT=Production
 
 # Konfigurera Aspire Dashboard för att lyssna på alla nätverksinterfaces
-# OBS: Sätt inte ASPNETCORE_URLS här eftersom det ärvs av Web/API och skriver över deras portar
 export DOTNET_DASHBOARD_URLS="http://0.0.0.0:15000"
+
+# Konfigurera Kestrel för att explicit lyssna på alla interfaces
+export ASPNETCORE_HTTP_PORTS=""  # Töm denna så att ASPNETCORE_URLS används istället
+export DOTNET_URLS="http://0.0.0.0:15000"
 
 # Check if using published binaries or source
 INSTALL_DIR="$HOME/DanceCourseCreator"
