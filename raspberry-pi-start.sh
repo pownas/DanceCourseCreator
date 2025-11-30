@@ -122,7 +122,7 @@ if [ ! -f "appsettings.Production.json" ]; then
 fi
 
 if [ "$USE_PUBLISHED" = false ]; then
-    if [ ! -f "../DanceCourseCreator.Web/appsettings.Production.json" ] || [ ! -f "../DanceCourseCreator.Api/appsettings.Production.json" ]; then
+    if [ ! -f "../DanceCourseCreator.Web/appsettings.Production.json" ] || [ ! -f "../DanceCourseCreator.API/appsettings.Production.json" ]; then
         log_warning "appsettings.Production.json saknas för Web eller API"
         echo ""
         echo "Kör installationsskriptet igen för att skapa konfigurationsfiler:"

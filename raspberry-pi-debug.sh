@@ -109,7 +109,7 @@ fi
 echo ""
 
 # Kontrollera API appsettings
-API_CONFIG="$HOME/DanceCourseCreator/src/DanceCourseCreator.Api/appsettings.Production.json"
+API_CONFIG="$HOME/DanceCourseCreator/src/DanceCourseCreator.API/appsettings.Production.json"
 if [ -f "$API_CONFIG" ]; then
     echo "API appsettings.Production.json:"
     grep -A1 '"Urls"' "$API_CONFIG" || echo "Ingen Urls-konfiguration hittades"
