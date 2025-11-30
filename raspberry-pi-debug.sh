@@ -11,7 +11,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     Privatekonomi Raspberry Pi Felsökning             ║${NC}"
+echo -e "${BLUE}║     DanceCourseCreator Raspberry Pi Felsökning             ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -36,11 +36,11 @@ echo ""
 
 # 3. Kontrollera vilka portar som lyssnar
 echo -e "${BLUE}[3/11]${NC} Kontrollerar vilka portar som lyssnar..."
-echo "Portar som applikationen ska använda: 17127, 5274, 5277"
+echo "Portar som applikationen ska använda: 15000, 5001, 7177"
 echo ""
 
 # Kontrollera varje port
-for port in 17127 5274 5277; do
+for port in 15000 5001 7177; do
     if ss -lntp 2>/dev/null | grep -q ":$port "; then
         BIND_ADDR=$(ss -lntp 2>/dev/null | grep ":$port " | awk '{print $4}' | head -1)
         if echo "$BIND_ADDR" | grep -q "0.0.0.0:$port\|*:$port"; then
@@ -60,10 +60,10 @@ echo ""
 # 4. Kontrollera miljövariabler
 echo -e "${BLUE}[4/11]${NC} Kontrollerar miljövariabler..."
 if pgrep -f "dotnet" > /dev/null; then
-    PID=$(pgrep -f "Privatekonomi.AppHost" | head -1)
+    PID=$(pgrep -f "DanceCourseCreator.AppHost" | head -1)
     if [ -n "$PID" ]; then
         echo "Miljövariabler för process $PID:"
-        cat /proc/$PID/environ 2>/dev/null | tr '\0' '\n' | grep -E "PRIVATEKONOMI|ASPNETCORE|DOTNET_DASHBOARD" || echo "Kunde inte läsa miljövariabler"
+        cat /proc/$PID/environ 2>/dev/null | tr '\0' '\n' | grep -E "DanceCourseCreator|ASPNETCORE|DOTNET_DASHBOARD" || echo "Kunde inte läsa miljövariabler"
     fi
 else
     echo -e "${YELLOW}Ingen process körs, kan inte kontrollera miljövariabler${NC}"
@@ -76,10 +76,10 @@ if command -v ufw &> /dev/null; then
     if sudo ufw status 2>/dev/null | grep -q "Status: active"; then
         echo -e "${YELLOW}⚠ UFW brandvägg är aktiverad${NC}"
         echo "Brandväggsregler:"
-        sudo ufw status numbered | grep -E "17127|5274|5277|ALLOW"
+        sudo ufw status numbered | grep -E "15000|5001|7177|ALLOW"
         
         # Kontrollera om våra portar är öppna
-        for port in 17127 5274 5277; do
+        for port in 15000 5001 7177; do
             if sudo ufw status | grep -q "$port"; then
                 echo -e "${GREEN}✓ Port $port är öppen i brandväggen${NC}"
             else
@@ -99,7 +99,7 @@ echo ""
 echo -e "${BLUE}[6/11]${NC} Kontrollerar konfigurationsfiler..."
 
 # Kontrollera Web appsettings
-WEB_CONFIG="$HOME/Privatekonomi/src/Privatekonomi.Web/appsettings.Production.json"
+WEB_CONFIG="$HOME/DanceCourseCreator/src/DanceCourseCreator.Web/appsettings.Production.json"
 if [ -f "$WEB_CONFIG" ]; then
     echo "Web appsettings.Production.json:"
     grep -A1 '"Urls"' "$WEB_CONFIG" || echo "Ingen Urls-konfiguration hittades"
@@ -109,7 +109,7 @@ fi
 echo ""
 
 # Kontrollera API appsettings
-API_CONFIG="$HOME/Privatekonomi/src/Privatekonomi.Api/appsettings.Production.json"
+API_CONFIG="$HOME/DanceCourseCreator/src/DanceCourseCreator.Api/appsettings.Production.json"
 if [ -f "$API_CONFIG" ]; then
     echo "API appsettings.Production.json:"
     grep -A1 '"Urls"' "$API_CONFIG" || echo "Ingen Urls-konfiguration hittades"
@@ -120,7 +120,7 @@ echo ""
 
 # 7. Testa lokal åtkomst
 echo -e "${BLUE}[7/11]${NC} Testar lokal åtkomst..."
-for port in 17127 5274 5277; do
+for port in 15000 5001 7177; do
     if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 "http://localhost:$port" > /dev/null 2>&1; then
         echo -e "${GREEN}✓ Port $port svarar lokalt${NC}"
     else
@@ -131,7 +131,7 @@ echo ""
 
 # 8. Testa nätverksåtkomst från Pi själv
 echo -e "${BLUE}[8/11]${NC} Testar nätverksåtkomst (från Pi till sig själv)..."
-for port in 17127 5274 5277; do
+for port in 15000 5001 7177; do
     if curl -s -o /dev/null -w "%{http_code}" --connect-timeout 2 "http://$MY_IP:$port" > /dev/null 2>&1; then
         echo -e "${GREEN}✓ Port $port är nåbar via nätverks-IP ($MY_IP:$port)${NC}"
     else
@@ -146,15 +146,15 @@ if command -v nginx &> /dev/null; then
     if systemctl is-active --quiet nginx; then
         echo -e "${GREEN}✓ Nginx är installerat och körs${NC}"
         
-        # Kontrollera om Privatekonomi-konfiguration finns
-        if [ -f /etc/nginx/sites-available/privatekonomi ]; then
-            echo -e "${GREEN}✓ Privatekonomi Nginx-konfiguration finns${NC}"
+        # Kontrollera om DanceCourseCreator-konfiguration finns
+        if [ -f /etc/nginx/sites-available/DanceCourseCreator ]; then
+            echo -e "${GREEN}✓ DanceCourseCreator Nginx-konfiguration finns${NC}"
             
-            if [ -L /etc/nginx/sites-enabled/privatekonomi ]; then
-                echo -e "${GREEN}✓ Privatekonomi-sajt är aktiverad${NC}"
+            if [ -L /etc/nginx/sites-enabled/DanceCourseCreator ]; then
+                echo -e "${GREEN}✓ DanceCourseCreator-sajt är aktiverad${NC}"
             else
-                echo -e "${RED}✗ Privatekonomi-sajt är INTE aktiverad${NC}"
-                echo -e "${YELLOW}  Aktivera med: sudo ln -s /etc/nginx/sites-available/privatekonomi /etc/nginx/sites-enabled/${NC}"
+                echo -e "${RED}✗ DanceCourseCreator-sajt är INTE aktiverad${NC}"
+                echo -e "${YELLOW}  Aktivera med: sudo ln -s /etc/nginx/sites-available/DanceCourseCreator /etc/nginx/sites-enabled/${NC}"
             fi
             
             # Kontrollera om HTTP/HTTPS portar lyssnar
@@ -170,7 +170,7 @@ if command -v nginx &> /dev/null; then
                 echo -e "${YELLOW}⚠ Nginx lyssnar INTE på port 443 (SSL inte konfigurerat)${NC}"
             fi
         else
-            echo -e "${YELLOW}⚠ Privatekonomi Nginx-konfiguration saknas${NC}"
+            echo -e "${YELLOW}⚠ DanceCourseCreator Nginx-konfiguration saknas${NC}"
             echo -e "${YELLOW}  Konfigurera med: ./raspberry-pi-install.sh${NC}"
         fi
     else
@@ -222,10 +222,10 @@ if [ -d /etc/letsencrypt/live ]; then
     else
         echo -e "${YELLOW}⚠ Inga Let's Encrypt certifikat hittades${NC}"
     fi
-elif [ -d /etc/ssl/privatekonomi ]; then
-    if [ -f /etc/ssl/privatekonomi/privatekonomi.crt ]; then
+elif [ -d /etc/ssl/DanceCourseCreator ]; then
+    if [ -f /etc/ssl/DanceCourseCreator/DanceCourseCreator.crt ]; then
         echo -e "${GREEN}✓ Self-signed certifikat hittades${NC}"
-        EXPIRY=$(sudo openssl x509 -in /etc/ssl/privatekonomi/privatekonomi.crt -noout -enddate 2>/dev/null | cut -d= -f2)
+        EXPIRY=$(sudo openssl x509 -in /etc/ssl/DanceCourseCreator/DanceCourseCreator.crt -noout -enddate 2>/dev/null | cut -d= -f2)
         echo "  Giltig till: $EXPIRY"
     else
         echo -e "${YELLOW}⚠ Self-signed certifikat-katalog finns men inget certifikat${NC}"
@@ -248,13 +248,13 @@ echo "1. Om tjänster inte körs:"
 echo "   ./raspberry-pi-start.sh"
 echo ""
 echo "2. Om portar lyssnar på 127.0.0.1 istället för 0.0.0.0:"
-echo "   - Kontrollera att PRIVATEKONOMI_RASPBERRY_PI=true är satt"
+echo "   - Kontrollera att DanceCourseCreator_RASPBERRY_PI=true är satt"
 echo "   - Kör om installationen: ./raspberry-pi-install.sh"
 echo ""
 echo "3. Om brandväggen blockerar:"
-echo "   sudo ufw allow 17127/tcp"
-echo "   sudo ufw allow 5274/tcp"
-echo "   sudo ufw allow 5277/tcp"
+echo "   sudo ufw allow 15000/tcp"
+echo "   sudo ufw allow 5001/tcp"
+echo "   sudo ufw allow 7177/tcp"
 if command -v nginx &> /dev/null; then
 echo "   sudo ufw allow 80/tcp"
 echo "   sudo ufw allow 443/tcp"
@@ -270,9 +270,9 @@ echo "   ./raspberry-pi-install.sh --configure-ssl  # Lägg till SSL"
 echo ""
 echo "6. Testa åtkomst från annan enhet:"
 echo "   ${YELLOW}Direktåtkomst (utan proxy):${NC}"
-echo "   http://$MY_IP:17127  (Aspire Dashboard)"
-echo "   http://$MY_IP:5274   (Web App)"
-echo "   http://$MY_IP:5277   (API)"
+echo "   http://$MY_IP:15000  (Aspire Dashboard)"
+echo "   http://$MY_IP:5001   (Web App)"
+echo "   http://$MY_IP:7177   (API)"
 echo ""
 if command -v nginx &> /dev/null && systemctl is-active --quiet nginx; then
 echo "   ${YELLOW}Via Nginx proxy:${NC}"

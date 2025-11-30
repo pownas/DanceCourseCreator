@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Raspberry Pi Aspire Startup Script
-# Kör Privatekonomi med Aspire på Raspberry Pi
+# Kör DanceCourseCreator med Aspire på Raspberry Pi
 
 # Colors for output
 RED='\033[0;31m'
@@ -45,7 +45,7 @@ cleanup_processes() {
         fi
     fi
     
-    # Check for processes using Privatekonomi ports and kill them
+    # Check for processes using DanceCourseCreator ports and kill them
     local ports=(17127 5274 5277)
     
     for port in "${ports[@]}"; do
@@ -69,7 +69,7 @@ cleanup_processes() {
 }
 
 echo ""
-log_info "Startar Privatekonomi Aspire AppHost på Raspberry Pi..."
+log_info "Startar DanceCourseCreator Aspire AppHost på Raspberry Pi..."
 echo ""
 
 # Cleanup before starting
@@ -91,26 +91,24 @@ if ! command -v dotnet &> /dev/null; then
 fi
 
 # Sätt miljövariabler för Raspberry Pi
-export PRIVATEKONOMI_RASPBERRY_PI=true
+export DANCECOURSE_RASPBERRY_PI=true
 export ASPNETCORE_ENVIRONMENT=Production
-export PRIVATEKONOMI_ENVIRONMENT=RaspberryPi
-export PRIVATEKONOMI_STORAGE_PROVIDER=Sqlite
 
 # Konfigurera Aspire Dashboard för att lyssna på alla nätverksinterfaces
 # OBS: Sätt inte ASPNETCORE_URLS här eftersom det ärvs av Web/API och skriver över deras portar
-export DOTNET_DASHBOARD_URLS="http://0.0.0.0:17127"
+export DOTNET_DASHBOARD_URLS="http://0.0.0.0:15000"
 
 # Check if using published binaries or source
-INSTALL_DIR="$HOME/Privatekonomi"
+INSTALL_DIR="$HOME/DanceCourseCreator"
 PUBLISH_DIR="$INSTALL_DIR/publish/AppHost"
 
-if [ -d "$PUBLISH_DIR" ] && [ -f "$PUBLISH_DIR/Privatekonomi.AppHost" ]; then
+if [ -d "$PUBLISH_DIR" ] && [ -f "$PUBLISH_DIR/DanceCourseCreator.AppHost" ]; then
     log_info "Hittade publicerade binärer, använder dem..."
     WORKING_DIR="$PUBLISH_DIR"
     USE_PUBLISHED=true
 else
     log_info "Använder källkod med dotnet run..."
-    WORKING_DIR="$(dirname "$0")/src/Privatekonomi.AppHost"
+    WORKING_DIR="$(dirname "$0")/src/DanceCourseCreator.AppHost"
     USE_PUBLISHED=false
 fi
 
@@ -124,7 +122,7 @@ if [ ! -f "appsettings.Production.json" ]; then
 fi
 
 if [ "$USE_PUBLISHED" = false ]; then
-    if [ ! -f "../Privatekonomi.Web/appsettings.Production.json" ] || [ ! -f "../Privatekonomi.Api/appsettings.Production.json" ]; then
+    if [ ! -f "../DanceCourseCreator.Web/appsettings.Production.json" ] || [ ! -f "../DanceCourseCreator.Api/appsettings.Production.json" ]; then
         log_warning "appsettings.Production.json saknas för Web eller API"
         echo ""
         echo "Kör installationsskriptet igen för att skapa konfigurationsfiler:"
@@ -135,10 +133,8 @@ fi
 
 echo ""
 log_info "Miljövariabler:"
-echo "  PRIVATEKONOMI_RASPBERRY_PI: $PRIVATEKONOMI_RASPBERRY_PI"
+echo "  DANCECOURSE_RASPBERRY_PI: $DANCECOURSE_RASPBERRY_PI"
 echo "  ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
-echo "  PRIVATEKONOMI_ENVIRONMENT: $PRIVATEKONOMI_ENVIRONMENT"
-echo "  PRIVATEKONOMI_STORAGE_PROVIDER: $PRIVATEKONOMI_STORAGE_PROVIDER"
 echo "  DOTNET_DASHBOARD_URLS: $DOTNET_DASHBOARD_URLS"
 echo ""
 
@@ -147,27 +143,27 @@ log_info "Använder .NET version: $(dotnet --version)"
 if [ "$USE_PUBLISHED" = true ]; then
     log_success "Startar från publicerade binärer (snabbare uppstart)..."
     echo ""
-    echo -e "${GREEN}🚀 Startar Privatekonomi...${NC}"
+    echo -e "${GREEN}🚀 Startar DanceCourseCreator...${NC}"
     echo ""
     echo -e "${YELLOW}Tjänster:${NC}"
-    echo "  • Aspire Dashboard: http://[raspberry-pi-ip]:17127"
-    echo "  • Web App: http://[raspberry-pi-ip]:5274"
-    echo "  • API: http://[raspberry-pi-ip]:5277"
+    echo "  • Aspire Dashboard: http://[raspberry-pi-ip]:15000"
+    echo "  • Web App: http://[raspberry-pi-ip]:5001"
+    echo "  • API: http://[raspberry-pi-ip]:7177"
     echo ""
     echo -e "${RED}Tryck Ctrl+C för att stoppa${NC}"
     echo ""
     
     # Starta från publicerade binärer
-    ./Privatekonomi.AppHost
+    ./DanceCourseCreator.AppHost
 else
     log_info "Startar från källkod med dotnet run..."
     echo ""
-    echo -e "${GREEN}🚀 Startar Privatekonomi...${NC}"
+    echo -e "${GREEN}🚀 Startar DanceCourseCreator...${NC}"
     echo ""
     echo -e "${YELLOW}Tjänster:${NC}"
-    echo "  • Aspire Dashboard: http://[raspberry-pi-ip]:17127"
-    echo "  • Web App: http://[raspberry-pi-ip]:5274"
-    echo "  • API: http://[raspberry-pi-ip]:5277"
+    echo "  • Aspire Dashboard: http://[raspberry-pi-ip]:15000"
+    echo "  • Web App: http://[raspberry-pi-ip]:5001"
+    echo "  • API: http://[raspberry-pi-ip]:7177"
     echo ""
     echo -e "${RED}Tryck Ctrl+C för att stoppa${NC}"
     echo ""

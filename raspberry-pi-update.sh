@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # ============================================================================
-# Privatekonomi Raspberry Pi Update Script
+# DanceCourseCreator Raspberry Pi Update Script
 # ============================================================================
 # 
-# This script automates the update process for an existing Privatekonomi
+# This script automates the update process for an existing DanceCourseCreator
 # installation on Raspberry Pi OS.
 #
 # Summary of update operations:
@@ -32,10 +32,10 @@ PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Configuration
-INSTALL_DIR="$HOME/Privatekonomi"
-DATA_DIR="$HOME/privatekonomi-data"
-BACKUP_DIR="$HOME/privatekonomi-backups"
-SERVICE_NAME="privatekonomi"
+INSTALL_DIR="$HOME/DanceCourseCreator"
+DATA_DIR="$HOME/DanceCourseCreator-data"
+BACKUP_DIR="$HOME/DanceCourseCreator-backups"
+SERVICE_NAME="DanceCourseCreator"
 
 # Logging functions
 log_info() {
@@ -61,19 +61,19 @@ log_section() {
     echo -e "${PURPLE}===================================================${NC}"
 }
 
-# Check if Privatekonomi is installed
+# Check if DanceCourseCreator is installed
 check_installation() {
     log_section "Kontrollerar befintlig installation"
     
     if [ ! -d "$INSTALL_DIR" ]; then
-        log_error "Privatekonomi är inte installerat i $INSTALL_DIR"
+        log_error "DanceCourseCreator är inte installerat i $INSTALL_DIR"
         echo ""
         echo "Kör först installationsskriptet:"
-        echo "  curl -sSL https://raw.githubusercontent.com/pownas/Privatekonomi/main/raspberry-pi-install.sh | bash"
+        echo "  curl -sSL https://raw.githubusercontent.com/pownas/DanceCourseCreator/main/raspberry-pi-install.sh | bash"
         exit 1
     fi
     
-    if [ ! -f "$INSTALL_DIR/Privatekonomi.sln" ]; then
+    if [ ! -f "$INSTALL_DIR/DanceCourseCreator.sln" ]; then
         log_error "Ogiltig installation i $INSTALL_DIR"
         exit 1
     fi
@@ -95,15 +95,15 @@ stop_services() {
     fi
     
     # Kill any running dotnet processes
-    if pgrep -f "Privatekonomi" > /dev/null; then
-        log_warning "Hittade körande Privatekonomi-processer, stoppar dem..."
-        pkill -f "Privatekonomi" || true
+    if pgrep -f "DanceCourseCreator" > /dev/null; then
+        log_warning "Hittade körande DanceCourseCreator-processer, stoppar dem..."
+        pkill -f "DanceCourseCreator" || true
         sleep 2
         
         # Force kill if still running
-        if pgrep -f "Privatekonomi" > /dev/null; then
+        if pgrep -f "DanceCourseCreator" > /dev/null; then
             log_warning "Tvångsstoppar kvarvarande processer..."
-            pkill -9 -f "Privatekonomi" || true
+            pkill -9 -f "DanceCourseCreator" || true
             sleep 1
         fi
         
@@ -121,9 +121,9 @@ create_backup() {
     local backup_name="pre_update_$timestamp"
     
     # Backup SQLite database if exists
-    if [ -f "$DATA_DIR/privatekonomi.db" ]; then
+    if [ -f "$DATA_DIR/DanceCourseCreator.db" ]; then
         log_info "Backup av SQLite-databas..."
-        cp "$DATA_DIR/privatekonomi.db" "$BACKUP_DIR/${backup_name}.db"
+        cp "$DATA_DIR/DanceCourseCreator.db" "$BACKUP_DIR/${backup_name}.db"
         log_success "SQLite backup: $BACKUP_DIR/${backup_name}.db"
     fi
     
@@ -149,7 +149,7 @@ create_backup() {
 
 # Update repository
 update_repository() {
-    log_section "Uppdaterar Privatekonomi från GitHub"
+    log_section "Uppdaterar DanceCourseCreator från GitHub"
     
     cd "$INSTALL_DIR"
     
@@ -271,8 +271,8 @@ publish_application() {
     log_info "Publicerar för linux-arm64 med self-contained..."
     
     # Publish AppHost
-    log_info "Publicerar Privatekonomi.AppHost..."
-    dotnet publish src/Privatekonomi.AppHost/Privatekonomi.AppHost.csproj \
+    log_info "Publicerar DanceCourseCreator.AppHost..."
+    dotnet publish src/DanceCourseCreator.AppHost/DanceCourseCreator.AppHost.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
@@ -281,8 +281,8 @@ publish_application() {
         /p:PublishSingleFile=false
     
     # Publish Web
-    log_info "Publicerar Privatekonomi.Web..."
-    dotnet publish src/Privatekonomi.Web/Privatekonomi.Web.csproj \
+    log_info "Publicerar DanceCourseCreator.Web..."
+    dotnet publish src/DanceCourseCreator.Web/DanceCourseCreator.Web.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
@@ -291,8 +291,8 @@ publish_application() {
         /p:PublishSingleFile=false
     
     # Publish API
-    log_info "Publicerar Privatekonomi.Api..."
-    dotnet publish src/Privatekonomi.Api/Privatekonomi.Api.csproj \
+    log_info "Publicerar DanceCourseCreator.Api..."
+    dotnet publish src/DanceCourseCreator.Api/DanceCourseCreator.Api.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
@@ -303,16 +303,16 @@ publish_application() {
     # Copy configuration files
     log_info "Kopierar konfigurationsfiler..."
     
-    if [ -f "src/Privatekonomi.AppHost/appsettings.Production.json" ]; then
-        cp "src/Privatekonomi.AppHost/appsettings.Production.json" "$publish_dir/AppHost/"
+    if [ -f "src/DanceCourseCreator.AppHost/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.AppHost/appsettings.Production.json" "$publish_dir/AppHost/"
     fi
     
-    if [ -f "src/Privatekonomi.Web/appsettings.Production.json" ]; then
-        cp "src/Privatekonomi.Web/appsettings.Production.json" "$publish_dir/Web/"
+    if [ -f "src/DanceCourseCreator.Web/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.Web/appsettings.Production.json" "$publish_dir/Web/"
     fi
     
-    if [ -f "src/Privatekonomi.Api/appsettings.Production.json" ]; then
-        cp "src/Privatekonomi.Api/appsettings.Production.json" "$publish_dir/Api/"
+    if [ -f "src/DanceCourseCreator.Api/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.Api/appsettings.Production.json" "$publish_dir/Api/"
     fi
     
     log_success "Applikation publicerad framgångsrikt"
@@ -331,7 +331,7 @@ update_systemd_service() {
     
     # Check if using published binaries
     local use_published=false
-    if [ -d "$INSTALL_DIR/publish/AppHost" ] && [ -f "$INSTALL_DIR/publish/AppHost/Privatekonomi.AppHost" ]; then
+    if [ -d "$INSTALL_DIR/publish/AppHost" ] && [ -f "$INSTALL_DIR/publish/AppHost/DanceCourseCreator.AppHost" ]; then
         use_published=true
     fi
     
@@ -350,7 +350,7 @@ update_systemd_service() {
             
             sudo tee "/etc/systemd/system/$SERVICE_NAME.service" > /dev/null << EOF
 [Unit]
-Description=Privatekonomi Personal Finance Application
+Description=DanceCourseCreator Personal Finance Application
 After=network.target
 
 [Service]
@@ -359,12 +359,12 @@ User=$user
 Group=$user
 WorkingDirectory=$INSTALL_DIR/publish/AppHost
 Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=PRIVATEKONOMI_ENVIRONMENT=RaspberryPi
-Environment=PRIVATEKONOMI_STORAGE_PROVIDER=Sqlite
-Environment=PRIVATEKONOMI_RASPBERRY_PI=true
+Environment=DanceCourseCreator_ENVIRONMENT=RaspberryPi
+Environment=DanceCourseCreator_STORAGE_PROVIDER=Sqlite
+Environment=DanceCourseCreator_RASPBERRY_PI=true
 Environment=DOTNET_DASHBOARD_URLS=http://0.0.0.0:17127
 Environment=DOTNET_ROOT=$HOME/.dotnet
-ExecStart=$INSTALL_DIR/publish/AppHost/Privatekonomi.AppHost
+ExecStart=$INSTALL_DIR/publish/AppHost/DanceCourseCreator.AppHost
 Restart=always
 RestartSec=10
 SyslogIdentifier=$SERVICE_NAME
@@ -462,7 +462,7 @@ show_post_update_info() {
     local current_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "okänd")
     
     echo -e ""
-    echo -e "${GREEN}🎉 Privatekonomi har uppdaterats framgångsrikt!${NC}"
+    echo -e "${GREEN}🎉 DanceCourseCreator har uppdaterats framgångsrikt!${NC}"
     echo -e ""
     echo -e "${BLUE}Version information:${NC}"
     echo -e "  Commit: $current_commit"
@@ -505,7 +505,7 @@ show_post_update_info() {
 
 # Main execution
 main() {
-    log_section "Privatekonomi Raspberry Pi Uppdatering"
+    log_section "DanceCourseCreator Raspberry Pi Uppdatering"
     log_info "Startar uppdatering av befintlig installation..."
     
     check_installation
@@ -527,7 +527,7 @@ SKIP_PUBLISH=false
 
 case "${1:-}" in
     --help|-h)
-        echo "Privatekonomi Raspberry Pi Update Script"
+        echo "DanceCourseCreator Raspberry Pi Update Script"
         echo ""
         echo "Användning: $0 [ALTERNATIV]"
         echo ""

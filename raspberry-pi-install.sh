@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # ============================================================================
-# Privatekonomi Raspberry Pi Installation Script
+# DanceCourseCreator Raspberry Pi Installation Script
 # ============================================================================
 # 
-# This script automates the complete setup of the Privatekonomi application
+# This script automates the complete setup of the DanceCourseCreator application
 # on Raspberry Pi OS.
 #
 # Summary of setup performed:
 # 1. Check system requirements and dependencies
-# 2. Install/verify .NET 9 SDK
+# 2. Install/verify .NET 10 SDK
 # 3. Configure PATH for .NET tools
-# 4. Clone or update Privatekonomi repository 
+# 4. Clone or update DanceCourseCreator repository 
 # 5. Install Entity Framework CLI tools
 # 6. Configure HTTPS development certificates
 # 7. Build and prepare the application
@@ -19,7 +19,7 @@
 # 9. Configure firewall if needed
 # 10. Verify installation and provide usage instructions
 #
-# Created: November 6, 2025
+# Created: November 30, 2025
 # For: Raspberry Pi OS (Debian-based)
 # ============================================================================
 
@@ -34,14 +34,14 @@ PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/pownas/Privatekonomi.git"
-INSTALL_DIR="$HOME/Privatekonomi"
-DATA_DIR="$HOME/privatekonomi-data"
-BACKUP_DIR="$HOME/privatekonomi-backups"
-SERVICE_NAME="privatekonomi"
-DEFAULT_PORT="17127"
-WEB_PORT="5274"
-API_PORT="5277"
+REPO_URL="https://github.com/pownas/DanceCourseCreator.git"
+INSTALL_DIR="$HOME/DanceCourseCreator"
+DATA_DIR="$HOME/dancecourse-data"
+BACKUP_DIR="$HOME/dancecourse-backups"
+SERVICE_NAME="dancecourse"
+DEFAULT_PORT="15000"
+WEB_PORT="5001"
+API_PORT="7177"
 
 # Logging functions
 log_info() {
@@ -153,24 +153,24 @@ EOF
     log_success "NuGet.Config skapad"
 }
 
-# Install .NET 9 SDK
-install_dotnet_9() {
-    log_section "Installerar .NET 9 SDK"
+# Install .NET 10 SDK
+install_dotnet_10() {
+    log_section "Installerar .NET 10 SDK"
     
     if command -v dotnet &> /dev/null; then
         local current_version=$(dotnet --version 2>/dev/null || echo "Okänd")
         log_info "Befintlig .NET-version: $current_version"
         
-        if [[ "$current_version" == 9.* ]]; then
-            log_success ".NET 9 SDK är redan installerat"
+        if [[ "$current_version" == 10.* ]]; then
+            log_success ".NET 10 SDK är redan installerat"
             return 0
         fi
     fi
     
-    log_info "Laddar ner och installerar .NET 9 SDK..."
+    log_info "Laddar ner och installerar .NET 10 SDK..."
     
     # Download and run the install script
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 9.0
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 10.0
     
     # Add to PATH for current session
     export PATH="$PATH:$HOME/.dotnet"
@@ -186,16 +186,16 @@ install_dotnet_9() {
     # Verify installation
     if [ -f "$HOME/.dotnet/dotnet" ]; then
         local version=$($HOME/.dotnet/dotnet --version)
-        log_success ".NET 9 SDK installerat: version $version"
+        log_success ".NET 10 SDK installerat: version $version"
     else
-        log_error "Misslyckades med att installera .NET 9 SDK"
+        log_error "Misslyckades med att installera .NET 10 SDK"
         exit 1
     fi
 }
 
 # Setup project
 setup_project() {
-    log_section "Konfigurerar Privatekonomi-projekt"
+    log_section "Konfigurerar DanceCourseCreator-projekt"
     
     if [ -d "$INSTALL_DIR" ]; then
         log_info "Katalogen $INSTALL_DIR finns redan"
@@ -211,7 +211,7 @@ setup_project() {
             cd "$INSTALL_DIR"
         fi
     else
-        log_info "Klonar Privatekonomi repository..."
+        log_info "Klonar DanceCourseCreator repository..."
         git clone "$REPO_URL" "$INSTALL_DIR"
         cd "$INSTALL_DIR"
     fi
@@ -259,41 +259,41 @@ publish_application() {
     cd "$INSTALL_DIR"
     
     # Publish AppHost (Aspire orchestrator)
-    log_info "Publicerar Privatekonomi.AppHost..."
-    if ! dotnet publish src/Privatekonomi.AppHost/Privatekonomi.AppHost.csproj \
+    log_info "Publicerar DanceCourseCreator.AppHost..."
+    if ! dotnet publish src/DanceCourseCreator.AppHost/DanceCourseCreator.AppHost.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
         -o "$publish_dir/AppHost" \
         /p:PublishTrimmed=false \
         /p:PublishSingleFile=false; then
-        log_error "Misslyckades att publicera Privatekonomi.AppHost"
+        log_error "Misslyckades att publicera DanceCourseCreator.AppHost"
         return 1
     fi
     
     # Publish Web
-    log_info "Publicerar Privatekonomi.Web..."
-    if ! dotnet publish src/Privatekonomi.Web/Privatekonomi.Web.csproj \
+    log_info "Publicerar DanceCourseCreator.Web..."
+    if ! dotnet publish src/DanceCourseCreator.Web/DanceCourseCreator.Web.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
         -o "$publish_dir/Web" \
         /p:PublishTrimmed=false \
         /p:PublishSingleFile=false; then
-        log_error "Misslyckades att publicera Privatekonomi.Web"
+        log_error "Misslyckades att publicera DanceCourseCreator.Web"
         return 1
     fi
     
     # Publish API
-    log_info "Publicerar Privatekonomi.Api..."
-    if ! dotnet publish src/Privatekonomi.Api/Privatekonomi.Api.csproj \
+    log_info "Publicerar DanceCourseCreator.API..."
+    if ! dotnet publish src/DanceCourseCreator.API/DanceCourseCreator.API.csproj \
         --runtime linux-arm64 \
         --self-contained \
         --configuration Release \
         -o "$publish_dir/Api" \
         /p:PublishTrimmed=false \
         /p:PublishSingleFile=false; then
-        log_error "Misslyckades att publicera Privatekonomi.Api"
+        log_error "Misslyckades att publicera DanceCourseCreator.API"
         return 1
     fi
     
@@ -319,16 +319,16 @@ publish_application() {
     # Copy appsettings to publish directories
     log_info "Kopierar konfigurationsfiler..."
     
-    if [ -f "src/Privatekonomi.AppHost/appsettings.Production.json" ]; then
-        cp "src/Privatekonomi.AppHost/appsettings.Production.json" "$publish_dir/AppHost/"
+    if [ -f "src/DanceCourseCreator.AppHost/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.AppHost/appsettings.Production.json" "$publish_dir/AppHost/"
     fi
     
-    if [ -f "src/Privatekonomi.Web/appsettings.Production.json" ]; then
-        cp "src/Privatekonomi.Web/appsettings.Production.json" "$publish_dir/Web/"
+    if [ -f "src/DanceCourseCreator.Web/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.Web/appsettings.Production.json" "$publish_dir/Web/"
     fi
     
-    if [ -f "src/Privatekonomi.Api/appsettings.Production.json" ]; then
-        cp "src/Privatekonomi.Api/appsettings.Production.json" "$publish_dir/Api/"
+    if [ -f "src/DanceCourseCreator.API/appsettings.Production.json" ]; then
+        cp "src/DanceCourseCreator.API/appsettings.Production.json" "$publish_dir/Api/"
     fi
     
     log_success "Applikation publicerad till: $publish_dir"
@@ -348,76 +348,36 @@ configure_storage() {
     log_info "Backup-katalog skapad: $BACKUP_DIR"
     
     # Check existing configuration
-    local web_config="$INSTALL_DIR/src/Privatekonomi.Web/appsettings.Production.json"
-    local existing_provider=""
+    local api_config="$INSTALL_DIR/src/DanceCourseCreator.API/appsettings.Production.json"
+    local existing_db_path=""
     
-    if [ -f "$web_config" ]; then
-        # Try to extract existing provider from config
-        existing_provider=$(grep -Po '"Provider":\s*"\K[^"]+' "$web_config" 2>/dev/null || echo "")
-        if [ -n "$existing_provider" ]; then
-            log_info "Befintlig lagringskonfiguration hittad: $existing_provider"
+    if [ -f "$api_config" ]; then
+        # Try to extract existing database path from config
+        existing_db_path=$(grep -Po '"DefaultConnection":\s*"Data Source=\K[^"]+' "$api_config" 2>/dev/null || echo "")
+        if [ -n "$existing_db_path" ]; then
+            log_info "Befintlig databaskonfiguration hittad: $existing_db_path"
         fi
     fi
     
-    # Ask user for storage provider (always ask to allow easy change)
-    echo -e "${YELLOW}Välj lagringsalternativ:${NC}"
-    echo "  1) SQLite (Rekommenderat - snabb, låg resursanvändning)"
-    echo "  2) JsonFile (Enkel backup, automatisk sparning var 5:e minut)"
+    # Configure database path
+    local db_path="$DATA_DIR/dancecourse.db"
+    log_info "Använder SQLite-databas: $db_path"
     
-    if [ "$existing_provider" = "Sqlite" ]; then
-        read -p "Ditt val (1/2) [1 - nuvarande]: " storage_choice
-    elif [ "$existing_provider" = "JsonFile" ]; then
-        read -p "Ditt val (1/2) [2 - nuvarande]: " storage_choice
-    else
-        read -p "Ditt val (1/2) [1]: " storage_choice
-    fi
+    # Generate a secure JWT secret
+    local jwt_secret=$(openssl rand -base64 48)
     
-    storage_choice=${storage_choice:-1}
-    
-    local storage_provider
-    local connection_string
-    
-    if [ "$storage_choice" = "2" ]; then
-        storage_provider="JsonFile"
-        connection_string="$DATA_DIR"
-        log_info "Använder JsonFile-lagring"
-    else
-        storage_provider="Sqlite"
-        connection_string="Data Source=$DATA_DIR/privatekonomi.db"
-        log_info "Använder SQLite-lagring"
-    fi
-    
-    # Create appsettings.Production.json for Web
-    log_info "Skapar $web_config..."
-    
-    cat > "$web_config" << EOF
-{
-  "Storage": {
-    "Provider": "$storage_provider",
-    "ConnectionString": "$connection_string",
-    "SeedTestData": false
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "Urls": "http://0.0.0.0:$WEB_PORT",
-  "AllowedHosts": "*"
-}
-EOF
-    
-    # Create appsettings.Production.json for Api
-    local api_config="$INSTALL_DIR/src/Privatekonomi.Api/appsettings.Production.json"
+    # Create appsettings.Production.json for API
     log_info "Skapar $api_config..."
     
     cat > "$api_config" << EOF
 {
-  "Storage": {
-    "Provider": "$storage_provider",
-    "ConnectionString": "$connection_string",
-    "SeedTestData": false
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=$db_path"
+  },
+  "JWT": {
+    "SecretKey": "$jwt_secret",
+    "Issuer": "DanceCourseCreator",
+    "Audience": "DanceCourseCreatorAPI"
   },
   "Logging": {
     "LogLevel": {
@@ -425,13 +385,30 @@ EOF
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "Urls": "http://0.0.0.0:$API_PORT",
+  "Urls": "http://0.0.0.0:$API_PORT;https://0.0.0.0:7177",
+  "AllowedHosts": "*"
+}
+EOF
+    
+    # Create appsettings.Production.json for Web
+    local web_config="$INSTALL_DIR/src/DanceCourseCreator.Web/appsettings.Production.json"
+    log_info "Skapar $web_config..."
+    
+    cat > "$web_config" << EOF
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Urls": "http://0.0.0.0:$WEB_PORT;https://0.0.0.0:5001",
   "AllowedHosts": "*"
 }
 EOF
     
     # Create appsettings.Production.json for AppHost (Aspire Dashboard)
-    local apphost_config="$INSTALL_DIR/src/Privatekonomi.AppHost/appsettings.Production.json"
+    local apphost_config="$INSTALL_DIR/src/DanceCourseCreator.AppHost/appsettings.Production.json"
     log_info "Skapar $apphost_config..."
     
     cat > "$apphost_config" << EOF
@@ -509,8 +486,8 @@ configure_nginx() {
     if command -v nginx &> /dev/null; then
         log_info "Nginx är redan installerat"
         
-        if [ -f "/etc/nginx/sites-available/privatekonomi" ]; then
-            log_success "Nginx är redan konfigurerat för Privatekonomi"
+        if [ -f "/etc/nginx/sites-available/DanceCourseCreator" ]; then
+            log_success "Nginx är redan konfigurerat för DanceCourseCreator"
             
             read -p "Vill du uppdatera Nginx-konfigurationen? (y/n): " -n 1 -r
             echo
@@ -550,8 +527,8 @@ configure_nginx() {
     # Create Nginx configuration
     log_info "Skapar Nginx-konfiguration..."
     
-    sudo tee /etc/nginx/sites-available/privatekonomi > /dev/null << EOF
-# Privatekonomi Nginx Reverse Proxy Configuration
+    sudo tee /etc/nginx/sites-available/DanceCourseCreator > /dev/null << EOF
+# DanceCourseCreator Nginx Reverse Proxy Configuration
 # Created by raspberry-pi-install.sh
 
 # Redirect HTTP to HTTPS (uncomment after SSL is configured)
@@ -628,8 +605,8 @@ server {
 EOF
     
     # Enable the site
-    log_info "Aktiverar Privatekonomi-sajt..."
-    sudo ln -sf /etc/nginx/sites-available/privatekonomi /etc/nginx/sites-enabled/
+    log_info "Aktiverar DanceCourseCreator-sajt..."
+    sudo ln -sf /etc/nginx/sites-available/DanceCourseCreator /etc/nginx/sites-enabled/
     
     # Test configuration
     if sudo nginx -t; then
@@ -652,7 +629,7 @@ EOF
         echo -e ""
     else
         log_error "Nginx-konfigurationen är ogiltig"
-        log_info "Kontrollerar konfigurationsfil: /etc/nginx/sites-available/privatekonomi"
+        log_info "Kontrollerar konfigurationsfil: /etc/nginx/sites-available/DanceCourseCreator"
         return 1
     fi
 }
@@ -718,7 +695,7 @@ configure_letsencrypt() {
     
     # Get domain name
     local server_ip=$(hostname -I | awk '{print $1}')
-    read -p "Ange ditt domännamn (t.ex. privatekonomi.example.com): " domain_name
+    read -p "Ange ditt domännamn (t.ex. DanceCourseCreator.example.com): " domain_name
     
     if [ -z "$domain_name" ]; then
         log_error "Domännamn krävs för Let's Encrypt"
@@ -771,7 +748,7 @@ configure_letsencrypt() {
 configure_selfsigned() {
     log_info "Skapar self-signed SSL-certifikat..."
     
-    local cert_dir="/etc/ssl/privatekonomi"
+    local cert_dir="/etc/ssl/DanceCourseCreator"
     local server_ip=$(hostname -I | awk '{print $1}')
     
     # Create directory for certificates
@@ -780,9 +757,9 @@ configure_selfsigned() {
     # Generate self-signed certificate
     log_info "Genererar certifikat (giltigt i 365 dagar)..."
     sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout "$cert_dir/privatekonomi.key" \
-        -out "$cert_dir/privatekonomi.crt" \
-        -subj "/C=SE/ST=Sweden/L=Stockholm/O=Privatekonomi/CN=$server_ip"
+        -keyout "$cert_dir/DanceCourseCreator.key" \
+        -out "$cert_dir/DanceCourseCreator.crt" \
+        -subj "/C=SE/ST=Sweden/L=Stockholm/O=DanceCourseCreator/CN=$server_ip"
     
     if [ $? -ne 0 ]; then
         log_error "Misslyckades med att generera certifikat"
@@ -792,8 +769,8 @@ configure_selfsigned() {
     # Update Nginx configuration to use SSL
     log_info "Uppdaterar Nginx-konfiguration för SSL..."
     
-    sudo tee /etc/nginx/sites-available/privatekonomi > /dev/null << EOF
-# Privatekonomi Nginx Reverse Proxy Configuration with Self-Signed SSL
+    sudo tee /etc/nginx/sites-available/DanceCourseCreator > /dev/null << EOF
+# DanceCourseCreator Nginx Reverse Proxy Configuration with Self-Signed SSL
 # Created by raspberry-pi-install.sh
 
 # Redirect HTTP to HTTPS
@@ -811,8 +788,8 @@ server {
     server_name $server_ip;
     
     # SSL Configuration
-    ssl_certificate $cert_dir/privatekonomi.crt;
-    ssl_certificate_key $cert_dir/privatekonomi.key;
+    ssl_certificate $cert_dir/DanceCourseCreator.crt;
+    ssl_certificate_key $cert_dir/DanceCourseCreator.key;
     
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
@@ -974,7 +951,7 @@ configure_firewall() {
     local has_api=$(echo "$ufw_status" | grep -q "$API_PORT" && echo "yes" || echo "no")
     
     if [ "$has_dashboard" = "yes" ] && [ "$has_web" = "yes" ] && [ "$has_api" = "yes" ]; then
-        log_success "UFW är redan konfigurerat med alla Privatekonomi-portar"
+        log_success "UFW är redan konfigurerat med alla DanceCourseCreator-portar"
         sudo ufw status | grep -E "$DEFAULT_PORT|$WEB_PORT|$API_PORT"
         return 0
     fi
@@ -996,19 +973,19 @@ configure_firewall() {
     
     # Allow Aspire Dashboard
     if [ "$has_dashboard" = "no" ]; then
-        sudo ufw allow $DEFAULT_PORT/tcp comment "Privatekonomi Aspire Dashboard"
+        sudo ufw allow $DEFAULT_PORT/tcp comment "DanceCourseCreator Aspire Dashboard"
         log_info "Port $DEFAULT_PORT (Aspire Dashboard) öppnad"
     fi
     
     # Allow Web application
     if [ "$has_web" = "no" ]; then
-        sudo ufw allow $WEB_PORT/tcp comment "Privatekonomi Web App"
+        sudo ufw allow $WEB_PORT/tcp comment "DanceCourseCreator Web App"
         log_info "Port $WEB_PORT (Web App) öppnad"
     fi
     
     # Allow API
     if [ "$has_api" = "no" ]; then
-        sudo ufw allow $API_PORT/tcp comment "Privatekonomi API"
+        sudo ufw allow $API_PORT/tcp comment "DanceCourseCreator API"
         log_info "Port $API_PORT (API) öppnad"
     fi
     
@@ -1019,7 +996,7 @@ configure_firewall() {
     sudo ufw status
     
     # Open HTTP/HTTPS ports if Nginx is configured
-    if command -v nginx &> /dev/null && [ -f "/etc/nginx/sites-available/privatekonomi" ]; then
+    if command -v nginx &> /dev/null && [ -f "/etc/nginx/sites-available/DanceCourseCreator" ]; then
         log_info "Nginx detekterat - öppnar HTTP/HTTPS-portar..."
         sudo ufw allow 80/tcp comment "HTTP"
         sudo ufw allow 443/tcp comment "HTTPS"
@@ -1052,7 +1029,7 @@ create_systemd_service() {
             fi
         fi
     else
-        read -p "Vill du skapa en systemd-tjänst för att starta Privatekonomi automatiskt? (y/n): " -n 1 -r
+        read -p "Vill du skapa en systemd-tjänst för att starta DanceCourseCreator automatiskt? (y/n): " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             return 0
@@ -1064,12 +1041,12 @@ create_systemd_service() {
     local exec_command
     
     # Determine if using published binaries or dotnet run
-    if [ -d "$INSTALL_DIR/publish/AppHost" ] && [ -f "$INSTALL_DIR/publish/AppHost/Privatekonomi.AppHost" ]; then
+    if [ -d "$INSTALL_DIR/publish/AppHost" ] && [ -f "$INSTALL_DIR/publish/AppHost/DanceCourseCreator.AppHost" ]; then
         working_dir="$INSTALL_DIR/publish/AppHost"
-        exec_command="$INSTALL_DIR/publish/AppHost/Privatekonomi.AppHost"
+        exec_command="$INSTALL_DIR/publish/AppHost/DanceCourseCreator.AppHost"
         log_info "Använder publicerade binärer för systemd-tjänst"
     else
-        working_dir="$INSTALL_DIR/src/Privatekonomi.AppHost"
+        working_dir="$INSTALL_DIR/src/DanceCourseCreator.AppHost"
         exec_command="$HOME/.dotnet/dotnet run --configuration Release"
         log_info "Använder dotnet run för systemd-tjänst"
     fi
@@ -1078,7 +1055,7 @@ create_systemd_service() {
     
     sudo tee "$service_file" > /dev/null << EOF
 [Unit]
-Description=Privatekonomi Personal Finance Application
+Description=DanceCourseCreator Personal Finance Application
 After=network.target
 
 [Service]
@@ -1087,9 +1064,7 @@ User=$user
 Group=$user
 WorkingDirectory=$working_dir
 Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=PRIVATEKONOMI_ENVIRONMENT=RaspberryPi
-Environment=PRIVATEKONOMI_STORAGE_PROVIDER=Sqlite
-Environment=PRIVATEKONOMI_RASPBERRY_PI=true
+Environment=DANCECOURSE_RASPBERRY_PI=true
 Environment=DOTNET_DASHBOARD_URLS=http://0.0.0.0:$DEFAULT_PORT
 Environment=DOTNET_ROOT=$HOME/.dotnet
 ExecStart=$exec_command
@@ -1122,16 +1097,16 @@ setup_backup() {
     log_section "Konfigurerar automatiska backuper (valfritt)"
     
     local scripts_dir="$HOME/scripts"
-    local backup_script="$scripts_dir/backup-privatekonomi.sh"
+    local backup_script="$scripts_dir/backup-DanceCourseCreator.sh"
     
     # Check if backup script already exists
     if [ -f "$backup_script" ]; then
         log_info "Backup-script finns redan: $backup_script"
         
         # Check if cron job exists
-        if crontab -l 2>/dev/null | grep -q "backup-privatekonomi.sh"; then
+        if crontab -l 2>/dev/null | grep -q "backup-DanceCourseCreator.sh"; then
             log_success "Automatisk backup är redan schemalagd"
-            crontab -l 2>/dev/null | grep "backup-privatekonomi.sh"
+            crontab -l 2>/dev/null | grep "backup-DanceCourseCreator.sh"
             
             read -p "Vill du uppdatera backup-skriptet? (y/n): " -n 1 -r
             echo
@@ -1157,27 +1132,27 @@ setup_backup() {
 #!/bin/bash
 
 # Backup directory
-BACKUP_DIR=~/privatekonomi-backups
-DATA_DIR=~/privatekonomi-data
+BACKUP_DIR=~/DanceCourseCreator-backups
+DATA_DIR=~/DanceCourseCreator-data
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # Skapa backup directory om det inte finns
 mkdir -p $BACKUP_DIR
 
 # För SQLite
-if [ -f "$DATA_DIR/privatekonomi.db" ]; then
-    cp "$DATA_DIR/privatekonomi.db" "$BACKUP_DIR/privatekonomi_$DATE.db"
-    echo "SQLite backup skapad: $BACKUP_DIR/privatekonomi_$DATE.db"
+if [ -f "$DATA_DIR/dancecourse.db" ]; then
+    cp "$DATA_DIR/dancecourse.db" "$BACKUP_DIR/dancecourse_$DATE.db"
+    echo "SQLite backup skapad: $BACKUP_DIR/dancecourse_$DATE.db"
 fi
 
-# För JsonFile
+# För JsonFile (if applicable in future)
 if [ -d "$DATA_DIR" ] && [ "$(ls -A $DATA_DIR/*.json 2>/dev/null)" ]; then
-    tar -czf "$BACKUP_DIR/privatekonomi_json_$DATE.tar.gz" -C "$DATA_DIR" .
-    echo "JSON backup skapad: $BACKUP_DIR/privatekonomi_json_$DATE.tar.gz"
+    tar -czf "$BACKUP_DIR/dancecourse_json_$DATE.tar.gz" -C "$DATA_DIR" .
+    echo "JSON backup skapad: $BACKUP_DIR/dancecourse_json_$DATE.tar.gz"
 fi
 
 # Ta bort backuper äldre än 750 dagar (ca 2 år)
-find $BACKUP_DIR -name "privatekonomi_*" -type f -mtime +750 -delete
+find $BACKUP_DIR -name "dancecourse_*" -type f -mtime +750 -delete
 
 echo "Backup klar: $(date)"
 EOFBACKUP
@@ -1197,7 +1172,7 @@ EOFBACKUP
     local cron_entry="0 2 * * * $backup_script >> $HOME/backup.log 2>&1"
     
     # Check if entry already exists
-    if crontab -l 2>/dev/null | grep -q "backup-privatekonomi.sh"; then
+    if crontab -l 2>/dev/null | grep -q "backup-DanceCourseCreator.sh"; then
         log_info "Cron-jobb finns redan"
     else
         (crontab -l 2>/dev/null; echo "$cron_entry") | crontab -
@@ -1261,7 +1236,7 @@ configure_static_ip() {
     # Add static IP configuration
     sudo tee -a /etc/dhcpcd.conf > /dev/null << EOF
 
-# Static IP configuration added by Privatekonomi installer
+# Static IP configuration added by DanceCourseCreator installer
 interface $interface
 static ip_address=$static_ip/24
 static routers=$gateway
@@ -1312,10 +1287,10 @@ verify_installation() {
     fi
     
     # Check project
-    if [ -f "$INSTALL_DIR/Privatekonomi.sln" ]; then
-        log_success "Privatekonomi-projekt: Installerat i $INSTALL_DIR"
+    if [ -f "$INSTALL_DIR/DanceCourseCreator.sln" ]; then
+        log_success "DanceCourseCreator-projekt: Installerat i $INSTALL_DIR"
     else
-        log_error "Privatekonomi-projekt inte funnet"
+        log_error "DanceCourseCreator-projekt inte funnet"
         return 1
     fi
     
@@ -1336,9 +1311,9 @@ validate_network_config() {
     local validation_passed=true
     
     # Check appsettings.Production.json files exist and have correct Urls
-    local web_config="$INSTALL_DIR/src/Privatekonomi.Web/appsettings.Production.json"
-    local api_config="$INSTALL_DIR/src/Privatekonomi.Api/appsettings.Production.json"
-    local apphost_config="$INSTALL_DIR/src/Privatekonomi.AppHost/appsettings.Production.json"
+    local web_config="$INSTALL_DIR/src/DanceCourseCreator.Web/appsettings.Production.json"
+    local api_config="$INSTALL_DIR/src/DanceCourseCreator.Api/appsettings.Production.json"
+    local apphost_config="$INSTALL_DIR/src/DanceCourseCreator.AppHost/appsettings.Production.json"
     
     # Validate Web config
     if [ -f "$web_config" ]; then
@@ -1422,9 +1397,9 @@ validate_network_config() {
         if [ "$firewall_ok" = false ]; then
             echo ""
             echo -e "${YELLOW}Öppna portar med:${NC}"
-            echo "  sudo ufw allow 17127/tcp comment 'Privatekonomi Aspire'"
-            echo "  sudo ufw allow 5274/tcp comment 'Privatekonomi Web'"
-            echo "  sudo ufw allow 5277/tcp comment 'Privatekonomi API'"
+            echo "  sudo ufw allow 17127/tcp comment 'DanceCourseCreator Aspire'"
+            echo "  sudo ufw allow 5274/tcp comment 'DanceCourseCreator Web'"
+            echo "  sudo ufw allow 5277/tcp comment 'DanceCourseCreator API'"
             echo "  sudo ufw reload"
             validation_passed=false
         fi
@@ -1446,7 +1421,7 @@ show_usage_info() {
     local pi_ip=$(hostname -I | awk '{print $1}')
     
     echo -e ""
-    echo -e "${GREEN}🎉 Privatekonomi har installerats framgångsrikt på din Raspberry Pi!${NC}"
+    echo -e "${GREEN}🎉 DanceCourseCreator har installerats framgångsrikt på din Raspberry Pi!${NC}"
     echo -e ""
     echo -e "${BLUE}Så här startar du applikationen:${NC}"
     echo -e ""
@@ -1455,8 +1430,8 @@ show_usage_info() {
     echo -e "    ./raspberry-pi-start.sh"
     echo -e ""
     echo -e "  ${YELLOW}Eller direkt med dotnet:${NC}"
-    echo -e "    cd $INSTALL_DIR/src/Privatekonomi.AppHost"
-    echo -e "    PRIVATEKONOMI_RASPBERRY_PI=true DOTNET_DASHBOARD_URLS=http://0.0.0.0:$DEFAULT_PORT dotnet run"
+    echo -e "    cd $INSTALL_DIR/src/DanceCourseCreator.AppHost"
+    echo -e "    DanceCourseCreator_RASPBERRY_PI=true DOTNET_DASHBOARD_URLS=http://0.0.0.0:$DEFAULT_PORT dotnet run"
     echo -e ""
     
     if systemctl is-enabled "$SERVICE_NAME" &>/dev/null; then
@@ -1489,16 +1464,15 @@ show_usage_info() {
     echo -e "    dotnet build --configuration Release"
     echo -e ""
     echo -e "  ${YELLOW}Manuell backup:${NC}"
-    echo -e "    ~/scripts/backup-privatekonomi.sh"
+    echo -e "    ~/scripts/backup-DanceCourseCreator.sh"
     echo -e ""
     echo -e "  ${YELLOW}Visa backup-loggar:${NC}"
     echo -e "    cat ~/backup.log"
     echo -e ""
     echo -e "${BLUE}Projektstruktur:${NC}"
-    echo -e "  • ${YELLOW}Privatekonomi.Api${NC} - Backend API"
-    echo -e "  • ${YELLOW}Privatekonomi.Web${NC} - Blazor frontend"
-    echo -e "  • ${YELLOW}Privatekonomi.Core${NC} - Kärnbibliotek"
-    echo -e "  • ${YELLOW}Privatekonomi.AppHost${NC} - Aspire-orkestrering"
+    echo -e "  • ${YELLOW}DanceCourseCreator.API${NC} - Backend API"
+    echo -e "  • ${YELLOW}DanceCourseCreator.Web${NC} - Blazor frontend"
+    echo -e "  • ${YELLOW}DanceCourseCreator.AppHost${NC} - Aspire-orkestrering"
     echo -e ""
     echo -e "${BLUE}Datakatalog:${NC}"
     echo -e "  • ${YELLOW}Data:${NC} $DATA_DIR"
@@ -1513,20 +1487,20 @@ show_usage_info() {
     fi
     echo -e "  3. Öppna webbläsare på http://$pi_ip:$WEB_PORT"
     echo -e "  4. Skapa ditt första användarkonto"
-    echo -e "  5. Importera eller börja lägga till transaktioner"
+    echo -e "  5. Börja planera dina West Coast Swing-kurser!"
     echo -e ""
-    echo -e "${GREEN}Lycka till med din personliga ekonomi! 💰${NC}"
+    echo -e "${GREEN}Lycka till med din kursplanering! 💃�${NC}"
 }
 
 # Main execution
 main() {
-    log_section "Privatekonomi Raspberry Pi Installation"
+    log_section "DanceCourseCreator Raspberry Pi Installation"
     log_info "Startar automatisk installation för Raspberry Pi..."
     
     check_raspberry_pi
     check_system_requirements
     create_nuget_config
-    install_dotnet_9
+    install_dotnet_10
     setup_project
     publish_application
     configure_storage
@@ -1567,7 +1541,7 @@ SKIP_SSL=false
 
 case "${1:-}" in
     --help|-h)
-        echo "Privatekonomi Raspberry Pi Installation Script"
+        echo "DanceCourseCreator Raspberry Pi Installation Script"
         echo ""
         echo "Användning: $0 [ALTERNATIV]"
         echo ""
