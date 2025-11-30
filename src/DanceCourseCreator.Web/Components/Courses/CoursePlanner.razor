@@ -1,0 +1,758 @@
+@page "/courses/{CourseId}/planner"
+@using MudBlazor
+@inject ICoursesService CoursesService
+@inject ILessonsService LessonsService
+@inject IBreakpointService BreakpointService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
+@inject ILogger<CoursePlanner> Logger
+@implements IAsyncDisposable
+
+<PageTitle>@GetPageTitle()</PageTitle>
+
+<div class="course-planner-container @GetLayoutClass()">
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center align-center" style="height: 400px;">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else if (_course == null)
+    {
+        <MudAlert Severity="Severity.Warning" Class="ma-4">
+            <MudText Typo="Typo.body1">Kursen kunde inte hittas.</MudText>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="NavigateBackToCourses">
+                Gå tillbaka till kurslistan
+            </MudButton>
+        </MudAlert>
+    }
+    else
+    {
+        @* Header with course info - editable inline *@
+        <MudPaper Class="course-planner-header pa-4 mb-4" Elevation="2">
+            <MudGrid>
+                @* Course name - inline edit *@
+                <MudItem xs="12" md="6" lg="4">
+                    @if (_isEditingName)
+                    {
+                        <MudTextField @bind-Value="_editedName"
+                                      Label="Kursnamn"
+                                      Variant="Variant.Outlined"
+                                      Immediate="true"
+                                      OnBlur="SaveCourseName"
+                                      OnKeyDown="@(async (KeyboardEventArgs e) => { if (e.Key == "Enter") await SaveCourseName(); })"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Check"
+                                      AdornmentColor="Color.Success"
+                                      OnAdornmentClick="SaveCourseName"
+                                      FullWidth="true" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-center gap-2 cursor-pointer" @onclick="StartEditingName">
+                            <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Primary" />
+                            <div>
+                                <MudText Typo="Typo.h5">@_course.Name</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Klicka för att redigera</MudText>
+                            </div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                           Size="Size.Small" 
+                                           Color="Color.Primary" 
+                                           OnClick="StartEditingName"
+                                           aria-label="Redigera kursnamn" />
+                        </div>
+                    }
+                </MudItem>
+
+                @* Level selector *@
+                <MudItem xs="6" sm="4" md="2">
+                    <MudSelect @bind-Value="_course.Level"
+                               @bind-Value:after="OnCourseInfoChanged"
+                               Label="Nivå"
+                               Variant="Variant.Outlined"
+                               Dense="@_isMobile"
+                               AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
+                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
+                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
+                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                @* Week count selector (4-12) *@
+                <MudItem xs="6" sm="4" md="2">
+                    <MudSelect @bind-Value="_course.DurationWeeks"
+                               @bind-Value:after="OnWeekCountChanged"
+                               Label="Veckor"
+                               Variant="Variant.Outlined"
+                               Dense="@_isMobile"
+                               AnchorOrigin="Origin.BottomCenter">
+                        @for (int w = 4; w <= 12; w++)
+                        {
+                            var weeks = w;
+                            <MudSelectItem Value="@weeks">@weeks veckor</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                @* Dance style *@
+                <MudItem xs="6" sm="4" md="2">
+                    <MudSelect @bind-Value="_course.DanceStyle"
+                               @bind-Value:after="OnCourseInfoChanged"
+                               Label="Dansstil"
+                               Variant="Variant.Outlined"
+                               Dense="@_isMobile"
+                               AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
+                        <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
+                        <MudSelectItem Value="@("Fox")">Fox</MudSelectItem>
+                        <MudSelectItem Value="@("Foxtrot")">Foxtrot</MudSelectItem>
+                        <MudSelectItem Value="@("Lindy")">Lindy Hop</MudSelectItem>
+                        <MudSelectItem Value="@("Balboa")">Balboa</MudSelectItem>
+                        <MudSelectItem Value="@("Blues")">Blues</MudSelectItem>
+                        <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                @* Status summary *@
+                <MudItem xs="6" sm="12" md="2">
+                    <div class="d-flex align-center h-100 flex-wrap gap-2 @(_isMobile ? "" : "justify-end")">
+                        <MudChip T="string" Color="@GetProgressColor()" Size="Size.Small">
+                            <MudIcon Icon="@Icons.Material.Filled.Class" Size="Size.Small" Class="mr-1" />
+                            @_course.ActualLessonCount / @_course.PlannedLessonCount
+                        </MudChip>
+                        <MudChip T="string" Color="Color.Info" Size="Size.Small">
+                            <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" Class="mr-1" />
+                            @FormatTotalTime(_course.TotalPlannedMinutes)
+                        </MudChip>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        @* Main content - Timeline integration *@
+        <div class="course-planner-content">
+            @if (_isMobile)
+            {
+                @* Mobile: Vertical stacked layout *@
+                <MudPaper Class="pa-4 mb-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Timeline" Class="mr-2" />
+                        Veckoplanering
+                    </MudText>
+                    @RenderTimeline()
+                </MudPaper>
+
+                @* Course Goals (collapsible on mobile) *@
+                <MudExpansionPanels Class="mb-4" Elevation="2">
+                    <MudExpansionPanel Text="Kursmål" Icon="@Icons.Material.Filled.EmojiEvents">
+                        @RenderGoals()
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            }
+            else
+            {
+                @* Desktop/Tablet: Side-by-side layout *@
+                <MudGrid Spacing="4">
+                    <MudItem xs="12" lg="9">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.Timeline" Class="mr-2" />
+                                Veckoplanering
+                            </MudText>
+                            @RenderTimeline()
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12" lg="3">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.EmojiEvents" Class="mr-2" />
+                                Kursmål
+                            </MudText>
+                            @RenderGoals()
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            }
+        </div>
+
+        @* Bottom action bar - always visible *@
+        <MudPaper Class="course-planner-actions pa-3 mt-4" Elevation="4">
+            <div class="d-flex justify-space-between align-center flex-wrap gap-2">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="NavigateBackToCourses">
+                    Tillbaka
+                </MudButton>
+                <div class="d-flex gap-2 flex-wrap">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.Settings"
+                               OnClick="OpenCourseSettings">
+                        @if (!_isMobile) { <text>Inställningar</text> }
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Info"
+                               StartIcon="@Icons.Material.Filled.TrendingUp"
+                               OnClick="ViewProgression">
+                        @if (!_isMobile) { <text>Progression</text> }
+                    </MudButton>
+                    <MudMenu Icon="@Icons.Material.Filled.FileDownload" 
+                             Color="Color.Tertiary"
+                             Variant="Variant.Outlined"
+                             Label="@(_isMobile ? "" : "Exportera")"
+                             AnchorOrigin="Origin.TopCenter"
+                             TransformOrigin="Origin.BottomCenter">
+                        <MudMenuItem OnClick="ExportToPdf">
+                            <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Class="mr-2" /> PDF
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="ExportToMarkdown">
+                            <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2" /> Markdown
+                        </MudMenuItem>
+                    </MudMenu>
+                    @if (_hasUnsavedChanges)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Class="mr-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Class="mr-1" />
+                            Osparade ändringar
+                        </MudChip>
+                    }
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="SaveCourse"
+                               Disabled="_isSaving">
+                        @if (_isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        }
+                        @if (!_isMobile) { <text>Spara</text> }
+                    </MudButton>
+                </div>
+            </div>
+        </MudPaper>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string CourseId { get; set; } = string.Empty;
+
+    private Course? _course;
+    private List<Lesson> _allLessons = new();
+    private bool _isLoading = true;
+    private bool _isSaving = false;
+    private bool _isMobile = false;
+    private bool _isEditingName = false;
+    private string _editedName = string.Empty;
+    private Guid _breakpointSubscriptionId;
+    private bool _hasUnsavedChanges = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breakpointSubscriptionId = await BreakpointService.Subscribe(OnBreakpointChanged);
+        _isMobile = await BreakpointService.IsMobile();
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        try
+        {
+            _course = await CoursesService.GetCourseAsync(CourseId);
+            
+            if (_course == null)
+            {
+                Logger.LogWarning("Course with ID {CourseId} not found", CourseId);
+                Snackbar.Add("Kursen hittades inte", Severity.Warning);
+                return;
+            }
+
+            _allLessons = await LessonsService.GetLessonsAsync() ?? new List<Lesson>();
+            
+            // Ensure ThemesByWeek has the correct number of entries
+            EnsureThemesCount();
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error loading course data: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading course data: {Message}", ex.Message);
+            Snackbar.Add($"Fel vid laddning: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void EnsureThemesCount()
+    {
+        if (_course == null) return;
+        
+        while (_course.ThemesByWeek.Count < _course.DurationWeeks)
+        {
+            _course.ThemesByWeek.Add(string.Empty);
+        }
+        
+        if (_course.ThemesByWeek.Count > _course.DurationWeeks)
+        {
+            _course.ThemesByWeek = _course.ThemesByWeek.Take(_course.DurationWeeks).ToList();
+        }
+    }
+
+    private Task OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        _isMobile = breakpoint <= Breakpoint.Sm;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private string GetPageTitle()
+    {
+        return _course != null ? $"Kursplanering - {_course.Name}" : "Kursplanering";
+    }
+
+    private string GetLayoutClass()
+    {
+        return _isMobile ? "mobile-layout" : "desktop-layout";
+    }
+
+    // Inline editing methods
+    private void StartEditingName()
+    {
+        if (_course != null)
+        {
+            _editedName = _course.Name;
+            _isEditingName = true;
+        }
+    }
+
+    private async Task SaveCourseName()
+    {
+        if (_course != null && !string.IsNullOrWhiteSpace(_editedName))
+        {
+            _course.Name = _editedName.Trim();
+            _hasUnsavedChanges = true;
+            _isEditingName = false;
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            _isEditingName = false;
+        }
+    }
+
+    private void OnCourseInfoChanged()
+    {
+        _hasUnsavedChanges = true;
+    }
+
+    private void OnWeekCountChanged()
+    {
+        EnsureThemesCount();
+        _hasUnsavedChanges = true;
+    }
+
+    // Timeline rendering
+    private RenderFragment RenderTimeline() => __builder =>
+    {
+        if (_course == null) return;
+
+        <MudAlert Severity="Severity.Info" Class="mb-4 d-md-none" Dense="true">
+            <MudText Typo="Typo.body2">
+                <strong>Tips:</strong> Svep horisontellt för att se alla veckor.
+            </MudText>
+        </MudAlert>
+
+        <div class="timeline-container" style="overflow-x: auto;">
+            <MudTimeline TimelinePosition="@(_isMobile ? TimelinePosition.Start : TimelinePosition.Alternate)">
+                @for (int week = 1; week <= _course.DurationWeeks; week++)
+                {
+                    var weekIndex = week - 1;
+                    var weekLessons = GetLessonsForWeek(week);
+                    var weekTheme = weekIndex < _course.ThemesByWeek.Count ? _course.ThemesByWeek[weekIndex] : "";
+                    
+                    <MudTimelineItem Color="@GetWeekColor(weekLessons.Count)" Size="Size.Medium">
+                        <ItemOpposite>
+                            <MudText Typo="Typo.subtitle1" Color="Color.Primary">Vecka @week</MudText>
+                        </ItemOpposite>
+                        <ItemContent>
+                            <MudPaper Class="pa-3 week-card" Elevation="1">
+                                @* Week theme - editable *@
+                                <MudTextField @bind-Value="_course.ThemesByWeek[weekIndex]"
+                                              @bind-Value:after="OnCourseInfoChanged"
+                                              Label="Tema"
+                                              Variant="Variant.Text"
+                                              Placeholder="Ange veckans tema..."
+                                              Margin="Margin.Dense"
+                                              FullWidth="true"
+                                              Class="mb-2" />
+
+                                @* Lessons for this week *@
+                                <div class="d-flex justify-space-between align-center mb-2">
+                                    <MudChip T="string" Size="Size.Small" Color="@GetWeekLessonColor(weekLessons.Count)">
+                                        @weekLessons.Count lektion(er)
+                                    </MudChip>
+                                    <MudButton Size="Size.Small"
+                                               StartIcon="@Icons.Material.Filled.Add"
+                                               Color="Color.Primary"
+                                               Variant="Variant.Text"
+                                               OnClick="@(() => AddLessonToWeek(week))">
+                                        Lägg till
+                                    </MudButton>
+                                </div>
+
+                                @if (weekLessons.Any())
+                                {
+                                    <MudStack Spacing="1">
+                                        @foreach (var lesson in weekLessons)
+                                        {
+                                            <MudCard Class="lesson-card pa-2" Outlined="true">
+                                                <div class="d-flex justify-space-between align-center">
+                                                    <div>
+                                                        <MudText Typo="Typo.body2">
+                                                            @if (lesson.Date.HasValue)
+                                                            {
+                                                                @lesson.Date.Value.ToString("yyyy-MM-dd")
+                                                            }
+                                                            else if (!string.IsNullOrWhiteSpace(lesson.Notes))
+                                                            {
+                                                                @lesson.Notes
+                                                            }
+                                                            else
+                                                            {
+                                                                <text>Lektion</text>
+                                                            }
+                                                        </MudText>
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            @lesson.Duration min • @lesson.Sections.Count sektioner
+                                                        </MudText>
+                                                    </div>
+                                                    <div class="d-flex">
+                                                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                                       Size="Size.Small"
+                                                                       Color="Color.Primary"
+                                                                       OnClick="@(() => EditLesson(lesson))"
+                                                                       aria-label="Redigera lektion" />
+                                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                                       Size="Size.Small"
+                                                                       Color="Color.Error"
+                                                                       OnClick="@(() => RemoveLesson(lesson))"
+                                                                       aria-label="Ta bort lektion" />
+                                                    </div>
+                                                </div>
+                                            </MudCard>
+                                        }
+                                    </MudStack>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="text-center">
+                                        Ingen lektion planerad
+                                    </MudText>
+                                }
+                            </MudPaper>
+                        </ItemContent>
+                    </MudTimelineItem>
+                }
+            </MudTimeline>
+        </div>
+    };
+
+    // Goals rendering
+    private RenderFragment RenderGoals() => __builder =>
+    {
+        if (_course == null) return;
+
+        <MudTextField @bind-Value="_newGoal"
+                      Label="Lägg till mål"
+                      Placeholder="T.ex. 'Lära grundläggande mönster'"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.Add"
+                      AdornmentColor="Color.Primary"
+                      OnAdornmentClick="AddGoal"
+                      OnKeyDown="@((KeyboardEventArgs e) => { if (e.Key == "Enter") AddGoal(); })"
+                      Class="mb-3" />
+
+        @if (_course.Goals.Any())
+        {
+            <MudList T="string" Dense="true">
+                @for (int i = 0; i < _course.Goals.Count; i++)
+                {
+                    var index = i;
+                    <MudListItem T="string">
+                        <div class="d-flex align-center justify-space-between w-100">
+                            <div class="d-flex align-center gap-2">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" Size="Size.Small" Color="Color.Success" />
+                                <MudText Typo="Typo.body2">@_course.Goals[index]</MudText>
+                            </div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Size="Size.Small"
+                                           Color="Color.Error"
+                                           OnClick="@(() => RemoveGoal(index))"
+                                           aria-label="Ta bort mål" />
+                        </div>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="text-center">
+                Inga mål definierade ännu.
+            </MudText>
+        }
+    };
+
+    private string _newGoal = string.Empty;
+
+    private void AddGoal()
+    {
+        if (_course != null && !string.IsNullOrWhiteSpace(_newGoal))
+        {
+            _course.Goals.Add(_newGoal.Trim());
+            _newGoal = string.Empty;
+            _hasUnsavedChanges = true;
+        }
+    }
+
+    private void RemoveGoal(int index)
+    {
+        if (_course != null && index >= 0 && index < _course.Goals.Count)
+        {
+            _course.Goals.RemoveAt(index);
+            _hasUnsavedChanges = true;
+        }
+    }
+
+    // Lesson management
+    private List<Lesson> GetLessonsForWeek(int weekNumber)
+    {
+        if (_course == null) return new List<Lesson>();
+        
+        var courseLessons = _allLessons.Where(l => 
+            _course.LessonIds.Contains(l.Id) && 
+            l.Date.HasValue
+        ).OrderBy(l => l.Date).ToList();
+        
+        // Simple distribution logic (same as CourseTimelineBuilder)
+        var lessonsPerWeek = (double)courseLessons.Count / _course.DurationWeeks;
+        var startIndex = (int)Math.Floor((weekNumber - 1) * lessonsPerWeek);
+        var endIndex = (int)Math.Floor(weekNumber * lessonsPerWeek);
+        
+        if (startIndex < courseLessons.Count)
+        {
+            endIndex = Math.Min(endIndex, courseLessons.Count);
+            return courseLessons.Skip(startIndex).Take(endIndex - startIndex).ToList();
+        }
+        
+        return new List<Lesson>();
+    }
+
+    private async Task AddLessonToWeek(int weekNumber)
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions 
+        { 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true,
+            CloseButton = true
+        };
+
+        var dialog = await DialogService.ShowAsync<LessonBuilderWithDragDrop>(
+            $"Skapa lektion för vecka {weekNumber}", 
+            parameters, 
+            options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadData();
+            Snackbar.Add("Lektion skapad!", Severity.Success);
+        }
+    }
+
+    private async Task EditLesson(Lesson lesson)
+    {
+        var parameters = new DialogParameters
+        {
+            { "LessonId", lesson.Id }
+        };
+        var options = new DialogOptions 
+        { 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true,
+            CloseButton = true
+        };
+
+        var dialog = await DialogService.ShowAsync<LessonBuilderWithDragDrop>("Redigera lektion", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task RemoveLesson(Lesson lesson)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Ta bort lektion",
+            "Är du säker på att du vill ta bort denna lektion från kursen?",
+            yesText: "Ja, ta bort",
+            cancelText: "Avbryt");
+
+        if (confirmed == true && _course != null)
+        {
+            _course.LessonIds.Remove(lesson.Id);
+            _hasUnsavedChanges = true;
+            StateHasChanged();
+        }
+    }
+
+    // Navigation and actions
+    private void NavigateBackToCourses()
+    {
+        Navigation.NavigateTo("/courses");
+    }
+
+    private async Task OpenCourseSettings()
+    {
+        if (_course == null) return;
+
+        var parameters = new DialogParameters<CreateCourseDialog>
+        {
+            { x => x.Course, _course }
+        };
+
+        var dialog = await DialogService.ShowAsync<CreateCourseDialog>("Kursinställningar", parameters);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadData();
+            Snackbar.Add("Kursinställningar uppdaterade!", Severity.Success);
+        }
+    }
+
+    private async Task ViewProgression()
+    {
+        if (_course == null) return;
+
+        var parameters = new DialogParameters
+        {
+            { "CourseId", _course.Id }
+        };
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Large,
+            FullWidth = true
+        };
+
+        await DialogService.ShowAsync<CourseProgressionDialog>(
+            $"Progression: {_course.Name}", 
+            parameters, 
+            options);
+    }
+
+    private Task ExportToPdf()
+    {
+        // TODO: Implement PDF export
+        Snackbar.Add("PDF-export kommer snart!", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private Task ExportToMarkdown()
+    {
+        // TODO: Implement Markdown export
+        Snackbar.Add("Markdown-export kommer snart!", Severity.Info);
+        return Task.CompletedTask;
+    }
+
+    private async Task SaveCourse()
+    {
+        if (_course == null) return;
+
+        _isSaving = true;
+        try
+        {
+            var result = await CoursesService.UpdateCourseAsync(_course.Id, _course);
+            if (result != null)
+            {
+                _hasUnsavedChanges = false;
+                Snackbar.Add("Kursen sparades!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Kunde inte spara kursen", Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error saving course: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving course: {Message}", ex.Message);
+            Snackbar.Add($"Fel: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    // Helper methods
+    private Color GetProgressColor()
+    {
+        if (_course == null || _course.PlannedLessonCount == 0) return Color.Default;
+        var progress = (double)_course.ActualLessonCount / _course.PlannedLessonCount;
+        if (progress >= 1.0) return Color.Success;
+        if (progress >= 0.5) return Color.Warning;
+        return Color.Error;
+    }
+
+    private Color GetWeekColor(int lessonCount)
+    {
+        if (lessonCount == 0) return Color.Default;
+        if (lessonCount >= 2) return Color.Success;
+        return Color.Primary;
+    }
+
+    private Color GetWeekLessonColor(int lessonCount)
+    {
+        if (lessonCount == 0) return Color.Default;
+        return Color.Success;
+    }
+
+    private string FormatTotalTime(int totalMinutes)
+    {
+        if (totalMinutes == 0) return "0 min";
+        
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+        
+        if (hours > 0 && minutes > 0)
+            return $"{hours}h {minutes}min";
+        else if (hours > 0)
+            return $"{hours}h";
+        else
+            return $"{minutes}min";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await BreakpointService.Unsubscribe(_breakpointSubscriptionId);
+    }
+}
