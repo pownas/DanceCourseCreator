@@ -78,15 +78,6 @@
                             @_totalEstimatedTime / @_lessonRequest.Duration min
                         </MudChip>
                         <MudText Typo="Typo.caption" Class="ml-2">@GetTimeStatusText()</MudText>
-                        @if (_lastAutoSaveTime.HasValue)
-                        {
-                            <MudTooltip Text="Automatiskt sparat lokalt">
-                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
-                                    <MudIcon Icon="@Icons.Material.Filled.CloudDone" Size="Size.Small" Class="mr-1" />
-                                    @_lastAutoSaveTime.Value.ToString("HH:mm")
-                                </MudChip>
-                            </MudTooltip>
-                        }
                     </div>
                 </MudItem>
             </MudGrid>
@@ -205,10 +196,11 @@
         _breakpointSubscriptionId = await BreakpointService.Subscribe(OnBreakpointChanged);
         _isMobile = await BreakpointService.IsMobile();
         
-        // Initialize auto-save timer (debounce: save 2 seconds after last change)
-        _autoSaveTimer = new System.Timers.Timer(2000);
+        // Initialize auto-save timer (save every 30 seconds)
+        _autoSaveTimer = new System.Timers.Timer(30000);
         _autoSaveTimer.Elapsed += async (sender, e) => await AutoSaveToLocalStorage();
-        _autoSaveTimer.AutoReset = false;
+        _autoSaveTimer.AutoReset = true;
+        _autoSaveTimer.Start();
         
         await LoadData();
     }
@@ -895,10 +887,8 @@
     
     private void TriggerAutoSave()
     {
+        // Mark that there are unsaved changes (will be saved on next timer tick)
         _hasUnsavedChanges = true;
-        // Reset and start the timer (debounce)
-        _autoSaveTimer?.Stop();
-        _autoSaveTimer?.Start();
     }
 
     private async Task AutoSaveToLocalStorage()
@@ -919,15 +909,9 @@
             var json = JsonSerializer.Serialize(draftData);
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", LOCAL_STORAGE_KEY, json);
             
-            var previousSaveTime = _lastAutoSaveTime;
             _lastAutoSaveTime = DateTime.Now;
             _hasUnsavedChanges = false;
             
-            // Only update UI if save time indicator needs to be refreshed (first save or time changed)
-            if (!previousSaveTime.HasValue || previousSaveTime.Value.Minute != _lastAutoSaveTime.Value.Minute)
-            {
-                await InvokeAsync(StateHasChanged);
-            }
             Logger.LogDebug("Auto-saved lesson draft to localStorage at {Time}", _lastAutoSaveTime);
         }
         catch (Exception ex)
