@@ -100,6 +100,11 @@
                                                    OnClick="() => ViewLesson(lesson)">
                                             View
                                         </MudButton>
+                                        <MudIconButton Size="Size.Small"
+                                                       Icon="@Icons.Material.Filled.ViewCompact"
+                                                       Color="Color.Info"
+                                                       OnClick="() => OpenCompactView(lesson)"
+                                                       aria-label="Kompakt vy" />
                                         <MudButton Size="Size.Small" 
                                                    Color="Color.Secondary" 
                                                    OnClick="() => EditLesson(lesson)">
@@ -294,5 +299,24 @@
         {
             Snackbar.Add("Mall skapad framgångsrikt! Se den på Mallar-sidan.", Severity.Success);
         }
+    }
+
+    private async Task OpenCompactView(Lesson lesson)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Lesson", lesson },
+            { "AllLessons", lessons },
+            { "ShowNavigation", true }
+        };
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            CloseOnEscapeKey = true
+        };
+
+        await DialogService.ShowAsync<LessonCompactViewDialog>("Kompakt vy", parameters, options);
     }
 }
