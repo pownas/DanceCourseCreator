@@ -133,7 +133,8 @@
         </div>
 
         @* Lesson Notes *@
-        @if (!string.IsNullOrEmpty(_lesson.Notes) && _lesson.Notes != GetFirstSectionName())
+        @* Lesson Notes - shown if present and not just repeating section notes *@
+        @if (!string.IsNullOrEmpty(_lesson.Notes))
         {
             <div class="compact-notes">
                 <strong>Noter:</strong> @_lesson.Notes
@@ -219,6 +220,10 @@
     private bool _allExpanded = false;
     private bool _isPrinting = false;
     private Guid _breakpointSubscriptionId;
+    
+    // Delay constants for print functionality
+    private const int RenderDelayMs = 100;
+    private const int PrintResetDelayMs = 1000;
 
     private bool HasPreviousLesson => GetLessonIndex() > 0;
     private bool HasNextLesson => AllLessons != null && GetLessonIndex() < AllLessons.Count - 1;
@@ -348,14 +353,14 @@
         _expandedSections = Enumerable.Range(0, sectionCount).ToHashSet();
         StateHasChanged();
 
-        // Wait for render, then trigger print
-        await Task.Delay(100);
+        // Wait for render cycle to complete before showing print message
+        await Task.Delay(RenderDelayMs);
         // Note: In a real implementation, we'd use JSInterop to trigger window.print()
         // For now, users can use Ctrl+P / Cmd+P
         Snackbar.Add("Tryck Ctrl+P (Windows) eller Cmd+P (Mac) för att skriva ut", Severity.Info);
         
-        // Reset after a delay
-        await Task.Delay(1000);
+        // Reset printing state after user has had time to initiate print
+        await Task.Delay(PrintResetDelayMs);
         _isPrinting = false;
         StateHasChanged();
     }
@@ -452,11 +457,6 @@
             "Social" => "Socialdans",
             _ => sectionType
         };
-    }
-
-    private string? GetFirstSectionName()
-    {
-        return _lesson?.Sections?.FirstOrDefault()?.Notes;
     }
 
     public async ValueTask DisposeAsync()
