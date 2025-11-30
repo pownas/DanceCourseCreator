@@ -1,0 +1,249 @@
+/* LessonBuilder.razor.css - Styling for the LessonBuilder page component */
+
+/* CSS Custom Properties for consistent spacing */
+:root {
+    --lesson-builder-action-bar-height: 64px;
+    --lesson-builder-header-height: 160px;
+    --lesson-builder-content-padding: 32px;
+}
+
+/* Container layout */
+.lesson-builder-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--mud-appbar-height, 64px) - 32px);
+    min-height: 600px;
+}
+
+.lesson-builder-container.mobile-layout {
+    height: calc(100vh - var(--mud-appbar-height, 64px) - var(--bottom-nav-height, 56px) - 16px);
+}
+
+/* Header section */
+.lesson-builder-header {
+    flex-shrink: 0;
+    border-left: 4px solid var(--mud-palette-primary);
+}
+
+.time-chip {
+    min-width: 100px;
+    justify-content: center;
+}
+
+/* Main content area */
+.lesson-builder-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Pattern bank panel */
+.pattern-bank-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pattern-bank-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pattern-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.pattern-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.pattern-card:hover {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Lesson structure panel */
+.lesson-structure-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.lesson-structure-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Section cards */
+.section-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-left: 4px solid var(--mud-palette-primary);
+    transition: all 0.2s ease;
+}
+
+.section-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.section-items {
+    background-color: var(--mud-palette-background-grey, #f5f5f5);
+    border-radius: 4px;
+    min-height: 60px;
+    padding: 8px;
+}
+
+.section-item {
+    background-color: white;
+    border-radius: 4px;
+    border-left: 3px solid var(--mud-palette-secondary);
+    transition: all 0.2s ease;
+}
+
+.section-item:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateX(2px);
+}
+
+/* Add section button */
+.add-section-btn {
+    border-style: dashed;
+    min-height: 48px;
+}
+
+/* Bottom action bar */
+.lesson-builder-actions {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--mud-palette-surface);
+    border-top: 1px solid var(--mud-palette-lines-default);
+    z-index: 10;
+}
+
+/* Mobile-specific styles */
+.mobile-layout .lesson-builder-content {
+    flex: 1;
+    overflow: hidden;
+    padding-bottom: 80px; /* Space for fixed action bar */
+}
+
+.mobile-layout .lesson-builder-tabs {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-layout .lesson-builder-tabs ::deep .mud-tabs-panels {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.mobile-layout .lesson-builder-actions {
+    position: fixed;
+    bottom: var(--bottom-nav-height, 56px);
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.mobile-layout .lesson-builder-header {
+    border-left-width: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .lesson-builder-container {
+        /* Space for fixed bottom action bar + bottom nav */
+        padding-bottom: calc(var(--lesson-builder-action-bar-height, 64px) + var(--bottom-nav-height, 56px));
+    }
+    
+    .pattern-list {
+        max-height: 400px !important;
+    }
+    
+    .section-card {
+        border-left-width: 3px;
+    }
+}
+
+@media (min-width: 960px) {
+    .pattern-bank-panel,
+    .lesson-structure-panel {
+        /* Header height + action bar + container padding */
+        max-height: calc(100vh - var(--lesson-builder-header-height, 160px) - var(--lesson-builder-action-bar-height, 64px) - var(--lesson-builder-content-padding, 32px) - var(--mud-appbar-height, 64px));
+        overflow-y: auto;
+    }
+}
+
+/* Touch-friendly sizes */
+@media (hover: none) and (pointer: coarse) {
+    .pattern-card {
+        min-height: 64px;
+    }
+    
+    .section-item {
+        min-height: 48px;
+    }
+    
+    ::deep .mud-icon-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-card {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .section-card {
+        background: linear-gradient(145deg, #2d2d2d 0%, #1e1e1e 100%);
+    }
+    
+    .section-items {
+        background-color: #1a1a1a;
+    }
+    
+    .section-item {
+        background-color: #2d2d2d;
+    }
+}
+
+/* Print styles */
+@media print {
+    .lesson-builder-actions {
+        display: none;
+    }
+    
+    .lesson-builder-container {
+        height: auto;
+    }
+    
+    .pattern-bank-panel {
+        display: none;
+    }
+}
