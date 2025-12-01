@@ -15,12 +15,23 @@
             <MudPaper Class="pa-4">
                 <div class="d-flex justify-space-between align-center mb-4">
                     <MudText Typo="Typo.h4">Lessons</MudText>
-                    <MudButton Variant="Variant.Filled" 
-                               Color="Color.Primary" 
-                               StartIcon="Icons.Material.Filled.Add"
-                               OnClick="OpenCreateDialog">
-                        Create Lesson
-                    </MudButton>
+                    <div class="d-flex gap-2">
+                        @if (lessons != null && lessons.Any())
+                        {
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Info" 
+                                       StartIcon="@Icons.Material.Filled.ViewCompact"
+                                       OnClick="OpenCompactView">
+                                Kompakt vy
+                            </MudButton>
+                        }
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   StartIcon="Icons.Material.Filled.Add"
+                                   OnClick="OpenCreateDialog">
+                            Create Lesson
+                        </MudButton>
+                    </div>
                 </div>
 
                 @if (isLoading)
@@ -100,11 +111,6 @@
                                                    OnClick="() => ViewLesson(lesson)">
                                             View
                                         </MudButton>
-                                        <MudIconButton Size="Size.Small"
-                                                       Icon="@Icons.Material.Filled.ViewCompact"
-                                                       Color="Color.Info"
-                                                       OnClick="() => OpenCompactView(lesson)"
-                                                       aria-label="Kompakt vy" />
                                         <MudButton Size="Size.Small" 
                                                    Color="Color.Secondary" 
                                                    OnClick="() => EditLesson(lesson)">
@@ -301,11 +307,17 @@
         }
     }
 
-    private async Task OpenCompactView(Lesson lesson)
+    private async Task OpenCompactView()
     {
+        if (lessons == null || !lessons.Any())
+        {
+            Snackbar.Add("Inga lektioner att visa", Severity.Warning);
+            return;
+        }
+
         var parameters = new DialogParameters
         {
-            { "Lesson", lesson },
+            { "Lesson", lessons.First() },
             { "AllLessons", lessons },
             { "ShowNavigation", true }
         };
