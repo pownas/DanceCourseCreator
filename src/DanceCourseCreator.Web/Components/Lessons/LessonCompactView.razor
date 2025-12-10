@@ -1,0 +1,466 @@
+@using MudBlazor
+@inject ILessonsService LessonsService
+@inject IPatternsService PatternsService
+@inject IBreakpointService BreakpointService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<LessonCompactView> Logger
+@implements IAsyncDisposable
+
+<div class="lesson-compact-view @(_isPrinting ? "print-mode" : "")">
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center align-center pa-8">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (_lesson == null)
+    {
+        <MudAlert Severity="Severity.Warning" Class="ma-4">
+            Lektionen kunde inte hittas.
+        </MudAlert>
+    }
+    else
+    {
+        @* Compact Header *@
+        <div class="compact-header">
+            <div class="d-flex justify-space-between align-center flex-wrap gap-2">
+                <div class="compact-title">
+                    @if (_lesson.Date.HasValue)
+                    {
+                        <span class="lesson-date">@_lesson.Date.Value.ToString("yyyy-MM-dd")</span>
+                        <span class="separator">|</span>
+                    }
+                    @if (!string.IsNullOrEmpty(_lesson.Notes))
+                    {
+                        <span class="lesson-name">@_lesson.Notes</span>
+                        <span class="separator">|</span>
+                    }
+                    <span class="lesson-duration">@_lesson.Duration min</span>
+                </div>
+                @if (!_isPrinting)
+                {
+                    <div class="compact-actions d-print-none">
+                        <MudIconButton Icon="@Icons.Material.Filled.Print"
+                                       Size="Size.Small"
+                                       OnClick="HandlePrint"
+                                       aria-label="Skriv ut" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Fullscreen"
+                                       Size="Size.Small"
+                                       OnClick="ToggleFullscreen"
+                                       aria-label="Fullskärm" />
+                        <MudIconButton Icon="@(_allExpanded ? Icons.Material.Filled.UnfoldLess : Icons.Material.Filled.UnfoldMore)"
+                                       Size="Size.Small"
+                                       OnClick="ToggleAllSections"
+                                       aria-label="@(_allExpanded ? "Minimera alla" : "Expandera alla")" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Sections List *@
+        <div class="compact-sections">
+            @if (_lesson.Sections != null && _lesson.Sections.Any())
+            {
+                @for (int i = 0; i < _lesson.Sections.Count; i++)
+                {
+                    var section = _lesson.Sections[i];
+                    var sectionIndex = i;
+                    var isExpanded = _expandedSections.Contains(sectionIndex);
+                    var sectionTime = GetSectionEstimatedTime(section);
+
+                    <div class="compact-section @(isExpanded ? "expanded" : "collapsed")">
+                        <div class="section-header" @onclick="@(() => ToggleSection(sectionIndex))" 
+                             role="button" 
+                             tabindex="0"
+                             @onkeydown="@(e => HandleSectionKeyDown(e, sectionIndex))"
+                             aria-expanded="@isExpanded"
+                             aria-controls="@($"section-content-{sectionIndex}")">
+                            <span class="expand-icon">@(isExpanded ? "▼" : "▶")</span>
+                            <span class="section-number">@(i + 1).</span>
+                            <span class="section-type">@GetSectionDisplayName(section.Type)</span>
+                            <span class="section-time">(@sectionTime min)</span>
+                        </div>
+                        
+                        <div id="@($"section-content-{sectionIndex}")" 
+                             class="section-content @(isExpanded || _isPrinting ? "visible" : "hidden")">
+                            @if (section.Items != null && section.Items.Any())
+                            {
+                                <ul class="section-items-list">
+                                    @foreach (var itemId in section.Items)
+                                    {
+                                        var pattern = GetPatternById(itemId);
+                                        <li class="section-item">
+                                            @if (pattern != null)
+                                            {
+                                                <span class="item-bullet">•</span>
+                                                <span class="item-name">@pattern.Name</span>
+                                                @if (isExpanded && pattern.EstimatedMinutes > 0)
+                                                {
+                                                    <span class="item-time">(@pattern.EstimatedMinutes min)</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="item-bullet">•</span>
+                                                <span class="item-name text-muted">@itemId</span>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="no-items">Inga moment</p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(section.Notes))
+                            {
+                                <div class="section-notes">
+                                    <span class="notes-label">Not:</span> @(section.Notes)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-sections">
+                    Inga sektioner i denna lektion.
+                </div>
+            }
+        </div>
+
+        @* Lesson Notes *@
+        @* Lesson Notes - shown if present and not just repeating section notes *@
+        @if (!string.IsNullOrEmpty(_lesson.Notes))
+        {
+            <div class="compact-notes">
+                <strong>Noter:</strong> @_lesson.Notes
+            </div>
+        }
+
+        @* Navigation Footer *@
+        @if (!_isPrinting && ShowNavigation)
+        {
+            <div class="compact-navigation d-print-none">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.ChevronLeft"
+                           OnClick="NavigatePrevious"
+                           Disabled="@(!HasPreviousLesson)"
+                           Class="nav-button">
+                    Föregående
+                </MudButton>
+                
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           Size="Size.Small"
+                           OnClick="CloseCompactView">
+                    Stäng
+                </MudButton>
+                
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           EndIcon="@Icons.Material.Filled.ChevronRight"
+                           OnClick="NavigateNext"
+                           Disabled="@(!HasNextLesson)"
+                           Class="nav-button">
+                    Nästa
+                </MudButton>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The ID of the lesson to display.
+    /// </summary>
+    [Parameter]
+    public string? LessonId { get; set; }
+
+    /// <summary>
+    /// The lesson object to display (alternative to LessonId).
+    /// </summary>
+    [Parameter]
+    public Lesson? Lesson { get; set; }
+
+    /// <summary>
+    /// List of all lessons for navigation purposes.
+    /// </summary>
+    [Parameter]
+    public List<Lesson>? AllLessons { get; set; }
+
+    /// <summary>
+    /// Whether to show navigation controls.
+    /// </summary>
+    [Parameter]
+    public bool ShowNavigation { get; set; } = true;
+
+    /// <summary>
+    /// Event callback when compact view is closed.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    /// <summary>
+    /// Event callback when navigating to another lesson.
+    /// </summary>
+    [Parameter]
+    public EventCallback<string> OnNavigate { get; set; }
+
+    private Lesson? _lesson;
+    private List<PatternOrExercise>? _patterns;
+    private HashSet<int> _expandedSections = new();
+    private bool _isLoading = true;
+    private bool _allExpanded = false;
+    private bool _isPrinting = false;
+    private Guid _breakpointSubscriptionId;
+    
+    // Delay constants for print functionality
+    private const int RenderDelayMs = 100;
+    private const int PrintResetDelayMs = 1000;
+
+    private bool HasPreviousLesson => GetLessonIndex() > 0;
+    private bool HasNextLesson => AllLessons != null && GetLessonIndex() < AllLessons.Count - 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _breakpointSubscriptionId = await BreakpointService.Subscribe(OnBreakpointChanged);
+        await LoadData();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // If Lesson parameter changed directly
+        if (Lesson != null && (_lesson == null || _lesson.Id != Lesson.Id))
+        {
+            _lesson = Lesson;
+            _expandedSections.Clear();
+            _allExpanded = false;
+            await LoadPatterns();
+        }
+        // If LessonId changed
+        else if (!string.IsNullOrEmpty(LessonId) && (_lesson == null || _lesson.Id != LessonId))
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        try
+        {
+            // Load patterns for display
+            await LoadPatterns();
+
+            // Use provided Lesson or load by ID
+            if (Lesson != null)
+            {
+                _lesson = Lesson;
+            }
+            else if (!string.IsNullOrEmpty(LessonId))
+            {
+                _lesson = await LessonsService.GetLessonAsync(LessonId);
+            }
+
+            // Reset expansion state
+            _expandedSections.Clear();
+            _allExpanded = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading lesson data: {Message}", ex.Message);
+            Snackbar.Add("Fel vid laddning av lektion", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadPatterns()
+    {
+        try
+        {
+            _patterns = await PatternsService.GetPatternsAsync();
+            _patterns ??= new List<PatternOrExercise>();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load patterns: {Message}", ex.Message);
+            _patterns = new List<PatternOrExercise>();
+        }
+    }
+
+    private Task OnBreakpointChanged(Breakpoint breakpoint)
+    {
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void ToggleSection(int sectionIndex)
+    {
+        if (_expandedSections.Contains(sectionIndex))
+        {
+            _expandedSections.Remove(sectionIndex);
+        }
+        else
+        {
+            _expandedSections.Add(sectionIndex);
+        }
+        UpdateAllExpandedState();
+    }
+
+    private void HandleSectionKeyDown(KeyboardEventArgs e, int sectionIndex)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            ToggleSection(sectionIndex);
+        }
+    }
+
+    private void ToggleAllSections()
+    {
+        if (_allExpanded)
+        {
+            _expandedSections.Clear();
+        }
+        else
+        {
+            var sectionCount = _lesson?.Sections?.Count ?? 0;
+            _expandedSections = Enumerable.Range(0, sectionCount).ToHashSet();
+        }
+        _allExpanded = !_allExpanded;
+    }
+
+    private void UpdateAllExpandedState()
+    {
+        var sectionCount = _lesson?.Sections?.Count ?? 0;
+        _allExpanded = sectionCount > 0 && _expandedSections.Count == sectionCount;
+    }
+
+    private async Task HandlePrint()
+    {
+        _isPrinting = true;
+        // Expand all sections for printing
+        var sectionCount = _lesson?.Sections?.Count ?? 0;
+        _expandedSections = Enumerable.Range(0, sectionCount).ToHashSet();
+        StateHasChanged();
+
+        // Wait for render cycle to complete before showing print message
+        await Task.Delay(RenderDelayMs);
+        // Note: In a real implementation, we'd use JSInterop to trigger window.print()
+        // For now, users can use Ctrl+P / Cmd+P
+        Snackbar.Add("Tryck Ctrl+P (Windows) eller Cmd+P (Mac) för att skriva ut", Severity.Info);
+        
+        // Reset printing state after user has had time to initiate print
+        await Task.Delay(PrintResetDelayMs);
+        _isPrinting = false;
+        StateHasChanged();
+    }
+
+    private void ToggleFullscreen()
+    {
+        // Could be implemented with JSInterop for document.fullscreenElement
+        Snackbar.Add("Fullskärmsläge kommer snart", Severity.Info);
+    }
+
+    private async Task NavigatePrevious()
+    {
+        var index = GetLessonIndex();
+        if (index > 0 && AllLessons != null)
+        {
+            var previousLesson = AllLessons[index - 1];
+            if (OnNavigate.HasDelegate)
+            {
+                await OnNavigate.InvokeAsync(previousLesson.Id);
+            }
+            else
+            {
+                _lesson = previousLesson;
+                _expandedSections.Clear();
+                _allExpanded = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task NavigateNext()
+    {
+        var index = GetLessonIndex();
+        if (AllLessons != null && index < AllLessons.Count - 1)
+        {
+            var nextLesson = AllLessons[index + 1];
+            if (OnNavigate.HasDelegate)
+            {
+                await OnNavigate.InvokeAsync(nextLesson.Id);
+            }
+            else
+            {
+                _lesson = nextLesson;
+                _expandedSections.Clear();
+                _allExpanded = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private int GetLessonIndex()
+    {
+        if (AllLessons == null || _lesson == null) return -1;
+        return AllLessons.FindIndex(l => l.Id == _lesson.Id);
+    }
+
+    private async Task CloseCompactView()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private PatternOrExercise? GetPatternById(string id)
+    {
+        return _patterns?.FirstOrDefault(p => p.Id == id);
+    }
+
+    private int GetSectionEstimatedTime(LessonSection section)
+    {
+        if (section.Items == null || !section.Items.Any() || _patterns == null)
+        {
+            return section.AllocatedMinutes;
+        }
+
+        var estimatedFromItems = section.Items
+            .Select(id => GetPatternById(id))
+            .Where(p => p != null)
+            .Sum(p => p!.EstimatedMinutes);
+
+        return estimatedFromItems > 0 ? estimatedFromItems : section.AllocatedMinutes;
+    }
+
+    private string GetSectionDisplayName(string sectionType)
+    {
+        return sectionType switch
+        {
+            "Warmup" => "Uppvärmning",
+            "Technique" => "Teknik",
+            "Patterns" => "Turer",
+            "Combination" => "Kombination",
+            "Repetition" => "Repetition",
+            "Social" => "Socialdans",
+            _ => sectionType
+        };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await BreakpointService.Unsubscribe(_breakpointSubscriptionId);
+    }
+}

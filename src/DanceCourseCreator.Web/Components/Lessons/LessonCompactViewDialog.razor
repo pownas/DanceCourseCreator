@@ -1,0 +1,50 @@
+@using MudBlazor
+@using DanceCourseCreator.Web.Models
+
+<MudDialog>
+    <DialogContent>
+        <LessonCompactView Lesson="@Lesson"
+                           AllLessons="@AllLessons"
+                           ShowNavigation="@ShowNavigation"
+                           OnClose="Close"
+                           OnNavigate="HandleNavigate" />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+
+    /// <summary>
+    /// The lesson to display.
+    /// </summary>
+    [Parameter]
+    public Lesson? Lesson { get; set; }
+
+    /// <summary>
+    /// List of all lessons for navigation.
+    /// </summary>
+    [Parameter]
+    public List<Lesson>? AllLessons { get; set; }
+
+    /// <summary>
+    /// Whether to show navigation controls.
+    /// </summary>
+    [Parameter]
+    public bool ShowNavigation { get; set; } = true;
+
+    private void Close()
+    {
+        MudDialog.Close();
+    }
+
+    private void HandleNavigate(string lessonId)
+    {
+        // Find the lesson by ID and update
+        var newLesson = AllLessons?.FirstOrDefault(l => l.Id == lessonId);
+        if (newLesson != null)
+        {
+            Lesson = newLesson;
+            StateHasChanged();
+        }
+    }
+}
