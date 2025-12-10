@@ -1,7 +1,9 @@
 @page "/courses"
+@using DanceCourseCreator.Web.Models
 @* @attribute [Authorize] *@
 @inject ICoursesService CoursesService
 @inject ITemplatesService TemplatesService
+@inject IExportService ExportService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -178,6 +180,21 @@
                                                        OnClick="@(() => ViewProgression(course))">
                                                 Progression
                                             </MudButton>
+                                            <MudMenu Icon="@Icons.Material.Filled.FileDownload" 
+                                                     Size="Size.Small"
+                                                     Color="Color.Success"
+                                                     Label="Exportera"
+                                                     StartIcon="@Icons.Material.Filled.FileDownload"
+                                                     Variant="Variant.Filled">
+                                                <MudMenuItem OnClick="@(() => ExportCourse(course, ExportFormat.PDF))">
+                                                    <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Class="mr-2" />
+                                                    Exportera som PDF
+                                                </MudMenuItem>
+                                                <MudMenuItem OnClick="@(() => ExportCourse(course, ExportFormat.Markdown))">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2" />
+                                                    Exportera som Markdown
+                                                </MudMenuItem>
+                                            </MudMenu>
                                             <MudButton Size="Size.Small" 
                                                        Color="Color.Tertiary" 
                                                        StartIcon="Icons.Material.Filled.ContentCopy"
@@ -432,6 +449,21 @@
         else
         {
             return $"{minutes}min";
+        }
+    }
+
+    private async Task ExportCourse(Course course, ExportFormat format)
+    {
+        try
+        {
+            Snackbar.Add($"Exporterar kurs som {format}...", Severity.Info);
+            await ExportService.ExportCourseAsync(course.Id, format, includeSchedule: true, includePatternDetails: true);
+            Snackbar.Add($"Kurs exporterad som {format}!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error exporting course {CourseId} as {Format}", course.Id, format);
+            Snackbar.Add($"Kunde inte exportera kurs: {ex.Message}", Severity.Error);
         }
     }
 }

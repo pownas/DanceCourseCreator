@@ -29,6 +29,7 @@ builder.Services.AddScoped<ICoursesService, CoursesService>();
 builder.Services.AddScoped<ITemplatesService, TemplatesService>();
 builder.Services.AddScoped<ITimeValidationService, TimeValidationService>();
 builder.Services.AddScoped<IBreakpointService, BreakpointService>();
+builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 // Add authorization

@@ -264,3 +264,17 @@ public class ProgressionWarning
     public string Message { get; set; } = string.Empty;
     public string Recommendation { get; set; } = string.Empty;
 }
+
+// Export models
+public class ExportRequest
+{
+    public ExportFormat Format { get; set; } = ExportFormat.PDF;
+    public bool IncludeSchedule { get; set; } = true;
+    public bool IncludePatternDetails { get; set; } = true;
+}
+
+public enum ExportFormat
+{
+    PDF,
+    Markdown
+}

@@ -1,8 +1,10 @@
 @page "/lessons"
+@using DanceCourseCreator.Web.Models
 @* @attribute [Authorize] *@
 @inject ILessonsService LessonsService
 @inject IPatternsService PatternsService
 @inject ITemplatesService TemplatesService
+@inject IExportService ExportService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -122,6 +124,21 @@
                                                    OnClick="() => SaveAsTemplate(lesson)">
                                             Spara som mall
                                         </MudButton>
+                                        <MudMenu Icon="@Icons.Material.Filled.FileDownload" 
+                                                 Size="Size.Small"
+                                                 Color="Color.Success"
+                                                 Label="Export"
+                                                 StartIcon="@Icons.Material.Filled.FileDownload"
+                                                 Variant="Variant.Filled">
+                                            <MudMenuItem OnClick="@(() => ExportLesson(lesson, ExportFormat.PDF))">
+                                                <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Class="mr-2" />
+                                                Export as PDF
+                                            </MudMenuItem>
+                                            <MudMenuItem OnClick="@(() => ExportLesson(lesson, ExportFormat.Markdown))">
+                                                <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2" />
+                                                Export as Markdown
+                                            </MudMenuItem>
+                                        </MudMenu>
                                         <MudSpacer />
                                         <MudIconButton Size="Size.Small" 
                                                        Icon="Icons.Material.Filled.Delete" 
@@ -330,5 +347,20 @@
         };
 
         await DialogService.ShowAsync<LessonCompactViewDialog>("Kompakt vy", parameters, options);
+    }
+
+    private async Task ExportLesson(Lesson lesson, ExportFormat format)
+    {
+        try
+        {
+            Snackbar.Add($"Exporting lesson as {format}...", Severity.Info);
+            await ExportService.ExportLessonAsync(lesson.Id, format, includePatternDetails: true);
+            Snackbar.Add($"Lesson exported as {format}!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error exporting lesson {LessonId} as {Format}", lesson.Id, format);
+            Snackbar.Add($"Failed to export lesson: {ex.Message}", Severity.Error);
+        }
     }
 }
