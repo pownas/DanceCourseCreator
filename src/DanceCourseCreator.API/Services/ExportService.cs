@@ -29,6 +29,8 @@ public class ExportService
     {
         _logger.LogInformation("Exporting course {CourseId} to PDF", courseId);
         
+        var exportTime = DateTime.UtcNow;
+        
         var course = await _context.Courses
             .Include(c => c.Lessons)
             .FirstOrDefaultAsync(c => c.Id == courseId);
@@ -198,7 +200,7 @@ public class ExportService
                     .Text(text =>
                     {
                         text.Span("Skapad: ");
-                        text.Span(DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                        text.Span(exportTime.ToString("yyyy-MM-dd HH:mm"));
                     });
             });
         });
@@ -212,6 +214,8 @@ public class ExportService
     public async Task<string> ExportCourseToMarkdownAsync(string courseId, bool includeSchedule = true, bool includePatternDetails = true)
     {
         _logger.LogInformation("Exporting course {CourseId} to Markdown", courseId);
+        
+        var exportTime = DateTime.UtcNow;
         
         var course = await _context.Courses
             .Include(c => c.Lessons)
@@ -353,7 +357,7 @@ public class ExportService
         }
 
         sb.AppendLine("---");
-        sb.AppendLine($"*Exporterad: {DateTime.Now:yyyy-MM-dd HH:mm}*");
+        sb.AppendLine($"*Exporterad: {exportTime:yyyy-MM-dd HH:mm}*");
 
         return sb.ToString();
     }
@@ -364,6 +368,8 @@ public class ExportService
     public async Task<byte[]> ExportLessonToPdfAsync(string lessonId, bool includePatternDetails = true)
     {
         _logger.LogInformation("Exporting lesson {LessonId} to PDF", lessonId);
+        
+        var exportTime = DateTime.UtcNow;
         
         var lesson = await _context.Lessons
             .Include(l => l.Course)
@@ -524,7 +530,7 @@ public class ExportService
                     .Text(text =>
                     {
                         text.Span("Skapad: ");
-                        text.Span(DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+                        text.Span(exportTime.ToString("yyyy-MM-dd HH:mm"));
                     });
             });
         });
@@ -538,6 +544,8 @@ public class ExportService
     public async Task<string> ExportLessonToMarkdownAsync(string lessonId, bool includePatternDetails = true)
     {
         _logger.LogInformation("Exporting lesson {LessonId} to Markdown", lessonId);
+        
+        var exportTime = DateTime.UtcNow;
         
         var lesson = await _context.Lessons
             .Include(l => l.Course)
@@ -669,7 +677,7 @@ public class ExportService
         sb.AppendLine();
 
         sb.AppendLine("---");
-        sb.AppendLine($"*Exporterad: {DateTime.Now:yyyy-MM-dd HH:mm}*");
+        sb.AppendLine($"*Exporterad: {exportTime:yyyy-MM-dd HH:mm}*");
 
         return sb.ToString();
     }
