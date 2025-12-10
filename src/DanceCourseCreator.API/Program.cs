@@ -39,6 +39,7 @@ builder.Services.AddAuthorization();
 // Add services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ProgressionService>();
+builder.Services.AddScoped<ExportService>();
 
 // Add controllers
 builder.Services.AddControllers();
