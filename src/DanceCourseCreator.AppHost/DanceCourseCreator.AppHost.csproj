@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.0.1">
+<Project Sdk="Aspire.AppHost.Sdk/13.0.2">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,10 +7,6 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>206a14db-912c-4856-8621-f85e8c287c18</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.1" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DanceCourseCreator.API\DanceCourseCreator.API.csproj" />

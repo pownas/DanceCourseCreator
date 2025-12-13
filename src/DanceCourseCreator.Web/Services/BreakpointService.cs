@@ -57,6 +57,7 @@ public class BreakpointService : IBreakpointService, IAsyncDisposable
     private readonly Dictionary<Guid, BreakpointObserver> _observers = new();
     private Breakpoint _currentBreakpoint = Breakpoint.Lg;
     private readonly SemaphoreSlim _lock = new(1, 1);
+    private bool _disposed = false;
 
     public BreakpointService(
         IBrowserViewportService browserViewportService,
@@ -68,6 +69,12 @@ public class BreakpointService : IBreakpointService, IAsyncDisposable
 
     public async Task<Guid> Subscribe(Func<Breakpoint, Task> callback)
     {
+        if (_disposed)
+        {
+            _logger.LogWarning("Attempted to subscribe to disposed BreakpointService");
+            return Guid.Empty;
+        }
+
         await _lock.WaitAsync();
         try
         {
@@ -90,6 +97,12 @@ public class BreakpointService : IBreakpointService, IAsyncDisposable
 
     public async Task Unsubscribe(Guid subscriptionId)
     {
+        if (_disposed)
+        {
+            _logger.LogDebug("Skipping unsubscribe for {SubscriptionId} - service already disposed", subscriptionId);
+            return;
+        }
+
         await _lock.WaitAsync();
         try
         {
@@ -144,6 +157,13 @@ public class BreakpointService : IBreakpointService, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
         foreach (var observer in _observers.Values)
         {
             try
