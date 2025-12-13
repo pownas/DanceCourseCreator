@@ -1,4 +1,4 @@
-@using MudBlazor
+﻿@using MudBlazor
 @using System.Text.Json
 @inject ITemplatesService TemplatesService
 @inject ILessonsService LessonsService
@@ -92,7 +92,7 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
+    [CascadingParameter] MudBlazor.IDialogReference? MudDialog { get; set; }
     [Parameter] public string ResourceId { get; set; } = string.Empty;
     [Parameter] public string ResourceType { get; set; } = string.Empty; // "Lesson" or "Course"
 
@@ -116,7 +116,7 @@
 
     private void Cancel()
     {
-        MudDialog.Close();
+        MudDialog?.Close();
     }
 
     private async Task SaveAsTemplate()
@@ -198,7 +198,7 @@
             if (createdTemplate != null)
             {
                 Snackbar.Add("Mall skapad framgångsrikt!", Severity.Success);
-                MudDialog.Close(DialogResult.Ok(createdTemplate));
+                MudDialog?.Close(DialogResult.Ok(createdTemplate));
             }
             else
             {
