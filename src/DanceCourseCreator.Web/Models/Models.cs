@@ -1,4 +1,4 @@
-namespace DanceCourseCreator.Web.Models;
+﻿namespace DanceCourseCreator.Web.Models;
 
 public class User
 {
@@ -70,7 +70,7 @@ public class CreatePatternRequest
     public string Name { get; set; } = string.Empty;
     public List<string> Aliases { get; set; } = new();
     public string Level { get; set; } = string.Empty;
-    public string DanceStyle { get; set; } = "WestCoastSwing";
+    public string DanceStyle { get; set; } = "WCS";
     public string Description { get; set; } = string.Empty;
     public List<string> Steps { get; set; } = new();
     public List<string> Counts { get; set; } = new();

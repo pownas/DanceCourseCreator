@@ -1,4 +1,5 @@
-@using MudBlazor
+﻿@using MudBlazor
+@using DanceCourseCreator.Web.Helpers
 @inject ISnackbar Snackbar
 
 <MudDialog>
@@ -33,10 +34,10 @@
                                        ValueChanged="(string value) => { filterLevel = value; FilterPatterns(); }"
                                        Clearable="true">
                                 <MudSelectItem Value="@("")">All Levels</MudSelectItem>
-                                <MudSelectItem Value="@("Beginner")">Beginner</MudSelectItem>
-                                <MudSelectItem Value="@("Improver")">Improver</MudSelectItem>
-                                <MudSelectItem Value="@("Intermediate")">Intermediate</MudSelectItem>
-                                <MudSelectItem Value="@("Advanced")">Advanced</MudSelectItem>
+                                @foreach (var level in LevelHelper.GetAllLevels())
+                                {
+                                    <MudSelectItem Value="@level.Key">@level.Value</MudSelectItem>
+                                }
                             </MudSelect>
                         </MudItem>
                     </MudGrid>

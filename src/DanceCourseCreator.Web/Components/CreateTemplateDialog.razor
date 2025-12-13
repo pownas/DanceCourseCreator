@@ -1,5 +1,6 @@
-@using MudBlazor
+﻿@using MudBlazor
 @using Microsoft.AspNetCore.Components.Web
+@using DanceCourseCreator.Web.Helpers
 @inject ITemplatesService TemplatesService
 @inject ISnackbar Snackbar
 
@@ -46,10 +47,10 @@
                             <MudGrid>
                                 <MudItem xs="12" md="6">
                                     <MudSelect @bind-Value="lessonLevel" Label="Nivå">
-                                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
-                                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
-                                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
-                                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                        @foreach (var level in LevelHelper.GetAllLevels())
+                                        {
+                                            <MudSelectItem Value="@level.Key.ToLower()">@level.Value</MudSelectItem>
+                                        }
                                     </MudSelect>
                                 </MudItem>
                                 <MudItem xs="12" md="6">
@@ -76,10 +77,10 @@
                             <MudGrid>
                                 <MudItem xs="12" md="6">
                                     <MudSelect @bind-Value="courseLevel" Label="Nivå">
-                                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
-                                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
-                                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
-                                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                        @foreach (var level in LevelHelper.GetAllLevels())
+                                        {
+                                            <MudSelectItem Value="@level.Key.ToLower()">@level.Value</MudSelectItem>
+                                        }
                                     </MudSelect>
                                 </MudItem>
                                 <MudItem xs="12" md="6">

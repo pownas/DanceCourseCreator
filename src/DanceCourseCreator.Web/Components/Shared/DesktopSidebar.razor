@@ -1,4 +1,4 @@
-@* DesktopSidebar.razor - Kollapserbar sidebar för desktop och surfplatta *@
+﻿@* DesktopSidebar.razor - Kollapserbar sidebar för desktop och surfplatta *@
 
 <MudDrawer @bind-Open="Open"
            Variant="DrawerVariant.Mini"
@@ -30,7 +30,7 @@
                                 Class="nav-item">
                         @if (Open)
                         {
-                            <span>Alla mönster</span>
+                            <span>Alla turer</span>
                         }
                     </MudNavLink>
                     <MudNavLink Href="/patterns/favorites" 

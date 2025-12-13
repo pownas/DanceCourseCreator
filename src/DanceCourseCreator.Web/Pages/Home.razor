@@ -1,5 +1,6 @@
 ﻿@page "/"
 @* @attribute [Authorize] *@
+@using DanceCourseCreator.Web.Helpers
 @inject IPatternsService PatternsService
 
 <PageTitle>Kursskapare - Dance Course Creator</PageTitle>
@@ -49,19 +50,19 @@
         <MudItem xs="6" sm="3">
             <MudPaper Class="pa-4 text-center" Elevation="2">
                 <MudText Typo="Typo.h3" Color="Color.Primary">@_totalPatterns</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Tillgängliga mönster</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Tillgängliga turer</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="6" sm="3">
             <MudPaper Class="pa-4 text-center" Elevation="2">
                 <MudText Typo="Typo.h3" Color="Color.Success">@_beginnerCount</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Nybörjarnivå</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@LevelHelper.GetDisplayName("Beginner")</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="6" sm="3">
             <MudPaper Class="pa-4 text-center" Elevation="2">
                 <MudText Typo="Typo.h3" Color="Color.Info">@_improverCount</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">Förbättringsnivå</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@LevelHelper.GetDisplayName("Improver")</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="6" sm="3">

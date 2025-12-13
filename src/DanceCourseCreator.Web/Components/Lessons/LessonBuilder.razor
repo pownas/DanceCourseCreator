@@ -1,7 +1,8 @@
-@page "/lessons/builder"
+﻿@page "/lessons/builder"
 @page "/lessons/{LessonId}/edit"
 @using MudBlazor
 @using System.Text.Json
+@using DanceCourseCreator.Web.Helpers
 @inject ILessonsService LessonsService
 @inject IPatternsService PatternsService
 @inject ITimeValidationService TimeValidationService
@@ -65,10 +66,10 @@
                                Label="Nivå"
                                Variant="Variant.Outlined"
                                AnchorOrigin="Origin.BottomCenter">
-                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
-                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
-                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
-                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                        @foreach (var level in LevelHelper.GetAllLevels())
+                        {
+                            <MudSelectItem Value="@level.Key.ToLower()">@level.Value</MudSelectItem>
+                        }
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" md="12" lg="3">
@@ -319,10 +320,10 @@
                                Clearable="true"
                                Dense="true">
                         <MudSelectItem Value="@((string?)null)">Alla nivåer</MudSelectItem>
-                        <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
-                        <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
-                        <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
-                        <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                        @foreach (var level in LevelHelper.GetAllLevels())
+                        {
+                            <MudSelectItem Value="@level.Key.ToLower()">@level.Value</MudSelectItem>
+                        }
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="6">

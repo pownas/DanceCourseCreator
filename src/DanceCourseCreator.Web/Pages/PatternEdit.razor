@@ -1,0 +1,361 @@
+﻿@page "/patterns/{Id}/edit"
+@using DanceCourseCreator.Web.Helpers
+@inject IPatternsService PatternsService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<PatternEdit> Logger
+
+<PageTitle>Redigera Tur - Kursskapare</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h4">Redigera Tur</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Uppdatera danstur eller övning i din turbank</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-center align-center" style="height: 400px;">
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                        </div>
+                    }
+                    else if (patternRequest == null)
+                    {
+                        <MudAlert Severity="Severity.Error">
+                            Kunde inte ladda turen. Den kanske inte finns längre.
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudForm @ref="form" @bind-IsValid="@formIsValid">
+                            <MudGrid>
+                                <!-- Type Selection -->
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="patternRequest.Type" 
+                                               Label="Typ" 
+                                               Required="true"
+                                               Variant="Variant.Outlined">
+                                        <MudSelectItem Value="@("Pattern")">Tur</MudSelectItem>
+                                        <MudSelectItem Value="@("Exercise")">Övning</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!-- Level Selection -->
+                                <MudItem xs="12" md="6">
+                                    <MudSelect @bind-Value="patternRequest.Level" 
+                                               Label="Nivå" 
+                                               Required="true"
+                                               Variant="Variant.Outlined">
+                                        @foreach (var level in LevelHelper.GetAllLevels())
+                                        {
+                                            <MudSelectItem Value="@level.Key">@level.Value</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!-- Name -->
+                                <MudItem xs="12" md="8">
+                                    <MudTextField @bind-Value="patternRequest.Name" 
+                                                  Label="Namn" 
+                                                  Required="true"
+                                                  RequiredError="Namnet är obligatoriskt"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Dance Style -->
+                                <MudItem xs="12" md="4">
+                                    <MudSelect @bind-Value="patternRequest.DanceStyle" 
+                                               Label="Dansstil" 
+                                               Required="true"
+                                               Variant="Variant.Outlined">
+                                        @foreach (var style in DanceStyleHelper.GetAllDanceStyles())
+                                        {
+                                            <MudSelectItem Value="@style.Key">@style.Value</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!-- Description -->
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="patternRequest.Description" 
+                                                  Label="Beskrivning" 
+                                                  Lines="3"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Aliases -->
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="aliasesInput" 
+                                                  Label="Alias (kommaseparerade)" 
+                                                  HelperText="T.ex. LSP, Left Pass"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Estimated Minutes -->
+                                <MudItem xs="12" md="4">
+                                    <MudNumericField @bind-Value="patternRequest.EstimatedMinutes" 
+                                                     Label="Uppskattad tid (minuter)" 
+                                                     Min="0"
+                                                     Max="120"
+                                                     Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- BPM Range -->
+                                <MudItem xs="6" md="4">
+                                    <MudNumericField @bind-Value="patternRequest.BpmRange.Min" 
+                                                     Label="BPM Min" 
+                                                     Min="0"
+                                                     Max="300"
+                                                     Variant="Variant.Outlined" />
+                                </MudItem>
+                                <MudItem xs="6" md="4">
+                                    <MudNumericField @bind-Value="patternRequest.BpmRange.Max" 
+                                                     Label="BPM Max" 
+                                                     Min="0"
+                                                     Max="300"
+                                                     Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Steps -->
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="stepsInput" 
+                                                  Label="Steg (en per rad)" 
+                                                  Lines="5"
+                                                  HelperText="Beskriv stegen för turen"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Counts -->
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="countsInput" 
+                                                  Label="Counts (kommaseparerade)" 
+                                                  HelperText="T.ex. 1,2,3&4,5&6"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Slot -->
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="patternRequest.Slot" 
+                                                  Label="Slot" 
+                                                  HelperText="T.ex. Left, Right, Center"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Teaching Points -->
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="teachingPointsInput" 
+                                                  Label="Undervisningspunkter (en per rad)" 
+                                                  Lines="4"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Common Mistakes -->
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="commonMistakesInput" 
+                                                  Label="Vanliga misstag (en per rad)" 
+                                                  Lines="4"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+
+                                <!-- Tags -->
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="tagsInput" 
+                                                  Label="Taggar (kommaseparerade)" 
+                                                  HelperText="T.ex. fundamentals, connection, slot"
+                                                  Variant="Variant.Outlined" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudForm>
+                    }
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               OnClick="HandleCancel">
+                        Avbryt
+                    </MudButton>
+                    <MudSpacer />
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="HandleSave"
+                               Disabled="@(!formIsValid || isSaving || patternRequest == null)">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+                        }
+                        Spara
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    private MudForm? form;
+    private bool formIsValid = false;
+    private bool isLoading = true;
+    private bool isSaving = false;
+    
+    private CreatePatternRequest? patternRequest;
+
+    // Input fields for arrays
+    private string aliasesInput = string.Empty;
+    private string stepsInput = string.Empty;
+    private string countsInput = string.Empty;
+    private string teachingPointsInput = string.Empty;
+    private string commonMistakesInput = string.Empty;
+    private string tagsInput = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPattern();
+    }
+
+    private async Task LoadPattern()
+    {
+        isLoading = true;
+        try
+        {
+            var pattern = await PatternsService.GetPatternAsync(Id);
+            
+            if (pattern == null)
+            {
+                Snackbar.Add("Kunde inte hitta turen", Severity.Error);
+                return;
+            }
+
+            // Convert to request model
+            patternRequest = new CreatePatternRequest
+            {
+                Type = pattern.Type,
+                Name = pattern.Name,
+                Aliases = pattern.Aliases,
+                Level = pattern.Level,
+                DanceStyle = pattern.DanceStyle,
+                Description = pattern.Description,
+                Steps = pattern.Steps,
+                Counts = pattern.Counts,
+                Holds = pattern.Holds,
+                Slot = pattern.Slot,
+                Rotations = pattern.Rotations,
+                Prerequisites = pattern.Prerequisites,
+                Related = pattern.Related,
+                TeachingPoints = pattern.TeachingPoints,
+                CommonMistakes = pattern.CommonMistakes,
+                Variations = pattern.Variations,
+                EstimatedMinutes = pattern.EstimatedMinutes,
+                BpmRange = pattern.BpmRange,
+                Tags = pattern.Tags,
+                MediaLinks = pattern.MediaLinks
+            };
+
+            // Populate input fields
+            aliasesInput = string.Join(", ", pattern.Aliases);
+            stepsInput = string.Join(Environment.NewLine, pattern.Steps);
+            countsInput = string.Join(", ", pattern.Counts);
+            teachingPointsInput = string.Join(Environment.NewLine, pattern.TeachingPoints);
+            commonMistakesInput = string.Join(Environment.NewLine, pattern.CommonMistakes);
+            tagsInput = string.Join(", ", pattern.Tags);
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error loading pattern: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading pattern: {Message}", ex.Message);
+            Snackbar.Add($"Fel: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void HandleCancel()
+    {
+        Navigation.NavigateTo("/patterns");
+    }
+
+    private async Task HandleSave()
+    {
+        if (form == null || !formIsValid || patternRequest == null)
+        {
+            return;
+        }
+
+        isSaving = true;
+        try
+        {
+            // Process array inputs
+            patternRequest.Aliases = SplitInput(aliasesInput);
+            patternRequest.Steps = SplitInputByLine(stepsInput);
+            patternRequest.Counts = SplitInput(countsInput);
+            patternRequest.TeachingPoints = SplitInputByLine(teachingPointsInput);
+            patternRequest.CommonMistakes = SplitInputByLine(commonMistakesInput);
+            patternRequest.Tags = SplitInput(tagsInput);
+
+            var result = await PatternsService.UpdatePatternAsync(Id, patternRequest);
+            
+            if (result != null)
+            {
+                Snackbar.Add("Tur uppdaterad!", Severity.Success);
+                Navigation.NavigateTo("/patterns");
+            }
+            else
+            {
+                Snackbar.Add("Kunde inte uppdatera tur", Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.LogWarning(ex, "Network error updating pattern: {Message}", ex.Message);
+            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating pattern: {Message}", ex.Message);
+            Snackbar.Add($"Fel: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private List<string> SplitInput(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return new List<string>();
+        }
+
+        return input.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                   .Select(s => s.Trim())
+                   .Where(s => !string.IsNullOrEmpty(s))
+                   .ToList();
+    }
+
+    private List<string> SplitInputByLine(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return new List<string>();
+        }
+
+        return input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                   .Select(s => s.Trim())
+                   .Where(s => !string.IsNullOrEmpty(s))
+                   .ToList();
+    }
+}

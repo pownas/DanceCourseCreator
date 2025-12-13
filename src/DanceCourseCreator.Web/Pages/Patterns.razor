@@ -1,9 +1,11 @@
-@page "/patterns"
+﻿@page "/patterns"
 @* @attribute [Authorize] *@
+@using DanceCourseCreator.Web.Helpers
 @inject IPatternsService PatternsService
 @inject IDialogService DialogService
+@inject NavigationManager Navigation
 
-<PageTitle>Mönster - Kursskapare</PageTitle>
+<PageTitle>Turbank - Kursskapare</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
@@ -12,14 +14,14 @@
                 <MudCardHeader>
                     <CardHeaderContent>
                         <MudText Typo="Typo.h4">Turbank</MudText>
-                        <MudText Typo="Typo.body1" Color="Color.Secondary">Utforska din samling av dansmönster och övningar för olika dansstilar</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary">Utforska din samling av dansturer och övningar för olika dansstilar</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
                                    StartIcon="Icons.Material.Filled.Add"
                                    OnClick="OpenCreateDialog">
-                            Lägg till mönster
+                            Lägg till tur
                         </MudButton>
                     </CardHeaderActions>
                 </MudCardHeader>
@@ -28,33 +30,29 @@
                     <MudGrid Class="mb-4">
                         <MudItem xs="12" sm="2">
                             <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(async () => { filterType = null; await LoadPatterns(); })">>
-                                <MudSelectItem Value="@("pattern")">Mönster</MudSelectItem>
+                                <MudSelectItem Value="@("pattern")">Tur</MudSelectItem>
                                 <MudSelectItem Value="@("exercise")">Övning</MudSelectItem>
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="2">
                             <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadPatterns(); })">>
-                                <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
-                                <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
-                                <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
-                                <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
+                                @foreach (var level in LevelHelper.GetAllLevels())
+                                {
+                                    <MudSelectItem Value="@level.Key.ToLower()">@level.Value</MudSelectItem>
+                                }
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="3">
                             <MudSelect @bind-Value="filterDanceStyle" Label="Dansstil" Clearable="true" OnClearButtonClick="@(async () => { filterDanceStyle = null; await LoadPatterns(); })">
-                                <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
-                                <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
-                                <MudSelectItem Value="@("Fox")">Fox</MudSelectItem>
-                                <MudSelectItem Value="@("Foxtrot")">Foxtrot</MudSelectItem>
-                                <MudSelectItem Value="@("Lindy")">Lindy Hop</MudSelectItem>
-                                <MudSelectItem Value="@("Balboa")">Balboa</MudSelectItem>
-                                <MudSelectItem Value="@("Blues")">Blues</MudSelectItem>
-                                <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
+                                @foreach (var style in DanceStyleHelper.GetAllDanceStyles())
+                                {
+                                    <MudSelectItem Value="@style.Key">@style.Value</MudSelectItem>
+                                }
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" sm="3">
                             <MudTextField @bind-Value="searchText" 
-                                          Label="Sök mönster..." 
+                                          Label="Sök turer..." 
                                           Adornment="Adornment.End" 
                                           AdornmentIcon="Icons.Material.Filled.Search"
                                           OnAdornmentClick="LoadPatterns" />
@@ -98,12 +96,12 @@
                                                     @pattern.Level?.ToUpperInvariant()
                                                 </MudChip>
                                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="GetTypeColor(pattern.Type)">
-                                                    @(pattern.Type?.ToUpperInvariant() == "PATTERN" ? "MÖNSTER" : "ÖVNING")
+                                                    @(pattern.Type?.ToUpperInvariant() == "PATTERN" ? "TUR" : "ÖVNING")
                                                 </MudChip>
                                                 @if (!string.IsNullOrEmpty(pattern.DanceStyle))
                                                 {
                                                     <MudChip T="string" Size="Size.Small" Color="Color.Info">
-                                                        @GetDanceStyleDisplayName(pattern.DanceStyle)
+                                                        @DanceStyleHelper.GetDisplayName(pattern.DanceStyle)
                                                     </MudChip>
                                                 }
                                             </div>
@@ -140,15 +138,15 @@
                     {
                         <MudPaper Class="pa-8 text-center" Style="background-color: var(--mud-palette-grey-lighten5);">
                             <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
-                            <MudText Typo="Typo.h6" Class="mb-2">Inga mönster hittades</MudText>
+                            <MudText Typo="Typo.h6" Class="mb-2">Inga turer hittades</MudText>
                             <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
-                                Börja genom att lägga till ditt första mönster!
+                                Börja genom att lägga till din första tur!
                             </MudText>
                             <MudButton Variant="Variant.Filled"
                                        Color="Color.Primary"
                                        StartIcon="Icons.Material.Filled.Add"
                                        OnClick="OpenCreateDialog">
-                                Lägg till mönster
+                                Lägg till tur
                             </MudButton>
                         </MudPaper>
                     }
@@ -199,7 +197,7 @@
         {
             Logger.LogError(ex, "Error loading patterns: {Message}", ex.Message);
             hasError = true;
-            errorMessage = "Ett oväntat fel uppstod vid hämtning av mönster.";
+            errorMessage = "Ett oväntat fel uppstod vid hämtning av turer.";
             Snackbar.Add(errorMessage, Severity.Error);
         }
         finally
@@ -229,37 +227,20 @@
             _ => Color.Default
         };
     }
-    
-    private string GetDanceStyleDisplayName(string danceStyle)
-    {
-        return danceStyle switch
-        {
-            "WestCoastSwing" => "West Coast Swing",
-            "Bugg" => "Bugg",
-            "Fox" => "Fox",
-            "Foxtrot" => "Foxtrot",
-            "Lindy" => "Lindy Hop",
-            "Balboa" => "Balboa",
-            "Blues" => "Blues",
-            "Other" => "Annan",
-            _ => danceStyle
-        };
-    }
 
-    private async Task OpenCreateDialog()
+    private void OpenCreateDialog()
     {
-        // TODO: Create pattern dialog
-        await LoadPatterns();
+        Navigation.NavigateTo("/patterns/new");
     }
 
     private void ViewPattern(PatternOrExercise pattern)
     {
-        // TODO: View pattern dialog
+        // TODO: View pattern details dialog or page
+        Snackbar.Add("Visa funktion kommer snart", Severity.Info);
     }
 
-    private async Task EditPattern(PatternOrExercise pattern)
+    private void EditPattern(PatternOrExercise pattern)
     {
-        // TODO: Edit pattern dialog
-        await LoadPatterns();
+        Navigation.NavigateTo($"/patterns/{pattern.Id}/edit");
     }
 }
