@@ -1,4 +1,5 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MudBlazor;
 using MudBlazor.Services;
@@ -9,20 +10,22 @@ namespace DanceCourseCreator.Web.Tests.Services;
 /// <summary>
 /// Unit tests for the BreakpointService that handles responsive breakpoint detection.
 /// </summary>
+[TestClass]
 public class BreakpointServiceTests
 {
-    private readonly Mock<IBrowserViewportService> _mockViewportService;
-    private readonly Mock<ILogger<BreakpointService>> _mockLogger;
-    private readonly BreakpointService _service;
+    private Mock<IBrowserViewportService> _mockViewportService = null!;
+    private Mock<ILogger<BreakpointService>> _mockLogger = null!;
+    private BreakpointService _service = null!;
 
-    public BreakpointServiceTests()
+    [TestInitialize]
+    public void TestInitialize()
     {
         _mockViewportService = new Mock<IBrowserViewportService>();
         _mockLogger = new Mock<ILogger<BreakpointService>>();
         _service = new BreakpointService(_mockViewportService.Object, _mockLogger.Object);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Subscribe_ShouldReturnValidGuid()
     {
         // Arrange
@@ -35,10 +38,10 @@ public class BreakpointServiceTests
         var subscriptionId = await _service.Subscribe(callback);
 
         // Assert
-        Assert.NotEqual(Guid.Empty, subscriptionId);
+        Assert.AreNotEqual(Guid.Empty, subscriptionId);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Subscribe_ShouldCallBrowserViewportService()
     {
         // Arrange
@@ -56,7 +59,7 @@ public class BreakpointServiceTests
             Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Unsubscribe_ShouldCallBrowserViewportServiceUnsubscribe()
     {
         // Arrange
@@ -79,24 +82,31 @@ public class BreakpointServiceTests
             Times.Once);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Unsubscribe_WithInvalidId_ShouldNotThrow()
     {
         // Arrange
         var invalidId = Guid.NewGuid();
 
         // Act & Assert
-        var exception = await Record.ExceptionAsync(() => _service.Unsubscribe(invalidId));
-        Assert.Null(exception);
+        try
+        {
+            await _service.Unsubscribe(invalidId);
+            // Test passes if no exception is thrown
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"Expected no exception, but got: {ex.Message}");
+        }
     }
 
-    [Theory]
-    [InlineData(Breakpoint.Xs, true)]
-    [InlineData(Breakpoint.Sm, true)]
-    [InlineData(Breakpoint.Md, false)]
-    [InlineData(Breakpoint.Lg, false)]
-    [InlineData(Breakpoint.Xl, false)]
-    [InlineData(Breakpoint.Xxl, false)]
+    [TestMethod]
+    [DataRow(Breakpoint.Xs, true)]
+    [DataRow(Breakpoint.Sm, true)]
+    [DataRow(Breakpoint.Md, false)]
+    [DataRow(Breakpoint.Lg, false)]
+    [DataRow(Breakpoint.Xl, false)]
+    [DataRow(Breakpoint.Xxl, false)]
     public async Task IsMobile_ShouldReturnCorrectValue(Breakpoint breakpoint, bool expectedIsMobile)
     {
         // Arrange
@@ -108,15 +118,15 @@ public class BreakpointServiceTests
         var result = await _service.IsMobile();
 
         // Assert
-        Assert.Equal(expectedIsMobile, result);
+        Assert.AreEqual(expectedIsMobile, result);
     }
 
-    [Theory]
-    [InlineData(Breakpoint.Xs, false)]
-    [InlineData(Breakpoint.Sm, false)]
-    [InlineData(Breakpoint.Md, true)]
-    [InlineData(Breakpoint.Lg, false)]
-    [InlineData(Breakpoint.Xl, false)]
+    [TestMethod]
+    [DataRow(Breakpoint.Xs, false)]
+    [DataRow(Breakpoint.Sm, false)]
+    [DataRow(Breakpoint.Md, true)]
+    [DataRow(Breakpoint.Lg, false)]
+    [DataRow(Breakpoint.Xl, false)]
     public async Task IsTablet_ShouldReturnCorrectValue(Breakpoint breakpoint, bool expectedIsTablet)
     {
         // Arrange
@@ -128,16 +138,16 @@ public class BreakpointServiceTests
         var result = await _service.IsTablet();
 
         // Assert
-        Assert.Equal(expectedIsTablet, result);
+        Assert.AreEqual(expectedIsTablet, result);
     }
 
-    [Theory]
-    [InlineData(Breakpoint.Xs, false)]
-    [InlineData(Breakpoint.Sm, false)]
-    [InlineData(Breakpoint.Md, false)]
-    [InlineData(Breakpoint.Lg, true)]
-    [InlineData(Breakpoint.Xl, true)]
-    [InlineData(Breakpoint.Xxl, true)]
+    [TestMethod]
+    [DataRow(Breakpoint.Xs, false)]
+    [DataRow(Breakpoint.Sm, false)]
+    [DataRow(Breakpoint.Md, false)]
+    [DataRow(Breakpoint.Lg, true)]
+    [DataRow(Breakpoint.Xl, true)]
+    [DataRow(Breakpoint.Xxl, true)]
     public async Task IsDesktop_ShouldReturnCorrectValue(Breakpoint breakpoint, bool expectedIsDesktop)
     {
         // Arrange
@@ -149,10 +159,10 @@ public class BreakpointServiceTests
         var result = await _service.IsDesktop();
 
         // Assert
-        Assert.Equal(expectedIsDesktop, result);
+        Assert.AreEqual(expectedIsDesktop, result);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetCurrentBreakpoint_ShouldReturnBreakpointFromService()
     {
         // Arrange
@@ -165,10 +175,10 @@ public class BreakpointServiceTests
         var result = await _service.GetCurrentBreakpoint();
 
         // Assert
-        Assert.Equal(expectedBreakpoint, result);
+        Assert.AreEqual(expectedBreakpoint, result);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetCurrentBreakpoint_WhenServiceThrows_ShouldReturnDefaultBreakpoint()
     {
         // Arrange
@@ -181,10 +191,10 @@ public class BreakpointServiceTests
 
         // Assert
         // Should return default cached value (Lg)
-        Assert.Equal(Breakpoint.Lg, result);
+        Assert.AreEqual(Breakpoint.Lg, result);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DisposeAsync_ShouldUnsubscribeAllObservers()
     {
         // Arrange
@@ -208,7 +218,7 @@ public class BreakpointServiceTests
             Times.Exactly(2));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Subscribe_MultipleSubscribers_ShouldAllReceiveCallbackId()
     {
         // Arrange
@@ -226,7 +236,7 @@ public class BreakpointServiceTests
         var id2 = await _service.Subscribe(callback2);
 
         // Assert
-        Assert.NotEqual(id1, id2);
+        Assert.AreNotEqual(id1, id2);
         _mockViewportService.Verify(
             x => x.SubscribeAsync(It.IsAny<IBrowserViewportObserver>(), true),
             Times.Exactly(2));

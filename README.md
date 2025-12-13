@@ -256,7 +256,29 @@ dotnet build                  # Build entire solution
 dotnet clean                  # Clean build artifacts
 ```
 
-### End-to-End Testing with Playwright
+### Testing
+
+The application includes comprehensive tests using **MSTest 4.0.2** with the modern test runner.
+
+#### Unit Tests (Web.Tests)
+
+**Run all unit tests:**
+```bash
+# Using modern MSTest runner (recommended)
+dotnet run --project src/DanceCourseCreator.Web.Tests
+
+# Traditional approach
+dotnet test src/DanceCourseCreator.Web.Tests
+```
+
+**Test Coverage:**
+- BreakpointService tests (responsive design)
+- Component tests with bUnit
+- Service layer tests with Moq
+
+**Test Results:** 25 tests covering breakpoint detection, subscription handling, and async operations.
+
+#### End-to-End Tests with Playwright
 
 The application includes comprehensive Playwright E2E tests with automatic screenshot capture for documentation and regression testing.
 
@@ -268,23 +290,66 @@ cd src/DanceCourseCreator.Tests.E2E
 dotnet build
 pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 
-# Run all tests
-dotnet test
+# Run all E2E tests using modern MSTest runner
+dotnet run --project src/DanceCourseCreator.Tests.E2E
 
 # Run specific test categories
 dotnet test --filter "TestCategory=Navigation"
 dotnet test --filter "TestCategory=Patterns"
 dotnet test --filter "TestCategory=Courses"
+dotnet test --filter "TestCategory=Screenshots"
 ```
 
 **Test Coverage:**
-- **Home & Navigation** - Main page and navigation flows
+- **Home & Navigation** - Main page and navigation flows with screenshots
 - **Turbank** - Browsing, filtering, and searching patterns
-- **Course Creation** - Complete course creation workflow
+- **Course Creation** - Complete course creation workflow with visual verification
 - **Course Editing** - Modifying existing courses
 - **Lessons & Templates** - Lesson and template management
+- **Integration Tests** - API CRUD operations with Playwright
+
+**Screenshot Organization:**
+All tests automatically capture screenshots in `screenshots/` folder, organized by feature:
+- `screenshots/navigation/` - Navigation flow screenshots
+- `screenshots/patterns/` - Turbank and pattern browsing
+- `screenshots/course-creation/` - Course creation workflow
+- `screenshots/course-editing/` - Course editing workflow
+- `screenshots/lessons-templates/` - Lesson and template management
 
 See [E2E Test Documentation](src/DanceCourseCreator.Tests.E2E/README.md) for detailed information on test structure, categories, and screenshot organization.
+
+#### Test Framework: MSTest 4.0.2
+
+**Key Features:**
+- ✅ Modern native test runner for .NET 10
+- ✅ Faster execution than traditional VSTest adapter
+- ✅ Standalone executables with `EnableMSTestRunner`
+- ✅ Rich assertion library with intuitive API
+- ✅ Parallel test execution support
+- ✅ Integrated with Visual Studio Test Explorer
+
+**Running Tests:**
+```bash
+# Web unit tests
+dotnet run --project src/DanceCourseCreator.Web.Tests
+
+# E2E integration tests  
+dotnet run --project src/DanceCourseCreator.Tests.E2E
+
+# Run all tests in solution
+dotnet test
+
+# Run with verbosity
+dotnet test --logger "console;verbosity=detailed"
+```
+
+**Test Project Configuration:**
+Both test projects use:
+- MSTest 4.0.2 with modern runner
+- `EnableMSTestRunner=true` for standalone execution
+- `TestingPlatformDotnetTestSupport=true` for .NET 10 compatibility
+- Playwright MSTest integration for E2E tests
+- bUnit for Blazor component testing
 
 ### API Documentation & Testing
 
@@ -307,11 +372,13 @@ The application uses Entity Framework Core with SQLite:
 - C# extension by Microsoft
 - .NET Install Tool
 - Blazor syntax highlighting
+- Test Explorer UI for MSTest
 
 **Visual Studio 2022:**
 - Full .NET 10 support
 - Integrated debugging and testing
 - Built-in Blazor development tools
+- Native MSTest runner support
 
 ## 🎯 Current Implementation Status
 
