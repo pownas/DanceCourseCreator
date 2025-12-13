@@ -7,13 +7,13 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     
-    <!-- Conditional runner configuration based on build environment -->
-    <EnableMSTestRunner Condition="'$(BuildingInsideVisualStudio)' != 'true'">true</EnableMSTestRunner>
-    <OutputType Condition="'$(BuildingInsideVisualStudio)' != 'true'">Exe</OutputType>
-    <OutputType Condition="'$(BuildingInsideVisualStudio)' == 'true'">Library</OutputType>
+    <!-- DISABLED: Native MSTest Runner - causes issues with Test Explorer -->
+    <!-- Use traditional VSTest adapter for maximum compatibility -->
+    <!-- <EnableMSTestRunner>true</EnableMSTestRunner> -->
+    <!-- <OutputType>Exe</OutputType> -->
     
-    <!-- Enable VSTest adapter support for Test Explorer -->
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <!-- Keep as Library for Test Explorer compatibility -->
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>

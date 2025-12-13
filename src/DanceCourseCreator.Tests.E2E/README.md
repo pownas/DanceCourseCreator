@@ -2,7 +2,29 @@
 
 This project contains comprehensive Playwright end-to-end tests for the Dance Course Creator application, including automated screenshot capture for documentation and regression testing.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Windows)
+
+**Easiest Way - Use Provided Scripts:**
+
+1. **First Time Setup** (install Playwright browsers):
+   ```cmd
+   install-playwright.cmd
+   ```
+   *Or verify everything is ready:*
+   ```cmd
+   verify-e2e-setup.cmd
+   ```
+
+2. **Run All Tests** (starts apps automatically):
+   ```cmd
+   playwright-tests.cmd
+   ```
+
+**That's it! The script handles everything for you.** ✅
+
+---
+
+## 🚀 Quick Start (Manual Mode)
 
 **Most Common Usage (Manual Mode):**
 
@@ -20,10 +42,40 @@ This project contains comprehensive Playwright end-to-end tests for the Dance Co
 2. **Run tests** (third terminal):
    ```bash
    cd src/DanceCourseCreator.Tests.E2E
-   dotnet run  # Modern MSTest runner
+   dotnet test
    ```
 
 **📖 For comprehensive testing options, see [E2E Testing Guide](../../docs/E2E-TESTING-GUIDE.md)**
+
+---
+
+## ⚠️ Common Issue: "No test is available"
+
+If you see this error:
+```
+No test is available in DanceCourseCreator.Tests.E2E.dll
+```
+
+**Solution:** Install Playwright browsers first!
+```cmd
+install-playwright.cmd
+```
+
+**Why?** Playwright tests require browser binaries (~200MB) that aren't included in the repository. They must be downloaded separately.
+
+📖 **Full troubleshooting guide:** [PLAYWRIGHT-TROUBLESHOOTING.md](../../docs/PLAYWRIGHT-TROUBLESHOOTING.md)
+
+---
+
+## 📁 Helper Scripts
+
+| Script | Purpose | When to Use |
+|--------|---------|-------------|
+| `install-playwright.cmd` | Install Playwright browsers | First time, or after "No test is available" error |
+| `verify-e2e-setup.cmd` | Check if environment is ready | Before running tests, troubleshooting |
+| `playwright-tests.cmd` | Run all E2E tests | After setup, for full test run |
+
+---
 
 ## Prerequisites
 
