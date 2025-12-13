@@ -1,4 +1,4 @@
-# Dance Course Creator - .NET 10
+﻿# Dance Course Creator - .NET 10
 
 En applikation för att skapa danskurser och hantera kursverksamheten för West Coast Swing, nu implementerad med .NET 10 Blazor Server frontend och Web API backend.
 
