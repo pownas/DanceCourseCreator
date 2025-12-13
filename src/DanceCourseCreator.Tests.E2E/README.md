@@ -2,12 +2,49 @@
 
 This project contains comprehensive Playwright end-to-end tests for the Dance Course Creator application, including automated screenshot capture for documentation and regression testing.
 
+## 🚀 Quick Start
+
+**Most Common Usage (Manual Mode):**
+
+1. **Start applications** (two terminals):
+   ```bash
+   # Terminal 1 - API
+   cd src/DanceCourseCreator.API
+   dotnet run --urls "http://localhost:5139"
+   
+   # Terminal 2 - Web
+   cd src/DanceCourseCreator.Web
+   dotnet run --urls "http://localhost:5034"
+   ```
+
+2. **Run tests** (third terminal):
+   ```bash
+   cd src/DanceCourseCreator.Tests.E2E
+   dotnet run  # Modern MSTest runner
+   ```
+
+**📖 For comprehensive testing options, see [E2E Testing Guide](../../docs/E2E-TESTING-GUIDE.md)**
+
 ## Prerequisites
 
 - .NET 10.0 SDK
-- Both API and Web applications running:
-  - API: `http://localhost:5139`
-  - Web: `http://localhost:5034`
+- Playwright browsers installed (see Setup section)
+
+## Test Modes
+
+This project supports two testing modes:
+
+1. **Manual Mode** (Default) - You start the applications manually
+   - Best for local development
+   - Easier debugging
+   - See full application logs
+
+2. **WebApplicationFactory Mode** - Tests start the API automatically
+   - Best for CI/CD pipelines
+   - Automatic cleanup
+   - Currently supports API-only integration tests
+
+📖 See [E2E Testing Guide](../../docs/E2E-TESTING-GUIDE.md) for detailed mode explanations
 
 ## Test Framework
 
