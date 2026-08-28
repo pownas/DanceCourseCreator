@@ -63,16 +63,17 @@
                             </MudItem>
                             <MudItem xs="12" md="6">
                                 <MudNumericField @bind-Value="courseRequest.PlannedLessonCount" 
-                                                 Label="Antal lektioner (1-20)"
+                                                 Label="@($"Antal lektioner ({MinPlannedLessonCount}-{MaxPlannedLessonCount})")"
                                                  Required="true"
-                                                 Min="1"
-                                                 Max="20"
+                                                 Min="@MinPlannedLessonCount"
+                                                 Max="@MaxPlannedLessonCount"
                                                  HideSpinButtons="false"
                                                  T="int" />
                             </MudItem>
                             <MudItem xs="12" md="6">
-                                <MudSelect @bind-Value="courseRequest.DurationWeeks" 
-                                           Label="Kurslängd (veckor)"
+                                <MudSelect Value="courseRequest.DurationWeeks"
+                                           ValueChanged="OnDurationWeeksChanged"
+                                           Label="@($"Kurslängd ({MinDurationWeeks}-{MaxDurationWeeks} veckor)")"
                                            Required="true"
                                            T="int">
                                     <MudSelectItem Value="1">1 vecka (intensiv/helg)</MudSelectItem>
@@ -155,7 +156,7 @@
         <MudButton Color="Color.Primary" 
                    Variant="Variant.Filled" 
                    OnClick="Save"
-                   Disabled="isLoading">
+                   Disabled="@(!CanSaveCourse() || isLoading)">
             @if (isLoading)
             {
                 <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
@@ -169,6 +170,11 @@
     [CascadingParameter] MudBlazor.IDialogReference MudDialog { get; set; } = null!;
 
     [Parameter] public Course? Course { get; set; }
+
+    private const int MinPlannedLessonCount = 1;
+    private const int MaxPlannedLessonCount = 20;
+    private const int MinDurationWeeks = 1;
+    private const int MaxDurationWeeks = 20;
 
     private CreateCourseRequest courseRequest = new();
     private string newGoal = string.Empty;
@@ -305,5 +311,21 @@
     private void Cancel()
     {
         MudDialog.Close();
+    }
+
+    private void OnDurationWeeksChanged(int weeks)
+    {
+        courseRequest.DurationWeeks = weeks;
+        EnsureThemesCount();
+    }
+
+    private bool CanSaveCourse()
+    {
+        return !string.IsNullOrWhiteSpace(courseRequest.Name)
+            && !string.IsNullOrWhiteSpace(courseRequest.Level)
+            && !string.IsNullOrWhiteSpace(courseRequest.DanceStyle)
+            && !string.IsNullOrWhiteSpace(courseRequest.Type)
+            && courseRequest.PlannedLessonCount is >= MinPlannedLessonCount and <= MaxPlannedLessonCount
+            && courseRequest.DurationWeeks is >= MinDurationWeeks and <= MaxDurationWeeks;
     }
 }
