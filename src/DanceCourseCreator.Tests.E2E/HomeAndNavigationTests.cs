@@ -38,7 +38,7 @@ public class HomeAndNavigationTests : PageTest
         // Verify key elements are visible
         await Expect(Page.GetByText("Välkommen till WCS Kursskapare")).ToBeVisibleAsync();
         await Expect(Page.GetByText("Biblioteksöversikt")).ToBeVisibleAsync();
-        await Expect(Page.GetByText("Snabbåtgärder")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Planera kursmaterial")).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -117,9 +117,16 @@ public class HomeAndNavigationTests : PageTest
             FullPage = true
         });
 
-        // Click "Kom igång" button for turbank
-        var komIgangButton = Page.GetByRole(AriaRole.Button, new() { Name = "Kom igång" }).First;
-        await komIgangButton.ClickAsync();
+        var patternLink = Page.GetByRole(AriaRole.Link, new() { Name = "Öppna turbanken" });
+        var lessonLink = Page.GetByRole(AriaRole.Link, new() { Name = "Öppna lektioner" });
+        var courseLink = Page.GetByRole(AriaRole.Link, new() { Name = "Öppna kursplaner" });
+        await Expect(patternLink).ToHaveAttributeAsync("href", "/patterns");
+        await Expect(lessonLink).ToHaveAttributeAsync("href", "/lessons");
+        await Expect(courseLink).ToHaveAttributeAsync("href", "/courses");
+        await Expect(Page.GetByText("Kommer snart")).ToHaveCountAsync(0);
+
+        // Open the first step of the course-planning workflow.
+        await patternLink.ClickAsync();
         
         // Wait for navigation to patterns page
         await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 10000 });
