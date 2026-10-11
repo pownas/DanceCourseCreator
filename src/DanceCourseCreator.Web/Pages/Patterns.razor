@@ -73,7 +73,7 @@
                     @if (patterns != null)
                     {
                         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-                            Visar @patterns.Count av totalt @patterns.Count objekt
+                            @patterns.Count objekt i turbanken
                         </MudText>
                     }
 
@@ -82,9 +82,18 @@
                     {
                         <MudProgressLinear Indeterminate="true" />
                     }
+                    else if (hasError)
+                    {
+                        <MudAlert Severity="Severity.Error" Class="mb-4">
+                            @errorMessage
+                            <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="LoadPatterns">
+                                Försök igen
+                            </MudButton>
+                        </MudAlert>
+                    }
 
                     <!-- Patterns Grid -->
-                    @if (patterns != null && patterns.Any())
+                    @if (!hasError && patterns != null && patterns.Any())
                     {
                         <MudGrid>
                             @foreach (var pattern in patterns)
@@ -130,13 +139,18 @@
                                                        OnClick="@(() => EditPattern(pattern))">
                                                 Redigera
                                             </MudButton>
+                                            <MudIconButton Size="Size.Small"
+                                                           Icon="Icons.Material.Filled.Delete"
+                                                           Color="Color.Error"
+                                                           aria-label="@($"Ta bort {pattern.Name}")"
+                                                           OnClick="@(() => DeletePattern(pattern))" />
                                         </MudCardActions>
                                     </MudCard>
                                 </MudItem>
                             }
                         </MudGrid>
                     }
-                    else if (!isLoading)
+                    else if (!isLoading && !hasError)
                     {
                         <MudPaper Class="pa-8 text-center" Style="background-color: var(--mud-palette-grey-lighten5);">
                             <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
@@ -161,9 +175,7 @@
 @code {
     private List<PatternOrExercise>? patterns;
     private bool isLoading = false;
-#pragma warning disable CS0414
     private bool hasError = false;
-#pragma warning restore CS0414
     private string? errorMessage;
     private string? filterType;
     private string? filterLevel;
@@ -187,20 +199,23 @@
         {
             var searchValue = string.IsNullOrWhiteSpace(searchText) ? null : searchText;
             patterns = await PatternsService.GetPatternsAsync(filterType, filterLevel, filterDanceStyle, searchValue);
+            if (patterns is null)
+            {
+                hasError = true;
+                errorMessage = "Kunde inte hämta turbanken. Kontrollera anslutningen och försök igen.";
+            }
         }
         catch (HttpRequestException ex)
         {
             Logger.LogWarning(ex, "Network error loading patterns: {Message}", ex.Message);
             hasError = true;
             errorMessage = "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.";
-            Snackbar.Add(errorMessage, Severity.Error);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading patterns: {Message}", ex.Message);
             hasError = true;
             errorMessage = "Ett oväntat fel uppstod vid hämtning av mönster.";
-            Snackbar.Add(errorMessage, Severity.Error);
         }
         finally
         {
@@ -246,20 +261,74 @@
         };
     }
 
-    private async Task OpenCreateDialog()
-    {
-        // TODO: Create pattern dialog
-        await LoadPatterns();
-    }
+    private Task OpenCreateDialog() => OpenPatternDialog();
 
-    private void ViewPattern(PatternOrExercise pattern)
+    private async Task ViewPattern(PatternOrExercise pattern)
     {
-        // TODO: View pattern dialog
+        var parameters = new DialogParameters<PatternEditorDialog>
+        {
+            { dialog => dialog.Pattern, pattern },
+            { dialog => dialog.ReadOnly, true }
+        };
+
+        await DialogService.ShowAsync<PatternEditorDialog>(
+            pattern.Name,
+            parameters,
+            new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true });
     }
 
     private async Task EditPattern(PatternOrExercise pattern)
     {
-        // TODO: Edit pattern dialog
-        await LoadPatterns();
+        await OpenPatternDialog(pattern);
+    }
+
+    private async Task DeletePattern(PatternOrExercise pattern)
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Ta bort från turbanken?",
+            $"Vill du ta bort ”{pattern.Name}”? Åtgärden kan inte ångras.",
+            yesText: "Ta bort",
+            cancelText: "Avbryt");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        try
+        {
+            if (await PatternsService.DeletePatternAsync(pattern.Id))
+            {
+                Snackbar.Add("Mönstret har tagits bort.", Severity.Success);
+                await LoadPatterns();
+            }
+            else
+            {
+                Snackbar.Add("Kunde inte ta bort mönstret. Kontrollera behörighet och försök igen.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not delete pattern {PatternId}", pattern.Id);
+            Snackbar.Add("Ett fel uppstod när mönstret skulle tas bort. Försök igen.", Severity.Error);
+        }
+    }
+
+    private async Task OpenPatternDialog(PatternOrExercise? pattern = null)
+    {
+        var parameters = new DialogParameters<PatternEditorDialog>
+        {
+            { dialog => dialog.Pattern, pattern }
+        };
+        var dialog = await DialogService.ShowAsync<PatternEditorDialog>(
+            pattern is null ? "Lägg till i turbanken" : "Redigera i turbanken",
+            parameters,
+            new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true, BackdropClick = false });
+
+        var result = await dialog.Result;
+        if (result is not null && !result.Canceled)
+        {
+            await LoadPatterns();
+        }
     }
 }

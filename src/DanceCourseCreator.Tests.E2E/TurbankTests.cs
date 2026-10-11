@@ -41,6 +41,26 @@ public class TurbankTests : PageTest
 
     [TestMethod]
     [TestCategory("Patterns")]
+    public async Task Turbank_CreatePattern_ShouldSaveAndShowItInLibrary()
+    {
+        await Page.GotoAsync($"{BaseUrl}/patterns");
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" })).ToBeVisibleAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" }).ClickAsync();
+        await Expect(Page.GetByText("Börja med namn, typ och nivå.", new() { Exact = false })).ToBeVisibleAsync();
+
+        var patternName = $"E2E WCS Pattern {Guid.NewGuid():N}";
+        await Page.GetByLabel("Namn").FillAsync(patternName);
+        await Page.GetByLabel("Beskrivning").FillAsync("Ett testmönster för lektioner.");
+        await Page.GetByLabel("Steg").FillAsync("Förberedelse\nPassering\nAnchor");
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till", Exact = true }).ClickAsync();
+
+        await Expect(Page.GetByText(patternName, new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Ett testmönster för lektioner.", new() { Exact = true })).ToBeVisibleAsync();
+    }
+
+    [TestMethod]
+    [TestCategory("Patterns")]
     [TestCategory("Screenshots")]
     public async Task Turbank_FilterByType_ShouldWork()
     {
