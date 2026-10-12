@@ -24,23 +24,24 @@
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <!-- Filters -->
-                    <MudGrid Class="mb-4">
-                        <MudItem xs="12" sm="2">
-                            <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(async () => { filterType = null; await LoadPatterns(); })">>
+                    <MudPaper Class="pa-4 mb-4" Outlined="true" Elevation="0">
+                        <MudText Typo="Typo.subtitle1" Class="mb-2">Sök och filtrera</MudText>
+                        <MudGrid>
+                        <MudItem xs="12" sm="6" md="2">
+                            <MudSelect @bind-Value="filterType" Label="Typ" Clearable="true" OnClearButtonClick="@(async () => { filterType = null; await LoadPatterns(); })">
                                 <MudSelectItem Value="@("pattern")">Mönster</MudSelectItem>
                                 <MudSelectItem Value="@("exercise")">Övning</MudSelectItem>
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" sm="2">
-                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadPatterns(); })">>
+                        <MudItem xs="12" sm="6" md="2">
+                            <MudSelect @bind-Value="filterLevel" Label="Nivå" Clearable="true" OnClearButtonClick="@(async () => { filterLevel = null; await LoadPatterns(); })">
                                 <MudSelectItem Value="@("beginner")">Nybörjare</MudSelectItem>
                                 <MudSelectItem Value="@("improver")">Förbättrare</MudSelectItem>
                                 <MudSelectItem Value="@("intermediate")">Medel</MudSelectItem>
                                 <MudSelectItem Value="@("advanced")">Avancerad</MudSelectItem>
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" sm="3">
+                        <MudItem xs="12" sm="6" md="3">
                             <MudSelect @bind-Value="filterDanceStyle" Label="Dansstil" Clearable="true" OnClearButtonClick="@(async () => { filterDanceStyle = null; await LoadPatterns(); })">
                                 <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
                                 <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
@@ -52,22 +53,34 @@
                                 <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" sm="3">
-                            <MudTextField @bind-Value="searchText" 
-                                          Label="Sök mönster..." 
-                                          Adornment="Adornment.End" 
+                        <MudItem xs="12" sm="6" md="5">
+                            <MudTextField @bind-Value="searchText"
+                                          Label="Sök mönster..."
+                                          Immediate="true"
+                                          Adornment="Adornment.End"
                                           AdornmentIcon="Icons.Material.Filled.Search"
-                                          OnAdornmentClick="LoadPatterns" />
+                                          OnAdornmentClick="LoadPatterns"
+                                          OnKeyDown="HandleSearchKeyDown" />
                         </MudItem>
-                        <MudItem xs="12" sm="2">
-                            <MudButton Variant="Variant.Outlined" 
-                                       Color="Color.Primary" 
-                                       OnClick="@(async () => await LoadPatterns())"
-                                       FullWidth="true">
-                                Filtrera
-                            </MudButton>
+                        <MudItem xs="12">
+                            <div class="d-flex justify-end gap-2">
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Default"
+                                           Disabled="@(!HasActiveFilters || isLoading)"
+                                           OnClick="ResetFilters">
+                                    Rensa filter
+                                </MudButton>
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           Disabled="@isLoading"
+                                           OnClick="LoadPatterns"
+                                           StartIcon="Icons.Material.Filled.Search">
+                                    Visa resultat
+                                </MudButton>
+                            </div>
                         </MudItem>
-                    </MudGrid>
+                        </MudGrid>
+                    </MudPaper>
 
                     <!-- Results Info -->
                     @if (patterns != null)
@@ -80,7 +93,10 @@
                     <!-- Loading Indicator -->
                     @if (isLoading)
                     {
-                        <MudProgressLinear Indeterminate="true" />
+                        <div role="status" aria-live="polite" class="mb-4">
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-1">Hämtar mönster…</MudText>
+                            <MudProgressLinear Indeterminate="true" />
+                        </div>
                     }
                     else if (hasError)
                     {
@@ -150,13 +166,26 @@
                             }
                         </MudGrid>
                     }
-                    else if (!isLoading && !hasError)
+                    else if (!isLoading && !hasError && HasActiveFilters)
                     {
-                        <MudPaper Class="pa-8 text-center" Style="background-color: var(--mud-palette-grey-lighten5);">
-                            <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
-                            <MudText Typo="Typo.h6" Class="mb-2">Inga mönster hittades</MudText>
+                        <MudPaper Class="pa-8 text-center" Outlined="true">
+                            <MudIcon Icon="Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Inga träffar</MudText>
                             <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
-                                Börja genom att lägga till ditt första mönster!
+                                Prova att ändra sökningen eller ta bort något filter.
+                            </MudText>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ResetFilters">
+                                Rensa filter
+                            </MudButton>
+                        </MudPaper>
+                    }
+                    else if (!isLoading && !hasError && patterns is { Count: 0 })
+                    {
+                        <MudPaper Class="pa-8 text-center" Outlined="true">
+                            <MudIcon Icon="Icons.Material.Filled.LibraryBooks" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
+                            <MudText Typo="Typo.h6" Class="mb-2">Turbanken är tom</MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                                Lägg till ett mönster eller en övning så blir det enklare att planera lektioner.
                             </MudText>
                             <MudButton Variant="Variant.Filled"
                                        Color="Color.Primary"
@@ -181,6 +210,11 @@
     private string? filterLevel;
     private string? filterDanceStyle;
     private string searchText = string.Empty;
+    private bool HasActiveFilters =>
+        !string.IsNullOrWhiteSpace(filterType) ||
+        !string.IsNullOrWhiteSpace(filterLevel) ||
+        !string.IsNullOrWhiteSpace(filterDanceStyle) ||
+        !string.IsNullOrWhiteSpace(searchText);
 
     [Inject] private ILogger<Patterns> Logger { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
@@ -204,6 +238,7 @@
                 hasError = true;
                 errorMessage = "Kunde inte hämta turbanken. Kontrollera anslutningen och försök igen.";
             }
+
         }
         catch (HttpRequestException ex)
         {
@@ -221,6 +256,18 @@
         {
             isLoading = false;
         }
+    }
+
+    private Task HandleSearchKeyDown(KeyboardEventArgs args) =>
+        args.Key == "Enter" ? LoadPatterns() : Task.CompletedTask;
+
+    private async Task ResetFilters()
+    {
+        filterType = null;
+        filterLevel = null;
+        filterDanceStyle = null;
+        searchText = string.Empty;
+        await LoadPatterns();
     }
 
     private Color GetChipColor(string? level)

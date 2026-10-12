@@ -99,8 +99,9 @@ public class TurbankTests : PageTest
         await Page.WaitForTimeoutAsync(500);
 
         // Click filter button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Visa resultat" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
+        await Expect(Page.GetByText("ÖVNING", new() { Exact = true })).ToHaveCountAsync(0);
 
         // Take screenshot after filtering
         await Page.ScreenshotAsync(new()
@@ -108,6 +109,9 @@ public class TurbankTests : PageTest
             Path = $"{ScreenshotsDir}/04-after-type-filter-applied.png",
             FullPage = true
         });
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Rensa filter" }).ClickAsync();
+        await Expect(Page.GetByText("ÖVNING", new() { Exact = true }).First).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -135,7 +139,7 @@ public class TurbankTests : PageTest
         await Page.WaitForTimeoutAsync(500);
 
         // Click filter button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Visa resultat" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot after filtering
@@ -165,7 +169,6 @@ public class TurbankTests : PageTest
         // Enter search text
         var searchBox = Page.GetByLabel("Sök mönster...");
         await searchBox.FillAsync("Push");
-        await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot with search text entered
         await Page.ScreenshotAsync(new()
@@ -174,9 +177,8 @@ public class TurbankTests : PageTest
             FullPage = true
         });
 
-        // Click filter/search button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
-        await Page.WaitForTimeoutAsync(1000);
+        await searchBox.PressAsync("Enter");
+        await Expect(Page.GetByText("Sugar Push", new() { Exact = true })).ToBeVisibleAsync();
 
         // Take screenshot after search
         await Page.ScreenshotAsync(new()
@@ -217,8 +219,13 @@ public class TurbankTests : PageTest
             });
 
             // Close dialog
-            await Page.GetByRole(AriaRole.Button, new() { Name = "Stäng" }).ClickAsync();
-            await Page.WaitForTimeoutAsync(500);
+            var closeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Stäng" })
+                .Or(Page.Locator("button[aria-label='Close']"));
+            if (await closeButton.IsVisibleAsync())
+            {
+                await closeButton.First.ClickAsync();
+                await Page.WaitForTimeoutAsync(500);
+            }
         }
     }
 
