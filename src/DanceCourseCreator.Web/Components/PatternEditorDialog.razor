@@ -1,0 +1,246 @@
+@inject IPatternsService PatternsService
+@inject ISnackbar Snackbar
+@inject ILogger<PatternEditorDialog> Logger
+
+<MudDialog>
+    <DialogContent>
+        @if (ReadOnly && Pattern is not null)
+        {
+            <MudStack Spacing="2">
+                <div class="d-flex gap-2">
+                    <MudChip T="string" Color="Color.Primary">@GetTypeName(Pattern.Type)</MudChip>
+                    <MudChip T="string" Color="Color.Success">@Pattern.Level</MudChip>
+                    <MudChip T="string" Color="Color.Info">@GetDanceStyleName(Pattern.DanceStyle)</MudChip>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Pattern.Description))
+                {
+                    <MudText>@Pattern.Description</MudText>
+                }
+                @if (Pattern.Steps.Count > 0)
+                {
+                    <MudText Typo="Typo.subtitle1">Steg</MudText>
+                    <MudList T="string" Dense="true">
+                        @foreach (var step in Pattern.Steps)
+                        {
+                            <MudListItem T="string">@step</MudListItem>
+                        }
+                    </MudList>
+                }
+                @if (Pattern.TeachingPoints.Count > 0)
+                {
+                    <MudText Typo="Typo.subtitle1">Undervisningspunkter</MudText>
+                    <MudList T="string" Dense="true">
+                        @foreach (var point in Pattern.TeachingPoints)
+                        {
+                            <MudListItem T="string">@point</MudListItem>
+                        }
+                    </MudList>
+                }
+                @if (Pattern.Tags.Count > 0)
+                {
+                    <MudText Typo="Typo.subtitle1">Taggar</MudText>
+                    <div class="d-flex gap-2 flex-wrap">
+                        @foreach (var tag in Pattern.Tags)
+                        {
+                            <MudChip T="string" Size="Size.Small">@tag</MudChip>
+                        }
+                    </div>
+                }
+                @if (Pattern.EstimatedMinutes > 0)
+                {
+                    <MudText Typo="Typo.body2">Uppskattad undervisningstid: @Pattern.EstimatedMinutes min</MudText>
+                }
+            </MudStack>
+        }
+        else
+        {
+            <MudForm @ref="_form">
+                <MudStack Spacing="3">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Börja med namn, typ och nivå. Övriga uppgifter kan läggas till senare.
+                    </MudText>
+                    <MudTextField @bind-Value="_request.Name"
+                                  Label="Namn"
+                                  Required="true"
+                                  RequiredError="Ange ett namn."
+                                  Immediate="true"
+                                  Disabled="_isSaving" />
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" @bind-Value="_request.Type" Label="Typ" Required="true" Disabled="_isSaving">
+                                <MudSelectItem Value="@("Pattern")">Mönster</MudSelectItem>
+                                <MudSelectItem Value="@("Exercise")">Övning</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" @bind-Value="_request.Level" Label="Nivå" Required="true" Disabled="_isSaving">
+                                <MudSelectItem Value="@("Beginner")">Nybörjare</MudSelectItem>
+                                <MudSelectItem Value="@("Improver")">Förbättrare</MudSelectItem>
+                                <MudSelectItem Value="@("Intermediate")">Medel</MudSelectItem>
+                                <MudSelectItem Value="@("Advanced")">Avancerad</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" @bind-Value="_request.DanceStyle" Label="Dansstil" Required="true" Disabled="_isSaving">
+                                <MudSelectItem Value="@("WestCoastSwing")">West Coast Swing</MudSelectItem>
+                                <MudSelectItem Value="@("Bugg")">Bugg</MudSelectItem>
+                                <MudSelectItem Value="@("Fox")">Fox</MudSelectItem>
+                                <MudSelectItem Value="@("Foxtrot")">Foxtrot</MudSelectItem>
+                                <MudSelectItem Value="@("Lindy")">Lindy Hop</MudSelectItem>
+                                <MudSelectItem Value="@("Balboa")">Balboa</MudSelectItem>
+                                <MudSelectItem Value="@("Blues")">Blues</MudSelectItem>
+                                <MudSelectItem Value="@("Other")">Annan</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                    <MudTextField @bind-Value="_request.Description"
+                                  Label="Beskrivning"
+                                  Lines="3"
+                                  Disabled="_isSaving" />
+                    <MudTextField @bind-Value="_stepsText"
+                                  Label="Steg"
+                                  HelperText="Skriv ett steg per rad."
+                                  Lines="4"
+                                  Disabled="_isSaving" />
+                    <MudTextField @bind-Value="_teachingPointsText"
+                                  Label="Undervisningspunkter"
+                                  HelperText="Skriv en punkt per rad."
+                                  Lines="3"
+                                  Disabled="_isSaving" />
+                    <MudTextField @bind-Value="_tagsText"
+                                  Label="Taggar"
+                                  HelperText="Separera taggar med kommatecken."
+                                  Disabled="_isSaving" />
+                    <MudNumericField T="int" @bind-Value="_request.EstimatedMinutes"
+                                     Label="Uppskattad undervisningstid (min)"
+                                     Min="0"
+                                     Disabled="_isSaving" />
+                </MudStack>
+            </MudForm>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Disabled="_isSaving">@(ReadOnly ? "Stäng" : "Avbryt")</MudButton>
+        @if (!ReadOnly)
+        {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save" Disabled="_isSaving">
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+                }
+                @(Pattern is null ? "Lägg till" : "Spara ändringar")
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public PatternOrExercise? Pattern { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+
+    private MudForm? _form;
+    private CreatePatternRequest _request = new();
+    private string _stepsText = string.Empty;
+    private string _teachingPointsText = string.Empty;
+    private string _tagsText = string.Empty;
+    private bool _isSaving;
+
+    protected override void OnParametersSet()
+    {
+        if (Pattern is null)
+        {
+            _request = new CreatePatternRequest { Type = "Pattern", Level = "Beginner" };
+            return;
+        }
+
+        _request = new CreatePatternRequest
+        {
+            Type = Pattern.Type,
+            Name = Pattern.Name,
+            Aliases = [.. Pattern.Aliases],
+            Level = Pattern.Level,
+            DanceStyle = Pattern.DanceStyle,
+            Description = Pattern.Description,
+            Steps = [.. Pattern.Steps],
+            Counts = [.. Pattern.Counts],
+            Holds = [.. Pattern.Holds],
+            Slot = Pattern.Slot,
+            Rotations = [.. Pattern.Rotations],
+            Prerequisites = [.. Pattern.Prerequisites],
+            Related = [.. Pattern.Related],
+            TeachingPoints = [.. Pattern.TeachingPoints],
+            CommonMistakes = [.. Pattern.CommonMistakes],
+            Variations = [.. Pattern.Variations],
+            EstimatedMinutes = Pattern.EstimatedMinutes,
+            BpmRange = new BpmRange { Min = Pattern.BpmRange.Min, Max = Pattern.BpmRange.Max },
+            Tags = [.. Pattern.Tags],
+            MediaLinks = [.. Pattern.MediaLinks]
+        };
+        _stepsText = string.Join(Environment.NewLine, Pattern.Steps);
+        _teachingPointsText = string.Join(Environment.NewLine, Pattern.TeachingPoints);
+        _tagsText = string.Join(", ", Pattern.Tags);
+    }
+
+    private async Task Save()
+    {
+        if (_form is null)
+        {
+            return;
+        }
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _request.Steps = ParseLines(_stepsText);
+        _request.TeachingPoints = ParseLines(_teachingPointsText);
+        _request.Tags = _tagsText.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        _isSaving = true;
+        try
+        {
+            var saved = Pattern is null
+                ? await PatternsService.CreatePatternAsync(_request)
+                : await PatternsService.UpdatePatternAsync(Pattern.Id, _request);
+            if (saved is null)
+            {
+                Snackbar.Add("Kunde inte spara mönstret. Kontrollera behörighet och försök igen.", Severity.Error);
+                return;
+            }
+
+            Snackbar.Add(Pattern is null ? "Tillagt i turbanken." : "Ändringarna har sparats.", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(saved));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not save pattern {PatternId}", Pattern?.Id);
+            Snackbar.Add("Ett fel uppstod när mönstret skulle sparas. Försök igen.", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Close(DialogResult.Cancel());
+
+    private static List<string> ParseLines(string value) =>
+        value.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+    private static string GetTypeName(string? type) =>
+        string.Equals(type, "Exercise", StringComparison.OrdinalIgnoreCase) ? "Övning" : "Mönster";
+
+    private static string GetDanceStyleName(string? danceStyle) =>
+        danceStyle switch
+        {
+            "WestCoastSwing" => "West Coast Swing",
+            "Lindy" => "Lindy Hop",
+            "Other" => "Annan",
+            _ => danceStyle ?? string.Empty
+        };
+}

@@ -42,6 +42,15 @@
                         <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                     </div>
                 }
+                else if (hasError)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mt-4">
+                        Kunde inte hämta lektionerna. Kontrollera anslutningen och försök igen.
+                        <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="LoadLessons">
+                            Försök igen
+                        </MudButton>
+                    </MudAlert>
+                }
                 else if (lessons == null || !lessons.Any())
                 {
                     <MudAlert Severity="Severity.Info" Class="mt-4">
@@ -158,9 +167,7 @@
 @code {
     private List<Lesson>? lessons;
     private bool isLoading = false;
-#pragma warning disable CS0414
     private bool hasError = false;
-#pragma warning restore CS0414
 
     [Inject] private ILogger<Lessons> Logger { get; set; } = null!;
 
@@ -176,18 +183,17 @@
         try
         {
             lessons = await LessonsService.GetLessonsAsync();
+            hasError = lessons is null;
         }
         catch (HttpRequestException ex)
         {
             Logger.LogWarning(ex, "Network error loading lessons: {Message}", ex.Message);
             hasError = true;
-            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading lessons: {Message}", ex.Message);
             hasError = true;
-            Snackbar.Add("Fel vid hämtning av lektioner", Severity.Error);
         }
         finally
         {
