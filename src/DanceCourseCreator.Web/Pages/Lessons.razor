@@ -136,28 +136,27 @@
                                         </MudText>
                                     </MudCardContent>
                                     <MudCardActions>
-                                        <MudButton Size="Size.Small" 
-                                                   Color="Color.Primary" 
-                                                   OnClick="() => ViewLesson(lesson)">
-                                            Visa
-                                        </MudButton>
-                                        <MudButton Size="Size.Small" 
-                                                   Color="Color.Secondary" 
+                                        <MudButton Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   Variant="Variant.Filled"
+                                                   StartIcon="@Icons.Material.Filled.Edit"
                                                    OnClick="() => EditLesson(lesson)">
                                             Redigera
                                         </MudButton>
-                                        <MudButton Size="Size.Small" 
-                                                   Color="Color.Tertiary" 
-                                                   StartIcon="Icons.Material.Filled.ContentCopy"
-                                                   OnClick="() => SaveAsTemplate(lesson)">
-                                            Spara som mall
-                                        </MudButton>
-                                        <MudMenu Icon="@Icons.Material.Filled.FileDownload" 
+                                        <MudSpacer />
+                                        <MudMenu Label="Fler åtgärder"
+                                                 StartIcon="@Icons.Material.Filled.MoreVert"
                                                  Size="Size.Small"
-                                                 Color="Color.Success"
-                                                 Label="Exportera"
-                                                 StartIcon="@Icons.Material.Filled.FileDownload"
-                                                 Variant="Variant.Filled">
+                                                 Variant="Variant.Text">
+                                            <MudMenuItem OnClick="@(() => ViewLesson(lesson))">
+                                                <MudIcon Icon="@Icons.Material.Filled.Visibility" Class="mr-2" />
+                                                Visa
+                                            </MudMenuItem>
+                                            <MudMenuItem OnClick="@(() => SaveAsTemplate(lesson))">
+                                                <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Class="mr-2" />
+                                                Spara som mall
+                                            </MudMenuItem>
+                                            <MudDivider />
                                             <MudMenuItem OnClick="@(() => ExportLesson(lesson, ExportFormat.PDF))">
                                                 <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Class="mr-2" />
                                                 Exportera som PDF
@@ -166,13 +165,12 @@
                                                 <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2" />
                                                 Exportera som Markdown
                                             </MudMenuItem>
+                                            <MudDivider />
+                                            <MudMenuItem OnClick="@(() => DeleteLesson(lesson))">
+                                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Class="mr-2" />
+                                                Ta bort
+                                            </MudMenuItem>
                                         </MudMenu>
-                                        <MudSpacer />
-                                        <MudIconButton Size="Size.Small" 
-                                                       Icon="Icons.Material.Filled.Delete" 
-                                                       Color="Color.Error"
-                                                       aria-label="@($"Ta bort lektion {lesson.Id}")"
-                                                       OnClick="() => DeleteLesson(lesson)" />
                                     </MudCardActions>
                                 </MudCard>
                             </MudItem>

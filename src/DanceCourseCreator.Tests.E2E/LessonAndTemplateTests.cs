@@ -275,7 +275,12 @@ public class LessonAndTemplateTests : PageTest
             FullPage = true
         });
 
-        // Try to find "Spara som mall" button for first lesson
+        // Open the first lesson's actions and select "Spara som mall"
+        var actionsButton = Page.GetByRole(AriaRole.Button, new() { Name = "Fler åtgärder" }).First;
+        if (await actionsButton.IsVisibleAsync())
+        {
+            await actionsButton.ClickAsync();
+        }
         var saveAsTemplateButton = Page.GetByRole(AriaRole.Button, new() { Name = "Spara som mall" }).First;
         if (await saveAsTemplateButton.IsVisibleAsync())
         {

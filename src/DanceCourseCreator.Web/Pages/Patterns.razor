@@ -150,16 +150,21 @@
                                                        OnClick="@(() => ViewPattern(pattern))">
                                                 Visa
                                             </MudButton>
-                                            <MudButton Size="Size.Small" 
-                                                       Color="Color.Secondary" 
-                                                       OnClick="@(() => EditPattern(pattern))">
-                                                Redigera
-                                            </MudButton>
-                                            <MudIconButton Size="Size.Small"
-                                                           Icon="Icons.Material.Filled.Delete"
-                                                           Color="Color.Error"
-                                                           aria-label="@($"Ta bort {pattern.Name}")"
-                                                           OnClick="@(() => DeletePattern(pattern))" />
+                                            <MudSpacer />
+                                            <MudMenu Label="Fler åtgärder"
+                                                     StartIcon="@Icons.Material.Filled.MoreVert"
+                                                     Size="Size.Small"
+                                                     Variant="Variant.Text">
+                                                <MudMenuItem OnClick="@(() => EditPattern(pattern))">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-2" />
+                                                    Redigera
+                                                </MudMenuItem>
+                                                <MudDivider />
+                                                <MudMenuItem OnClick="@(() => DeletePattern(pattern))">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Class="mr-2" />
+                                                    Ta bort
+                                                </MudMenuItem>
+                                            </MudMenu>
                                         </MudCardActions>
                                     </MudCard>
                                 </MudItem>

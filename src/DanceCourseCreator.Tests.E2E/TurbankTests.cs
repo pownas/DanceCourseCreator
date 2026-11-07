@@ -204,7 +204,12 @@ public class TurbankTests : PageTest
             FullPage = true
         });
 
-        // Try to find and click "Visa" button for first pattern
+        // Open the first pattern's actions and select "Visa"
+        var actionsButton = Page.GetByRole(AriaRole.Button, new() { Name = "Fler åtgärder" }).First;
+        if (await actionsButton.IsVisibleAsync())
+        {
+            await actionsButton.ClickAsync();
+        }
         var visaButton = Page.GetByRole(AriaRole.Button, new() { Name = "Visa" }).First;
         if (await visaButton.IsVisibleAsync())
         {
