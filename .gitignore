@@ -421,6 +421,7 @@ FodyWeavers.xsd
 **/screenshots/
 *.png
 !wwwroot/**/*.png
+!docs/ux-screenshots/*.png
 
 # SQLite database files
 *.sqlite
