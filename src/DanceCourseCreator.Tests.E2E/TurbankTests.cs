@@ -23,9 +23,7 @@ public class TurbankTests : PageTest
     [TestCategory("Screenshots")]
     public async Task Turbank_LoadAndBrowse_ShouldDisplayPatterns()
     {
-        // Navigate to patterns page
-        await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
+        await WaitForPatternsPageAsync();
 
         // Capture initial patterns page
         await Page.ScreenshotAsync(new()
@@ -35,8 +33,36 @@ public class TurbankTests : PageTest
         });
 
         // Verify key elements
-        await Expect(Page.GetByText("Turbank")).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Turbank", Exact = true })).ToBeVisibleAsync();
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" })).ToBeVisibleAsync();
+    }
+
+    [TestMethod]
+    [TestCategory("Patterns")]
+    public async Task Turbank_CreatePattern_ShouldSaveAndShowItInLibrary()
+    {
+        await Page.GotoAsync($"{BaseUrl}/login");
+        await Page.WaitForFunctionAsync(
+            "() => document.querySelector('input[aria-required=\"true\"]')?.getAttributeNames().some(name => name.startsWith('_bl_'))");
+        await Page.GetByLabel("E-post").FillAsync("instructor@dancecourse.com");
+        await Page.GetByLabel("Lösenord").FillAsync("instructor123");
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Logga in" }).ClickAsync();
+        await Page.WaitForURLAsync($"{BaseUrl}/");
+
+        await WaitForPatternsPageAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" })).ToBeVisibleAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till mönster" }).ClickAsync();
+        await Expect(Page.GetByText("Börja med namn, typ och nivå.", new() { Exact = false })).ToBeVisibleAsync();
+
+        var patternName = $"E2E WCS Pattern {Guid.NewGuid():N}";
+        await Page.GetByLabel("Namn").FillAsync(patternName);
+        await Page.GetByLabel("Beskrivning").FillAsync("Ett testmönster för lektioner.");
+        await Page.GetByLabel("Steg").FillAsync("Förberedelse\nPassering\nAnchor");
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Lägg till", Exact = true }).ClickAsync();
+
+        await Expect(Page.GetByText(patternName, new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Ett testmönster för lektioner.", new() { Exact = true }).First).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -45,8 +71,7 @@ public class TurbankTests : PageTest
     public async Task Turbank_FilterByType_ShouldWork()
     {
         // Navigate to patterns page
-        await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
+        await WaitForPatternsPageAsync();
 
         // Wait for patterns to load
         await Page.WaitForTimeoutAsync(1000);
@@ -59,8 +84,7 @@ public class TurbankTests : PageTest
         });
 
         // Click on Type dropdown
-        var typeDropdown = Page.Locator("label:has-text('Typ')").Locator("..").Locator("input").First;
-        await typeDropdown.ClickAsync();
+        await Page.GetByLabel("Typ").ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot with dropdown open
@@ -71,12 +95,13 @@ public class TurbankTests : PageTest
         });
 
         // Select "Mönster" option
-        await Page.GetByRole(AriaRole.Option, new() { Name = "Mönster" }).ClickAsync();
+        await Page.GetByText("Mönster", new() { Exact = true }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Click filter button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Visa resultat" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
+        await Expect(Page.GetByText("ÖVNING", new() { Exact = true })).ToHaveCountAsync(0);
 
         // Take screenshot after filtering
         await Page.ScreenshotAsync(new()
@@ -84,6 +109,9 @@ public class TurbankTests : PageTest
             Path = $"{ScreenshotsDir}/04-after-type-filter-applied.png",
             FullPage = true
         });
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Rensa filter" }).ClickAsync();
+        await Expect(Page.GetByText("ÖVNING", new() { Exact = true }).First).ToBeVisibleAsync();
     }
 
     [TestMethod]
@@ -92,13 +120,11 @@ public class TurbankTests : PageTest
     public async Task Turbank_FilterByLevel_ShouldWork()
     {
         // Navigate to patterns page
-        await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
+        await WaitForPatternsPageAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Click on Level dropdown
-        var levelDropdown = Page.Locator("label:has-text('Nivå')").Locator("..").Locator("input").First;
-        await levelDropdown.ClickAsync();
+        await Page.GetByLabel("Nivå").ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot with dropdown open
@@ -109,11 +135,11 @@ public class TurbankTests : PageTest
         });
 
         // Select "Nybörjare" option
-        await Page.GetByRole(AriaRole.Option, new() { Name = "Nybörjare" }).ClickAsync();
+        await Page.GetByText("Nybörjare", new() { Exact = true }).ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
         // Click filter button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Visa resultat" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot after filtering
@@ -130,8 +156,7 @@ public class TurbankTests : PageTest
     public async Task Turbank_SearchPatterns_ShouldWork()
     {
         // Navigate to patterns page
-        await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
+        await WaitForPatternsPageAsync();
         await Page.WaitForTimeoutAsync(1000);
 
         // Take screenshot before search
@@ -144,7 +169,6 @@ public class TurbankTests : PageTest
         // Enter search text
         var searchBox = Page.GetByLabel("Sök mönster...");
         await searchBox.FillAsync("Push");
-        await Page.WaitForTimeoutAsync(500);
 
         // Take screenshot with search text entered
         await Page.ScreenshotAsync(new()
@@ -153,9 +177,8 @@ public class TurbankTests : PageTest
             FullPage = true
         });
 
-        // Click filter/search button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Filtrera" }).ClickAsync();
-        await Page.WaitForTimeoutAsync(1000);
+        await searchBox.PressAsync("Enter");
+        await Expect(Page.GetByText("Sugar Push", new() { Exact = true })).ToBeVisibleAsync();
 
         // Take screenshot after search
         await Page.ScreenshotAsync(new()
@@ -171,8 +194,7 @@ public class TurbankTests : PageTest
     public async Task Turbank_ViewPatternDetails_ShouldOpenDialog()
     {
         // Navigate to patterns page
-        await Page.GotoAsync($"{BaseUrl}/patterns");
-        await Page.WaitForSelectorAsync("text=Turbank", new() { Timeout = 30000 });
+        await WaitForPatternsPageAsync();
         await Page.WaitForTimeoutAsync(1500);
 
         // Take screenshot before clicking view
@@ -182,7 +204,12 @@ public class TurbankTests : PageTest
             FullPage = true
         });
 
-        // Try to find and click "Visa" button for first pattern
+        // Open the first pattern's actions and select "Visa"
+        var actionsButton = Page.GetByRole(AriaRole.Button, new() { Name = "Fler åtgärder" }).First;
+        if (await actionsButton.IsVisibleAsync())
+        {
+            await actionsButton.ClickAsync();
+        }
         var visaButton = Page.GetByRole(AriaRole.Button, new() { Name = "Visa" }).First;
         if (await visaButton.IsVisibleAsync())
         {
@@ -197,13 +224,22 @@ public class TurbankTests : PageTest
             });
 
             // Close dialog
-            var closeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Stäng" }).Or(Page.Locator("button[aria-label='Close']"));
+            var closeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Stäng" })
+                .Or(Page.Locator("button[aria-label='Close']"));
             if (await closeButton.IsVisibleAsync())
             {
                 await closeButton.First.ClickAsync();
                 await Page.WaitForTimeoutAsync(500);
             }
         }
+    }
+
+    private async Task WaitForPatternsPageAsync()
+    {
+        await Page.GotoAsync($"{BaseUrl}/patterns");
+        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Turbank", Exact = true })).ToBeVisibleAsync();
+        await Page.WaitForFunctionAsync(
+            "() => [...document.querySelectorAll('button')].some(button => [...button.attributes].some(attribute => attribute.name.startsWith('_bl_')))");
     }
 
     public override BrowserNewContextOptions ContextOptions()

@@ -147,7 +147,7 @@ public class DemoScreenshots : PageTest
 
         // Navigate to lessons
         await Page.GotoAsync($"{BaseUrl}/lessons");
-        await Page.WaitForSelectorAsync("text=Lessons", new() { Timeout = 30000 });
+        await Page.WaitForSelectorAsync("text=Lektioner", new() { Timeout = 30000 });
         await Page.WaitForTimeoutAsync(2000);
 
         // Screenshot 8: Lessons page
@@ -157,7 +157,7 @@ public class DemoScreenshots : PageTest
             FullPage = true
         });
 
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Create Lesson" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Skapa lektion" }).ClickAsync();
         await Page.WaitForTimeoutAsync(1500);
 
         // Click duration dropdown

@@ -33,22 +33,6 @@
                             <span>Alla mönster</span>
                         }
                     </MudNavLink>
-                    <MudNavLink Href="/patterns/favorites" 
-                                Icon="@Icons.Material.Filled.Star"
-                                Class="nav-item">
-                        @if (Open)
-                        {
-                            <span>Mina favoriter</span>
-                        }
-                    </MudNavLink>
-                    <MudNavLink Href="/patterns/new" 
-                                Icon="@Icons.Material.Filled.Add"
-                                Class="nav-item">
-                        @if (Open)
-                        {
-                            <span>Ny tur</span>
-                        }
-                    </MudNavLink>
                 </MudNavGroup>
                 
                 <MudNavLink Href="/lessons" 
@@ -80,25 +64,7 @@
                     }
                 </MudNavLink>
                 
-                <MudNavLink Href="/shared" 
-                            Icon="@Icons.Material.Filled.Share"
-                            Class="nav-item">
-                    @if (Open)
-                    {
-                        <span>Delat innehåll</span>
-                    }
-                </MudNavLink>
-                
                 <MudSpacer />
-                
-                <MudNavLink Href="/settings" 
-                            Icon="@Icons.Material.Filled.Settings"
-                            Class="nav-item settings-nav">
-                    @if (Open)
-                    {
-                        <span>Inställningar</span>
-                    }
-                </MudNavLink>
             </Authorized>
             <NotAuthorized>
                 <MudNavLink Href="/login" 

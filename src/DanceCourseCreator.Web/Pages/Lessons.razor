@@ -9,14 +9,19 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
-<PageTitle>Lessons - Dance Course Creator</PageTitle>
+<PageTitle>Lektioner - Kursskapare</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
         <MudItem xs="12">
             <MudPaper Class="pa-4">
                 <div class="d-flex justify-space-between align-center mb-4">
-                    <MudText Typo="Typo.h4">Lessons</MudText>
+                    <div>
+                        <MudText Typo="Typo.h4">Lektioner</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Bygg lektioner av mönster och övningar från turbanken.
+                        </MudText>
+                    </div>
                     <div class="d-flex gap-2">
                         @if (lessons != null && lessons.Any())
                         {
@@ -24,14 +29,15 @@
                                        Color="Color.Info" 
                                        StartIcon="@Icons.Material.Filled.ViewCompact"
                                        OnClick="OpenCompactView">
-                                Kompakt vy
+                                Visa kompakt
                             </MudButton>
                         }
+
                         <MudButton Variant="Variant.Filled" 
                                    Color="Color.Primary" 
                                    StartIcon="Icons.Material.Filled.Add"
                                    OnClick="OpenCreateDialog">
-                            Create Lesson
+                            Skapa lektion
                         </MudButton>
                     </div>
                 </div>
@@ -39,14 +45,36 @@
                 @if (isLoading)
                 {
                     <div class="d-flex justify-center mt-8">
-                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                        <div role="status" aria-live="polite" class="d-flex flex-column align-center gap-2 mt-8">
+                            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Hämtar lektioner…</MudText>
+                        </div>
                     </div>
+                }
+                else if (hasError)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mt-4">
+                        Kunde inte hämta lektionerna. Kontrollera anslutningen och försök igen.
+                        <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="LoadLessons">
+                            Försök igen
+                        </MudButton>
+                    </MudAlert>
                 }
                 else if (lessons == null || !lessons.Any())
                 {
-                    <MudAlert Severity="Severity.Info" Class="mt-4">
-                        No lessons found. Create your first lesson to get started!
-                    </MudAlert>
+                    <MudPaper Class="pa-8 mt-4 text-center" Outlined="true">
+                        <MudIcon Icon="@Icons.Material.Filled.EventNote" Size="Size.Large" Color="Color.Primary" Class="mb-3" />
+                        <MudText Typo="Typo.h6" Class="mb-2">Inga lektioner ännu</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                            Skapa din första lektion och välj sedan mönster och övningar från turbanken.
+                        </MudText>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   OnClick="OpenCreateDialog">
+                            Skapa första lektionen
+                        </MudButton>
+                    </MudPaper>
                 }
                 else
                 {
@@ -64,7 +92,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <span>Lesson</span>
+                                                    <span>Lektion</span>
                                                 }
                                             </MudText>
                                             <MudChip T="string" Size="Size.Small" Color="GetDurationColor(lesson.Duration)">
@@ -75,7 +103,7 @@
                                         @if (lesson.Sections.Any())
                                         {
                                             <MudText Typo="Typo.body2" Class="mb-2">
-                                                @lesson.Sections.Count section(s), @lesson.TotalEstimatedMinutes min estimated
+                                                @lesson.Sections.Count delar, @lesson.TotalEstimatedMinutes min planerat
                                             </MudText>
                                             
                                             <div class="mb-2">
@@ -84,13 +112,13 @@
                                                     <MudChip T="string" Size="Size.Small" 
                                                              Color="GetSectionColor(section.Type)" 
                                                              Class="mr-1 mb-1">
-                                                        @(section.Type) (@(section.Items.Count))
+                                                        @(GetSectionDisplayName(section.Type)) (@(section.Items.Count))
                                                     </MudChip>
                                                 }
                                                 @if (lesson.Sections.Count > 3)
                                                 {
                                                     <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="mr-1 mb-1">
-                                                        +@(lesson.Sections.Count - 3) more
+                                                        +@(lesson.Sections.Count - 3) till
                                                     </MudChip>
                                                 }
                                             </div>
@@ -104,46 +132,45 @@
                                         }
                                         
                                         <MudText Typo="Typo.caption" Class="mt-2">
-                                            Updated: @lesson.UpdatedAt.ToString("yyyy-MM-dd HH:mm")
+                                            Uppdaterad: @lesson.UpdatedAt.ToString("yyyy-MM-dd HH:mm")
                                         </MudText>
                                     </MudCardContent>
                                     <MudCardActions>
-                                        <MudButton Size="Size.Small" 
-                                                   Color="Color.Primary" 
-                                                   OnClick="() => ViewLesson(lesson)">
-                                            View
-                                        </MudButton>
-                                        <MudButton Size="Size.Small" 
-                                                   Color="Color.Secondary" 
+                                        <MudButton Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   Variant="Variant.Filled"
+                                                   StartIcon="@Icons.Material.Filled.Edit"
                                                    OnClick="() => EditLesson(lesson)">
-                                            Edit
+                                            Redigera
                                         </MudButton>
-                                        <MudButton Size="Size.Small" 
-                                                   Color="Color.Tertiary" 
-                                                   StartIcon="Icons.Material.Filled.ContentCopy"
-                                                   OnClick="() => SaveAsTemplate(lesson)">
-                                            Spara som mall
-                                        </MudButton>
-                                        <MudMenu Icon="@Icons.Material.Filled.FileDownload" 
+                                        <MudSpacer />
+                                        <MudMenu Label="Fler åtgärder"
+                                                 StartIcon="@Icons.Material.Filled.MoreVert"
                                                  Size="Size.Small"
-                                                 Color="Color.Success"
-                                                 Label="Export"
-                                                 StartIcon="@Icons.Material.Filled.FileDownload"
-                                                 Variant="Variant.Filled">
+                                                 Variant="Variant.Text">
+                                            <MudMenuItem OnClick="@(() => ViewLesson(lesson))">
+                                                <MudIcon Icon="@Icons.Material.Filled.Visibility" Class="mr-2" />
+                                                Visa
+                                            </MudMenuItem>
+                                            <MudMenuItem OnClick="@(() => SaveAsTemplate(lesson))">
+                                                <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Class="mr-2" />
+                                                Spara som mall
+                                            </MudMenuItem>
+                                            <MudDivider />
                                             <MudMenuItem OnClick="@(() => ExportLesson(lesson, ExportFormat.PDF))">
                                                 <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Class="mr-2" />
-                                                Export as PDF
+                                                Exportera som PDF
                                             </MudMenuItem>
                                             <MudMenuItem OnClick="@(() => ExportLesson(lesson, ExportFormat.Markdown))">
                                                 <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-2" />
-                                                Export as Markdown
+                                                Exportera som Markdown
+                                            </MudMenuItem>
+                                            <MudDivider />
+                                            <MudMenuItem OnClick="@(() => DeleteLesson(lesson))">
+                                                <MudIcon Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Class="mr-2" />
+                                                Ta bort
                                             </MudMenuItem>
                                         </MudMenu>
-                                        <MudSpacer />
-                                        <MudIconButton Size="Size.Small" 
-                                                       Icon="Icons.Material.Filled.Delete" 
-                                                       Color="Color.Error"
-                                                       OnClick="() => DeleteLesson(lesson)" />
                                     </MudCardActions>
                                 </MudCard>
                             </MudItem>
@@ -158,9 +185,7 @@
 @code {
     private List<Lesson>? lessons;
     private bool isLoading = false;
-#pragma warning disable CS0414
     private bool hasError = false;
-#pragma warning restore CS0414
 
     [Inject] private ILogger<Lessons> Logger { get; set; } = null!;
 
@@ -176,18 +201,17 @@
         try
         {
             lessons = await LessonsService.GetLessonsAsync();
+            hasError = lessons is null;
         }
         catch (HttpRequestException ex)
         {
             Logger.LogWarning(ex, "Network error loading lessons: {Message}", ex.Message);
             hasError = true;
-            Snackbar.Add("Kunde inte ansluta till servern. Försök igen.", Severity.Error);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading lessons: {Message}", ex.Message);
             hasError = true;
-            Snackbar.Add("Fel vid hämtning av lektioner", Severity.Error);
         }
         finally
         {
@@ -219,6 +243,18 @@
             _ => Color.Default
         };
     }
+
+    private static string GetSectionDisplayName(string sectionType) =>
+        sectionType.ToLowerInvariant() switch
+        {
+            "warmup" => "Uppvärmning",
+            "technique" => "Teknik",
+            "patterns" => "Mönster",
+            "combination" => "Kombination",
+            "repetition" => "Repetition",
+            "social" => "Socialdans",
+            _ => sectionType
+        };
 
     private async Task OpenCreateDialog()
     {
@@ -285,10 +321,10 @@
     private async Task DeleteLesson(Lesson lesson)
     {
         var confirmed = await DialogService.ShowMessageBox(
-            "Delete Lesson",
-            $"Are you sure you want to delete this lesson? This action cannot be undone.",
-            yesText: "Delete",
-            cancelText: "Cancel"
+            "Ta bort lektion?",
+            "Vill du ta bort lektionen? Åtgärden kan inte ångras.",
+            yesText: "Ta bort",
+            cancelText: "Avbryt"
         );
 
         if (confirmed == true)
@@ -297,11 +333,11 @@
             if (success)
             {
                 await LoadLessons();
-                Snackbar.Add("Lesson deleted successfully!", Severity.Success);
+                Snackbar.Add("Lektionen har tagits bort.", Severity.Success);
             }
             else
             {
-                Snackbar.Add("Failed to delete lesson", Severity.Error);
+                Snackbar.Add("Kunde inte ta bort lektionen. Försök igen.", Severity.Error);
             }
         }
     }
@@ -353,14 +389,17 @@
     {
         try
         {
-            Snackbar.Add($"Exporting lesson as {format}...", Severity.Info);
+            Snackbar.Add($"Exporterar lektionen som {GetExportFormatName(format)}…", Severity.Info);
             await ExportService.ExportLessonAsync(lesson.Id, format, includePatternDetails: true);
-            Snackbar.Add($"Lesson exported as {format}!", Severity.Success);
+            Snackbar.Add($"Lektionen har exporterats som {GetExportFormatName(format)}.", Severity.Success);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error exporting lesson {LessonId} as {Format}", lesson.Id, format);
-            Snackbar.Add($"Failed to export lesson: {ex.Message}", Severity.Error);
+            Snackbar.Add("Kunde inte exportera lektionen. Försök igen.", Severity.Error);
         }
     }
+
+    private static string GetExportFormatName(ExportFormat format) =>
+        format == ExportFormat.PDF ? "PDF" : "Markdown";
 }
